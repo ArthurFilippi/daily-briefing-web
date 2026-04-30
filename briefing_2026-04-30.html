@@ -1,0 +1,119 @@
+<!doctype html><html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box}
+body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:20px 24px 80px;background:var(--bg);color:var(--fg);line-height:1.6;transition:background .2s,color .2s}
+.bar{position:sticky;top:0;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;z-index:10}
+.bar input{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--fg)}
+.bar button{padding:6px 12px;border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;cursor:pointer}
+.prog{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;transition:width .1s;z-index:100}
+h1{font-size:26px;border-bottom:2px solid var(--fg);padding-bottom:10px}
+h2{font-size:17px;margin-top:28px;padding:9px 13px;background:var(--sec);border-left:3px solid var(--fg);border-radius:4px;cursor:pointer}
+h2::after{content:" ▾";float:right;color:var(--muted)}
+h3{font-size:15px;margin-top:16px;margin-bottom:3px}
+a{color:var(--accent)}
+.hidden{display:none!important}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);color:var(--muted);font-size:12px}
+</style></head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="bar">
+  <input type="search" id="search" placeholder="🔎 Search...">
+  <button id="theme">🌓</button>
+  <button onclick="window.print()">🖨️</button>
+</div>
+<h1>Daily Briefing — Thursday, April 30 2026</h1>
+<p><em>~8 min read</em></p>
+<h2>⚡ TL;DR</h2>
+<p><strong>Macro trends:</strong>
+- <strong>Iran conflict reshaping energy &amp; geopolitics</strong>: Oil at $120+/barrel driving supply chain recalibration (Brazil surging, airlines cutting guidance, US economy resilient at 2% GDP growth despite war onset)
+- <strong>AI infrastructure proving resilient &amp; profitable</strong>: Alphabet's record one-day market cap jump, Apple supply-constrained on AI Macs (Neo, Mini, Studio), tech earnings validating capex thesis while broader markets hit record highs</p>
+<p><strong>Top stories:</strong>
+- <strong>Hezbollah escalates with fiber-optic drone warfare</strong> — Lebanese militant group deploying cable-controlled explosive drones against Israeli targets, mirroring Ukraine tactics. Deadliest Israeli strikes on southern Lebanon in ceasefire period kill 9+ including children. Israeli naval blockade of Gaza flotilla detains 175 activists in international waters near Crete. Signals breakdown of ceasefire restraint and broadening regional instability.
+- <strong>Legora reaches $5.6B valuation on $600M Series D extension</strong> — Swedish legal AI unicorn closes €513M ($600M) round backed by Atlassian and NVentures, now locked in dueling ad campaigns with Harvey. Embodies winner-take-most AI consolidation where capital concentrates on handful of incumbents.
+- <strong>Apple iPhone revenue hits $57B despite chip shortages; Alphabet posts historic one-day market cap gain</strong> — Apple revenue jumped 17% to $111.2B (Q2 FY2026), with iPhone demand "off the charts" despite supply constraints; Alphabet saw second-largest single-day market cap increase ever following blowout earnings. Both signal AI adoption translating into concrete hardware/cloud revenue at scale.</p>
+<hr />
+<h2>🌍 Geopolitics &amp; Policy</h2>
+<h3>Hezbollah Fiber-Optic Drones Escalate Against Israeli Targets</h3>
+<p>Lebanese militant group Hezbollah is deploying explosive drones controlled via fiber-optic cables against Israeli troops—a tactic mirroring Ukraine war innovations. The escalation follows deadly Israeli strikes on southern Lebanon that killed at least 9 people, including two children, despite an active ceasefire. Signifies breakdown of military restraint and expanding drone asymmetry in Middle East conflict. <a href="https://www.nytimes.com/2026/04/30/world/middleeast/hezbollah-fiber-optic-drones.html">Source: New York Times</a></p>
+<h3>Israel Intercepts Gaza Flotilla, Detains 175 Activists in International Waters</h3>
+<p>Israeli naval forces intercepted 22 boats near Crete carrying humanitarian aid, detaining 175 pro-Palestinian activists in what observers describe as an illegal seizure in international waters. Pro-Palestinian groups dispute the interception's legality; Israel asserts security mandate. Reinforces maritime escalation and humanitarian access restrictions. <a href="https://www.bbc.com/news/articles/c4g4lk9m77vo?at_medium=RSS&amp;at_campaign=rss">Source: BBC</a></p>
+<h3>Iran War Nears 60-Day War Powers Deadline; Pentagon Claims Ceasefire Pauses Clock</h3>
+<p>The US-Iran conflict approaches its war powers resolution deadline, but Defense Secretary Pete Hegseth argues the recently negotiated ceasefire suspends the congressional clock. Unresolved legal dispute over executive war authority and ceasefire durability. Critical for US domestic political timeline. <a href="https://foreignpolicy.com/2026/04/30/hegseth-senate-testimony-iran-war-60-days-war-powers-resolution/">Source: Foreign Policy</a></p>
+<h3>First US Commercial Flight Lands in Caracas After Seven-Year Ban</h3>
+<p>A US commercial flight touched down in Caracas, marking the first direct US-Venezuela service since Trump's first-term ban. Signals re-establishment of diplomatic ties and potential sanctions relief. Reflects shifting US regional strategy toward selective engagement. <a href="https://www.nytimes.com/2026/04/30/world/americas/us-flights-venezuela-caracas.html">Source: New York Times</a></p>
+<hr />
+<h2>🇫🇷 French/European Entrepreneurship</h2>
+<h3>Legora Hits $5.6B Valuation on €513M Series D Extension</h3>
+<p>Swedish legal AI startup Legora closed a €513M ($600M) Series D extension backed by Atlassian and NVentures (including Nvidia), now valued at €4.7B ($5.6B) post-money. The capital influx amplifies its dueling competitive battle with Harvey, with both firms running aggressive ad campaigns. Demonstrates winner-consolidation pattern where mega-rounds concentrate on proven platforms rather than proliferating competitors. <a href="https://www.eu-startups.com/2026/04/swedish-legal-ai-startup-legora-raises-e42-million-extension-to-series-d-bringing-total-to-over-e500-million/">Source: EU-Startups</a></p>
+<h3>Earlybird VC Closes €360M Fund VIII, Largest to Date</h3>
+<p>Berlin-based Earlybird VC closed its eighth fund at €360M, marking the pan-European firm's largest raise. Fund maintains steady three-to-four year cadence across market cycles, signaling conviction in European early-stage tech despite macro volatility. <a href="https://www.eu-startups.com/2026/04/earlybird-vc-closes-e360-million-fund-viii-its-largest-yet-as-it-implements-perpetual-active-ownership-model/">Source: EU-Startups</a></p>
+<h3>Groove Quantum Raises €16M for Scalable Germanium Spin-Qubit Processors</h3>
+<p>Delft-based quantum computing startup Groove Quantum secured €16M combined funding and unveiled an 18-qubit semiconductor spin-qubit processor—the largest of its kind ever built. Round includes €10M from unspecified lead backers. Demonstrates deeptech capital concentration on quantum hardware breakthroughs. <a href="https://www.eu-startups.com/2026/04/dutch-quantum-startup-groove-quantum-raises-e16-million-to-advance-scalable-chip-manufacturing/">Source: EU-Startups</a></p>
+<h3>Rocsys Launches First Multi-Bay Hands-Free Robotaxi Charger, Raises €11.1M</h3>
+<p>Rijswijk-based autonomous vehicle charging startup Rocsys unveiled the Rocsys M1—the world's first hands-free multi-bay charging solution for robotaxi depot operations—alongside a €11.1M ($13M) Series A extension. Positions company as critical infrastructure player for autonomous fleet scaling. <a href="https://www.eu-startups.com/2026/04/rocsys-raises-e11-1-million-and-unveils-world-s-first-multi-bay-hands-free-charging-solution-for-robotaxi-fleets/">Source: EU-Startups</a></p>
+<hr />
+<h2>💼 Business &amp; Finance</h2>
+<h3>US Economy Grows 2% Despite Iran War's Energy Price Hit</h3>
+<p>US GDP expanded at a 2% annualized rate in Q1 2026, including the first weeks of Iran conflict. Resilience reflects strong corporate earnings, elevated consumer spending, and energy sector absorption of supply shocks. Oil above $120/barrel has not yet triggered demand destruction. <a href="https://www.nytimes.com/2026/04/30/business/us-economy-gdp-oil-war.html">Source: New York Times</a></p>
+<h3>Petrobras Hits Record Oil/Gas Output as Iran War Jolts Markets</h3>
+<p>Brazilian state oil giant Petrobras pumped record volumes in Q1 2026 and ran refineries near full capacity, underscoring Brazil's strategic importance to energy markets disrupted by Iran conflict. Geopolitical realignment creating supply winners. <a href="https://www.bloomberg.com/news/articles/2026-04-30/petrobras-output-hits-record-as-iran-war-jolts-oil-markets">Source: Bloomberg</a></p>
+<h3>Air Canada Suspends 2026 Guidance on Jet Fuel Cost Surge</h3>
+<p>Air Canada suspended full-year 2026 financial guidance due to elevated jet fuel prices caused by the Iran war. Airline sector facing margin compression from energy shock. <a href="https://www.bloomberg.com/news/articles/2026-04-30/air-canada-suspends-2026-guidance-amid-rising-fuel-prices">Source: Bloomberg</a></p>
+<h3>Alphabet Posts Historic One-Day Market Cap Gain on Blowout Earnings</h3>
+<p>Alphabet reported second-largest single-day market cap increase in history following robust quarterly earnings, with investors validating massive AI infrastructure spending. Signal that tech capex is translating into tangible revenue and margin improvement. <a href="https://www.bloomberg.com/news/articles/2026-04-30/alphabet-has-the-second-biggest-one-day-jump-in-market-cap-ever">Source: Bloomberg</a></p>
+<hr />
+<h2>🚀 Tech / Deeptech / VC</h2>
+<h3>Apple iPhone Revenue Jumps 22% to $57B; Supply-Constrained on AI Macs</h3>
+<p>Apple reported Q2 revenue of $111.2B (+17% YoY), with iPhone sales jumping 22% to $57B. CEO Tim Cook stated demand was "off the charts," but the company will face supply constraints on Mac mini, Studio, and the new MacBook Neo through Q3—signaling overwhelming AI-driven demand for higher-end computing. Shortage reflects inability to secure sufficient processors despite premium pricing. <a href="https://www.theverge.com/tech/921527/apple-iphone-revenue-q2-2026-earnings">Source: The Verge</a></p>
+<h3>Roblox Daily Active Users Drop to 132M as Age Checks Slow Growth</h3>
+<p>Roblox reported Q1 2026 daily active users at 132M, down from 144M at year-end 2025 and 152M in prior year, as the platform's rollout of age verification features restricted younger user engagement. Safety implementation creating short-term user friction, though long-term platform credibility gains. <a href="https://www.theverge.com/games/921694/roblox-q1-2026-132-million-dau">Source: The Verge</a></p>
+<h3>Reddit Beats Sales Expectations Again on Advertising Growth</h3>
+<p>Reddit projected Q2 sales above Wall Street estimates, extending a streak of strong revenue growth powered by surging advertising. Platform's ad business proving resilient and scalable. <a href="https://www.bloomberg.com/news/articles/2026-04-30/reddit-beats-sales-expectations-again-on-continued-ads-growth">Source: Bloomberg</a></p>
+<h3>Rivian Downsizes DOE Loan to $4.5B, Maintains Georgia Factory Capacity</h3>
+<p>Rivian reworked its Department of Energy loan agreement downward from $6.6B to $4.5B for its Georgia electric vehicle factory, but maintained the facility's production capacity target. Reflects tighter federal subsidy environment under Trump's DOE while company negotiates construction efficiency. <a href="https://techcrunch.com/2026/04/30/rivian-downsizes-doe-loan-to-4-5b-while-boosting-capacity-of-georgia-factory/">Source: TechCrunch</a></p>
+<hr />
+<h2>🔍 Signal of the Day</h2>
+<p><strong>AI Capex Thesis Vindicated: From Controversy to Concrete Revenue</strong></p>
+<p><em>The fact:</em> Alphabet posted its second-largest single-day market cap gain in history following earnings that validated years of massive AI infrastructure spending. Simultaneously, Apple faces supply constraints on its new AI-capable Mac lineup—demand so strong it's exhausting supply chains. Both megacaps are converting speculative AI capex into tangible top-line growth and pricing power.</p>
+<p><em>The broader pattern:</em> For 18 months, critics questioned whether trillion-dollar AI infrastructure investments would yield returns before cannibalizing margins. This week proved those skeptics wrong. Alphabet's earnings show cloud AI workloads translating into higher-margin revenue; Apple's supply constraint on Neo, Studio, and Mini signals customers willing to pay premium prices for on-device compute capabilities. The market is repricing AI from "speculative bet" to "proven infrastructure spend"—exactly the narrative shift required to sustain capex momentum through an election cycle and geopolitical crisis (Iran war, higher oil/energy).</p>
+<p><em>Implication for future entrepreneurs:</em> The capital concentration visible in Legora's $5.6B valuation, Groove Quantum's €16M raise, and Rocsys's €11.1M extension reflects a clear investor thesis: AI and deeptech winners are being chosen <em>now</em>, not in five years. If you're building foundational infrastructure (quantum chips, robotaxi charging, legal AI), the window for mega-rounds exists if your unit economics align with proven demand. But the same capital concentration means losers in your category won't see Series C—velocity and defensibility matter more than ever.</p>
+<hr />
+<h2>📚 Deep Dives</h2>
+<ul>
+<li><a href="https://www.bloomberg.com/news/articles/2026-04-30/alphabet-has-the-second-biggest-one-day-jump-in-market-cap-ever">Alphabet's AI Spending Finally Pays Off: A Market Validation Moment</a></li>
+<li><a href="https://www.theverge.com/tech/921527/apple-iphone-revenue-q2-2026-earnings">Apple's Supply Chain Bottleneck Reveals True Demand Elasticity for AI Macs</a></li>
+<li><a href="https://www.eu-startups.com/2026/04/swedish-legal-ai-startup-legora-raises-e42-million-extension-to-series-d-bringing-total-to-over-e500-million/">European Deeptech Consolidation: From Legora to Groove Quantum, Capital Picking Winners</a></li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Thursday, April 30 2026</em></p>
+<footer>Briefing auto-generated via Claude API + GitHub Actions.</footer>
+<script>
+const t=document.getElementById('theme');
+const s=localStorage.getItem('theme');
+if(s)document.documentElement.setAttribute('data-theme',s);
+t.onclick=()=>{const c=document.documentElement.getAttribute('data-theme')||'light';const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n)};
+document.querySelectorAll('h2').forEach(h=>{
+  h.addEventListener('click',()=>{
+    let el=h.nextElementSibling;
+    const c=!h._collapsed;h._collapsed=c;
+    h.style.opacity=c?'0.7':'1';
+    while(el&&el.tagName!=='H2'){el.style.display=c?'none':'';el=el.nextElementSibling}
+  });
+});
+window.addEventListener('scroll',()=>{
+  const d=document.documentElement;
+  document.getElementById('prog').style.width=(d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';
+});
+document.getElementById('search').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  document.querySelectorAll('h3').forEach(h=>{
+    let el=h,block=[h];
+    while((el=el.nextElementSibling)&&!['H2','H3'].includes(el.tagName))block.push(el);
+    const match=!q||block.map(b=>b.textContent).join(' ').toLowerCase().includes(q);
+    block.forEach(b=>b.classList.toggle('hidden',!match));
+  });
+});
+</script></body></html>
