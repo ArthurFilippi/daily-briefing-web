@@ -1,125 +1,227 @@
-<!doctype html><html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Daily Briefing</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
 <style>
-:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2}
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
 [data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
-*{box-sizing:border-box}
-body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:20px 24px 80px;background:var(--bg);color:var(--fg);line-height:1.6;transition:background .2s,color .2s}
-.bar{position:sticky;top:0;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;z-index:10}
-.bar input{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--fg)}
-.bar button{padding:6px 12px;border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;cursor:pointer}
-.prog{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;transition:width .1s;z-index:100}
-h1{font-size:26px;border-bottom:2px solid var(--fg);padding-bottom:10px}
-h2{font-size:17px;margin-top:28px;padding:9px 13px;background:var(--sec);border-left:3px solid var(--fg);border-radius:4px;cursor:pointer}
-h2::after{content:" ▾";float:right;color:var(--muted)}
-h3{font-size:15px;margin-top:16px;margin-bottom:3px}
-a{color:var(--accent)}
-.hidden{display:none!important}
-footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);color:var(--muted);font-size:12px}
-</style></head>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
 <body>
-<div class="prog" id="prog"></div>
+
 <div class="bar">
-  <input type="search" id="search" placeholder="🔎 Search...">
-  <button id="theme">🌓</button>
-  <button onclick="window.print()">🖨️</button>
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
 </div>
-<h1>Daily Briefing — Friday, May 01 2026</h1>
-<p><em>~8 min read</em></p>
-<h2>⚡ TL;DR</h2>
-<p><strong>Macro trends:</strong>
-- <strong>Energy shock cascades into geopolitics and macro:</strong> Iran war enters day 60 with Congress authorization deadline looming; central banks accelerating gold purchases; LPG prices rising globally; oil correlation with currencies at 5-year highs—uncertainty reshaping reserve strategy and investment hedges.
-- <strong>AI demand surprises supply chains:</strong> Apple faces Mac shortages despite 17% Q2 revenue growth; chip scarcity spreads to memory costs; Toto (toilet manufacturer) pivots to semiconductor components capitalizing on AI server demand—traditional supply chains reconfigured by generative AI adoption.</p>
-<p><strong>Top stories:</strong>
-- <strong>Iran war triggers constitutional crisis:</strong> Trump administration claims ceasefire "terminated" 60-day War Powers Act clock on Friday deadline, preempting Congressional authorization vote—sets precedent for executive war authority under new interpretation.
-- <strong>Apple Q2 beats but signals structural shortage:</strong> Revenue jumps 17% to $111.2B; iPhone revenue surges 22% to $57B; supply constraints on Mac Studio, Mini, Neo extend "several months" due to chip and memory supply pressures.
-- <strong>European deeptech accelerates:</strong> Synaps (AI architecture platform) closes €3.06M pre-seed; Groove Quantum unveils 18-qubit processor after €16M raise; Rocsys launches robotaxi charging with €11.1M—focus shifting from software to hardware-software integration.</p>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul><li>War-driven energy shocks reshaping global economics: oil majors posting record earnings while central banks grapple with inflation-stagflation crossfire; fertiliser shortages threatening food security across regions.</li><li>AI infrastructure becoming critical bottleneck: chip shortages now affecting Apple, memory costs rising, while compute-optimisation startups (Eigen AI, Nebius) command premium valuations—inverse dynamic to 2022–23 AI hype cycle.</li></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>**Exxon, Chevron crush profit forecasts on Iran war supply disruptions** — both beat analyst expectations as Middle East conflict sustains elevated oil/gas pricing; downstream impacts now materialising (Japan trading houses, agricultural inputs). [Bloomberg]</li><li>**France's public sector payroll system collapses; 12-day Helios outage exposes critical infrastructure vulnerabilities** — Japanese hardware fault cascaded across millions of civil servant wages; Parliament flags systemic dependency risks. [Le Monde]</li><li>**Synaps (Vienna) raises €3.06M to rival AutoCAD with AI-native architecture canvas** — pre-seed victory five months post-beta; positioning against entrenched design software via generative UI. [EU-Startups]</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Iran War Reshaping Global Supply Chains</h3>
+<p>The Middle East conflict is triggering cascading disruptions across fertiliser, energy, and food systems. Yara's CEO warned that phosphate shortages risk "billions of meals"; India has already enacted the third consecutive commercial LPG price hike since conflict onset. Exxon and Chevron both reported record earnings despite production outages, signalling that elevated commodity pricing offsets operational losses. Source: <a href="https://bbci.co.uk">BBC</a>, <a href="https://bloomberg.com">Bloomberg</a></p>
+<h3>France's Critical Infrastructure Crisis: Helios Payroll System Failure</h3>
+<p>A 12-day outage of Helios, the central public accounting software, threatened wages for millions of French civil servants after a Japanese hardware fault. The National Assembly has flagged systemic vulnerabilities and over-reliance on single-point-of-failure infrastructure. This exposes how deeptech/hardware fragility can paralyse state capacity. Source: <a href="https://lemonde.fr">Le Monde</a></p>
+<h3>Israel-Palestine Tensions Escalate Amid Ceasefire Fraying</h3>
+<p>Israeli airstrikes killed 17 people in southern Lebanon despite ceasefire terms; Channel 14's "genocide discourse" (documented by three Israeli NGOs) signals hardening political positions. Gaza flotilla interception and ongoing village demolitions are eroding international restraint. Source: <a href="https://lemonde.fr">Le Monde</a>, <a href="https://bbci.co.uk">BBC</a></p>
+<h3>Myanmar's Junta Transfers Aung San Suu Kyi to House Arrest</h3>
+<p>The military regime moved the deposed civilian leader from prison to "designated residence," framing it as clemency while maintaining total control. Her son demands "proof of life"; the move signals regime confidence in consolidating power. Source: <a href="https://dw.com">DW</a>, <a href="https://nytimes.com">New York Times</a></p>
 <hr />
-<h2>🌍 Geopolitics &amp; Policy</h2>
-<h3>Iran War Congress Authorization: Executive Interprets Ceasefire as Deadline Reset</h3>
-<p>Trump's White House claims a temporary ceasefire "terminated" the 60-day War Powers Act clock, allowing military operations to continue without Congressional approval past Friday's deadline. Constitutional scholars contest this interpretation; the move establishes precedent for unilateral executive authority over Middle East military campaigns. A formal Congressional vote now unlikely unless Democrats force the issue. <a href="https://www.dw.com/en/iran-war-truce-stops-clock-on-congress-approval-says-trump-s-white-house/live-77007473?maca=en-rss-en-all-1573-rdf">Source: DW</a></p>
-<h3>India Raises Commercial LPG Prices—Third Monthly Hike Since Iran Conflict</h3>
-<p>India's government increased liquefied petroleum gas pricing for restaurants and hotels, marking the third consecutive monthly rise since the Iran war destabilized global supply. The hikes signal lasting cost pressures on hospitality and food service sectors across Asia. <a href="https://www.dw.com/en/india-news-commercial-lpg-prices-hiked-new-cylinder-rules-take-effect/live-77007624?maca=en-rss-en-all-1573-rdf">Source: DW</a></p>
-<h3>Central Banks Accelerate Gold Purchases Amid Geopolitical Risk</h3>
-<p>As the Iran conflict widens and economic uncertainty rises, central banks are acquiring gold at elevated rates for reserve security. Storage logistics—ensuring reserves remain accessible in crisis—now represent a critical constraint on further purchases. <a href="https://www.nytimes.com/2026/05/01/business/central-banks-gold-buying.html">Source: NYT</a></p>
-<h3>Hungary's Fidesz Party Regroups After Election Defeat</h3>
-<p>Viktor Orban's government faces uncertainty following their unexpected parliamentary losses earlier in May. The outcome signals potential shifts in Central European governance and EU alignment dynamics. <a href="https://www.dw.com/en/hungary-what-will-become-of-orban-and-his-system/a-77000968?maca=en-rss-en-all-1573-rdf">Source: DW</a></p>
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Synaps Captures €3.06M for AI-Native Architecture Platform</h3>
+<p>Vienna-based Synaps, described as "Figma × Lovable × architecture," closed pre-seed funding just five months after launching beta in November 2025. Backers include US-based Plug and Play and Fil Rouge. The bet: generative UI can disrupt AutoCAD's near-monopoly in architectural design—a category worth billions but locked in legacy UX. Source: <a href="https://eu-startups.com">EU-Startups</a></p>
+<h3>French Startups Raised €108M This Week</h3>
+<p>Domestic ecosystem sustained momentum despite broader market consolidation signals. Maddyness reports mounting concern that "bankruptcies now exceed exits"—a structural warning for founders eyeing 2026–27 exit windows. Source: <a href="https://maddyness.com">Maddyness</a></p>
+<h3>DeepMind Alumni Spawning European AI Startup Clusters</h3>
+<p>Dozens of ex-Google DeepMind personnel have founded or are launching European startups over the past 18 months, concentrating talent in AI research commercialisation. This mirrors historical chip-talent diaspora (Intel → startups) and signals competitive pressure on US AI incumbents. Source: <a href="https://tech.eu">Tech.eu</a></p>
+<h3>Swiss Biotech ALP Bio Raises €1.9M for Immune Organoid + AI</h3>
+<p>Schlieren-based ALP Bio secured pre-seed capital to combine human immune organoid biology with generative AI for antibody immunogenicity screening. Signals growing convergence of wet-lab biotech and large language models for drug development. Source: <a href="https://eu-startups.com">EU-Startups</a></p>
 <hr />
-<h2>🇫🇷 French/European Entrepreneurship</h2>
-<h3>Synaps Raises €3.06M to Build AI Canvas for Architecture</h3>
-<p>Vienna-based Synaps, launched in beta November 2025, secured pre-seed funding from Plug and Play and Fil Rouge to compete with AutoCAD using generative design principles. The platform positions itself as "Figma meets architecture," targeting a market dominated by 40-year-old incumbents. Rapid pre-launch traction validates demand for AI-native design tools in construction tech. <a href="https://www.eu-startups.com/2026/05/if-figma-and-lovable-had-a-child-that-became-an-architect-synaps-raises-e3-06-million-to-rival-autocad/">Source: EU-Startups</a></p>
-<h3>Groove Quantum Delivers 18-Qubit Germanium Processor After €16M Raise</h3>
-<p>Delft-based startup unveiled its largest spin-qubit semiconductor device following combined funding that included €10M venture capital. The breakthrough addresses quantum scaling bottlenecks and positions Netherlands as deeptech hardware hub competing with US labs. <a href="https://www.eu-startups.com/2026/04/dutch-quantum-startup-groove-quantum-raises-e16-million-to-advance-scalable-chip-manufacturing/">Source: EU-Startups</a></p>
-<h3>Rocsys Launches Multi-Bay Robotaxi Charging with €11.1M ($13M) Investment</h3>
-<p>Rijswijk-based autonomous vehicle infrastructure startup unveiled the M1—the first hands-free charging solution serving multiple robotaxi bays—addressing the operational bottleneck for fleet electrification. The capital injection supports scaled deployment across European mobility operators. <a href="https://www.eu-startups.com/2026/04/rocsys-raises-e11-1-million-and-unveils-world-first-multi-bay-hands-free-charging-solution-for-robotaxi-fleets/">Source: EU-Startups</a></p>
-<h3>PE/VC-Backed Firms Outpace Europe in Job Creation (4% vs 1%)</h3>
-<p>Companies backed by private equity and venture capital grew headcount 4× faster than baseline European employment in 2024, according to Invest Europe's Private Equity at Work report. This reinforces startup ecosystems' role as primary growth engines despite macro uncertainty. <a href="https://tech.eu/2026/04/30/invest-europe-pe-and-vc-backed-firms-grow-jobs-4-4x-faster-than-europe-in-2024/">Source: Tech.eu</a></p>
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Energy Majors Post Blowout Q1 Earnings on War Premium</h3>
+<p>Exxon and Chevron both beat profit estimates as higher oil/gas prices—sustained by Iran conflict supply losses—offset production outages. Exxon benefited from Guyana and Permian ramp-up; Chevron leveraged Hess acquisition. Japan's big-five trading houses positioned for strong earnings on sustained energy premiums. This creates a 2026 macro backdrop where energy costs anchor global inflation despite slowing growth. Source: <a href="https://bloomberg.com">Bloomberg</a></p>
+<h3>Central Banks Caught Between Inflation and Recession</h3>
+<p>IMF and Fed officials now openly acknowledge "crosscurrents": war-driven commodity shocks pushing inflation while geopolitical risk and tariffs slow growth. Japan spent $34.5B on emergency yen intervention Thursday; monetary policy tools are proving inadequate to counter stagflationary pressure. Source: <a href="https://nytimes.com">New York Times</a>, <a href="https://bloomberg.com">Bloomberg</a></p>
+<h3>Ares Management Misses Earnings Despite $30B Record Fundraising</h3>
+<p>The alternative-asset manager reported Q1 earnings below estimates even as wealthy clients delivered record capital commitments. Dealmaking slump persists despite record dry powder—signalling that dry powder does not equal deployment capacity in volatile markets. Source: <a href="https://bloomberg.com">Bloomberg</a></p>
+<h3>US Markets "Well Positioned" to Contain Iran Impact, Says Marathon</h3>
+<p>CEO Bruce Richards contended US earnings exposure to Middle East conflict is lower than feared and consumer spending remains "rock solid." However, this narrative is contradicted by central bank anxiety and emerging-market stress; optimism may be misplaced. Source: <a href="https://bloomberg.com">Bloomberg</a></p>
 <hr />
-<h2>💼 Business &amp; Finance</h2>
-<h3>ECB Signals June Rate Hike Unless "Outlook Improves Markedly"</h3>
-<p>Bundesbank President Joachim Nagel and outgoing Governing Council member Madis Muller both flagged imminent tightening if Iran war persists and inflation dynamics deteriorate. An ECB hike in June would mark the first in 18 months and reset yield curves across eurozone fixed income. <a href="https://www.bloomberg.com/news/articles/2026-05-01/nagel-favors-ecb-june-hike-unless-outlook-improves-markedly">Source: Bloomberg</a></p>
-<h3>Aluminum Faces "Very Large Supply Hole"; JPM Targets $4,000/MT</h3>
-<p>JPMorgan base metals research head Greg Shearer warned of structural undersupply as Middle East conflict disrupts production; near-term price targets approach $4,000 per metric ton. Aerospace, automotive, and packaging sectors facing margin compression from commodity inflation. <a href="https://www.bloomberg.com/news/videos/2026-05-01/aluminum-facing-very-large-supply-hole-jpm-says-video">Source: Bloomberg</a></p>
-<h3>Yen Intervention Headwind: Oil Correlation Reaches 2021 Peak</h3>
-<p>Dollar-yen correlation with Brent crude oil hit its highest level since late 2021 before Japanese authorities intervened in currency markets. The tight coupling signals carry-trade unwinding risk and limits central bank flexibility in managing FX volatility during energy shocks. <a href="https://www.bloomberg.com/news/articles/2026-05-01/yen-s-correlation-with-oil-hit-2021-high-before-intervention">Source: Bloomberg</a></p>
-<h3>Ceres Power Fuel Cell Rally Approaches 1,000% One-Year Gain</h3>
-<p>UK-listed Ceres Power Holdings extended a blistering rally this week as hydrogen and fuel cell sentiment accelerates, pushing year-to-date returns near generational highs. The move reflects institutional capital rotation into energy transition infrastructure plays amid geopolitical energy shocks. <a href="https://www.bloomberg.com/news/articles/2026-05-01/ceres-power-shares-near-1-000-gain-as-fuel-cell-rally-extends">Source: Bloomberg</a></p>
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Nebius Acquires Eigen AI to Accelerate Cost-Optimised LLM Inference</h3>
+<p>The Russian-founded cloud provider completed a deal for Eigen AI, a startup specialising in faster, cheaper inference. This consolidation reflects an emerging infrastructure pattern: compute efficiency and inference cost now command premium valuations—a 180-degree reversal from 2023–24 token-counting dynamics. Source: <a href="https://bloomberg.com">Bloomberg</a></p>
+<h3>Apple Warns Mac Shortage Will Persist "Several Months"; Memory Costs Rising</h3>
+<p>Despite record Q3 sales forecast (+14–17%), Apple flagged Mac Studio and Mac Mini supply constraints extending beyond Q2, driven by memory-chip availability and cost inflation. This is a leading indicator for PC/AI workstation markets and signals broader semiconductor capacity constraints. Source: <a href="https://bloomberg.com">Bloomberg</a>, <a href="https://macrumors.com">MacRumors</a></p>
+<h3>OpenAI CFO Cites "Vertical Wall of Demand"; Anthropic Eyes $900B+ Valuation Round</h3>
+<p>Sarah Friar pushed back on internal target concerns, claiming demand is robust. Simultaneously, Anthropic is fast-tracking a funding round that could value it above $900B—suggesting investor appetite for frontier AI remains extreme despite execution concerns at scale. Source: <a href="https://bloomberg.com">Bloomberg</a>, <a href="https://techcrunch.com">TechCrunch</a></p>
+<h3>Deep-Sea Submersibles Enable Critical Mineral Mapping; NOAA Explores AI-Driven Seafloor Mining</h3>
+<p>NOAA is mapping 8,000+ nautical miles of Pacific seafloor for rare-earth deposits using inexpensive autonomous submersibles. This deeptech convergence—robotics + ocean survey + AI mapping—will unlock undersea resource extraction, with major geopolitical and environmental implications for non-China rare-earth supply chains. Source: <a href="https://technologyreview.com">MIT Technology Review</a></p>
 <hr />
-<h2>🚀 Tech / Deeptech / VC</h2>
-<h3>Apple Q2 Revenue Beats 17% to $111.2B; Supply Constraints Loom</h3>
-<p>iPhone revenue surged 22% to $57 billion despite chip shortages, driven by "off the charts" demand. Cook warned of "little less flexibility" acquiring processors and signaled Mac Studio/Mini/Neo will remain constrained for "several months" due to memory-chip cost inflation and processor availability. <a href="https://www.bloomberg.com/news/videos/2026-04-30/apple-tops-sales-estimates-video">Source: Bloomberg</a></p>
-<h3>OpenAI CFO Friar: "Vertical Wall of Demand" for AI Products</h3>
-<p>Sarah Friar defended OpenAI's internal execution against missing targets, emphasizing unprecedented demand signals for enterprise AI deployments. The statement signals confidence in revenue acceleration despite $900B+ valuation round discussions ongoing with existing investors. <a href="https://www.bloomberg.com/news/articles/2026-05-01/openai-finance-chief-sees-vertical-wall-of-demand-for-products">Source: Bloomberg</a></p>
-<h3>Anthropic Faces Potential $900B Valuation in Imminent Fundraise</h3>
-<p>AI safety startup requesting investor allocations within 48 hours signals closing within 2 weeks, according to TechCrunch sources. A $900B+ valuation would cement Anthropic as third-largest AI company globally after OpenAI and Google. <a href="https://techcrunch.com/2026/04/30/anthropic-potential-900b-valuation-round-could-happen-within-two-weeks/">Source: TechCrunch</a></p>
-<h3>Toto Ltd. Shares Soar 18% on AI-Driven Chip Components Pivot</h3>
-<p>Japanese toilet manufacturer's stock hit record highs after announcing plans to expand semiconductor components business, capitalizing on AI server demand. The move illustrates how AI infrastructure buildout is reshaping traditional industrial capital allocation away from core products. <a href="https://www.bloomberg.com/news/articles/2026-05-01/toto-shares-surge-on-plans-to-boost-chip-parts-business">Source: Bloomberg</a></p>
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The Inference Revolution: Compute Efficiency Becomes the New Moat</strong></p>
+<p>Nebius's acquisition of Eigen AI, Apple's chip-shortage admission, and OpenAI's CFO rhetoric on "vertical wall of demand" collectively signal a structural shift in AI's competitive landscape.</p>
+<p><strong>The fact:</strong> A year ago, the race was for "bigger models, more tokens." Today, the bottleneck is <em>inference cost at scale</em>. Eigen AI's valuation reflects investor belief that making LLM inference 2–3x cheaper or faster unlocks entirely new commercial tiers (real-time applications, edge deployment, lower-margin verticals). Simultaneously, memory-chip shortages are making compute infrastructure <em>scarce</em>—a reversal of 2023's token-counting abundance.</p>
+<p><strong>Broader pattern:</strong> This mirrors the GPU duopoly collapse in 2024–25. When one resource (tokens, GPUs, memory) becomes the scarce constraint, startups that optimise around that constraint capture disproportionate value. We saw it with Anthropic's Constitution AI (efficiency), now we're seeing it with inference-cost optimisation. The next wave will be power/thermal efficiency for on-device AI.</p>
+<p><strong>Implication for a future entrepreneur:</strong> If you're building deeptech or AI infrastructure, the question is not "can we train bigger models?" but "can we deploy at 1/10th the cost or latency?" Founders who obsess over inference unit economics, edge deployment, or memory efficiency will find venture and enterprise appetite far exceeds those chasing raw model size. France/EU has a structural advantage here: energy costs and supply-chain fragility incentivise efficiency-first engineering cultures. Position yourself accordingly.</p>
 <hr />
-<h2>🔍 Signal of the Day</h2>
-<p><strong>AI Demand Breaks Supply Chains; Traditional Manufacturers Pivot</strong></p>
-<p><strong>The fact:</strong> Apple faces multi-month Mac shortages despite record 22% iPhone revenue growth and 17% overall Q2 beat; simultaneously, Toto—a 117-year-old Japanese toilet maker—announced capital reallocation toward semiconductor components, with shares jumping 18% on the news. Both dynamics reflect the same constraint: generative AI workload scaling outpaced capacity planning across memory chips, processors, and specialized components.</p>
-<p><strong>Broader pattern:</strong> The 2026 AI infrastructure boom is no longer a software story. It's a <em>hardware scarcity</em> story. Traditional supply chains built for smartphone and consumer electronics demand are inadequate for datacenter-scale AI training. Semiconductor fabrication bottlenecks now ripple into consumer products (Apple), component pricing (ECB inflation concerns), and create arbitrage opportunities for companies willing to retool capital into chips. Non-tech conglomerates (Toto, industrial manufacturers) are opportunistically repositioning as AI supply-chain enablers.</p>
-<p><strong>Implication for a future entrepreneur:</strong> If you're building a deeptech or hardware startup in 2026–27, supply-chain partnerships matter more than product innovation. The companies winning aren't those with the best algorithms; they're those with direct access to constrained inputs: memory, rare-earth magnets, specialty semiconductors. Consider founding a company that either (1) reduces component scarcity through design innovation, (2) enables alternative sourcing outside Asia, or (3) aggregates fragmented supply-chain data to predict and hedge shortage risk. This mirrors the 2022 energy crisis playbook: scarcity creates defensible margins and attracts corporate venture capital faster than feature velocity.</p>
-<hr />
-<h2>📚 Deep Dives</h2>
-<ul>
-<li>
-<p><strong>[Bloomberg] Taiwan as Global Chokepoint:</strong> How semiconductor dependency parallels oil geopolitics and why supply chain resilience is now a national security imperative. <a href="https://www.bloomberg.com/news/articles/2026-05-01/will-china-and-taiwan-go-to-war-can-the-us-prevent-a-conflict">Read →</a></p>
-</li>
-<li>
-<p><strong>[TechCrunch] Apple's Supply Chain Reality Check:</strong> Inside the chip shortage forcing record sales alongside structural constraints on high-margin Mac products. <a href="https://techcrunch.com/2026/04/30/as-tim-cook-steps-down-apple-hit-record-sales-but-a-chip-shortage-looms/">Read →</a></p>
-</li>
-<li>
-<p><strong>[EU-Startups] European Hardware Momentum:</strong> Tracking the 15 hardware startups VCs expect to break through in 2026, from quantum to robotics to energy storage. <a href="https://sifted.eu/articles/15-hardware-startups-2026-europe/">Read →</a></p>
-</li>
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong>"Economic Crosscurrents Go Global as Energy Shock Meets AI Wave"</strong> — Bloomberg's macro synthesis on how Iran war and AI capex are creating opposing deflationary and inflationary pressures simultaneously. <a href="https://bloomberg.com/news/articles/2026-05-01/economic-crosscurrents-go-global-as-energy-shock-meets-ai-wave">Read</a></li>
+<li><strong>"Trump's Mass Firing Just Dealt Another Blow to American Science"</strong> — MIT Technology Review on NSF gutting and implications for long-term US R&amp;D leadership in quantum, biotech, and materials. <a href="https://technologyreview.com/2026/05/01/1136722/mass-firing-trump-fresh-blow-american-science-nsf-nsb/">Read</a></li>
+<li><strong>"How Taiwan Could Become a Global Chokepoint"</strong> — Bloomberg on semiconductor supply-chain fragility and geopolitical risk concentration. Critical read for deeptech founders. <a href="https://bloomberg.com/news/articles/2026-05-01/will-china-and-taiwan-go-to-war-can-the-us-prevent-a-conflict">Read</a></li>
 </ul>
 <hr />
-<p><em>Sources: Bloomberg, Reuters, DW, Le Monde, NYT, TechCrunch, EU-Startups, Tech.eu, Sifted — Friday, May 01 2026</em></p>
-<footer>Briefing auto-generated via Claude API + GitHub Actions.</footer>
+<p><em>Sources: Multi-source RSS digest — Friday, May 01 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
 <script>
-const t=document.getElementById('theme');
-const s=localStorage.getItem('theme');
-if(s)document.documentElement.setAttribute('data-theme',s);
-t.onclick=()=>{const c=document.documentElement.getAttribute('data-theme')||'light';const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n)};
-document.querySelectorAll('h2').forEach(h=>{
-  h.addEventListener('click',()=>{
-    let el=h.nextElementSibling;
-    const c=!h._collapsed;h._collapsed=c;
-    h.style.opacity=c?'0.7':'1';
-    while(el&&el.tagName!=='H2'){el.style.display=c?'none':'';el=el.nextElementSibling}
-  });
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
 });
-window.addEventListener('scroll',()=>{
-  const d=document.documentElement;
-  document.getElementById('prog').style.width=(d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
 });
-document.getElementById('search').addEventListener('input',e=>{
-  const q=e.target.value.toLowerCase();
-  document.querySelectorAll('h3').forEach(h=>{
-    let el=h,block=[h];
-    while((el=el.nextElementSibling)&&!['H2','H3'].includes(el.tagName))block.push(el);
-    const match=!q||block.map(b=>b.textContent).join(' ').toLowerCase().includes(q);
-    block.forEach(b=>b.classList.toggle('hidden',!match));
-  });
-});
-</script></body></html>
+
+// Swipe
+let tx = 0;
+slider.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+slider.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) goTo(dx < 0 ? cur + 1 : cur - 1);
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
