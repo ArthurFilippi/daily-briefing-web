@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Trump claims Russia–Ukraine energy ceasefire; Zelensky cautiously supports, Moscow silent.</li><li>Houthis strike Riyadh airport twice in two days; one dead in latest attack.</li><li>European climate commissioner backs "made in Europe" nuclear over Chinese competition.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Trump's Unilateral Energy Ceasefire: Strategy or Miscalculation?</h3>
+<p>US President Donald Trump announced a Russia–Ukraine ceasefire on energy infrastructure via social media without prior coordination with Kyiv, according to BBC and Le Monde reporting. Ukraine's Zelensky indicated conditional support if Moscow reciprocates; Russia has offered no comment. The move signals Trump's preference for direct great-power negotiation over multilateral processes, but the opacity—and apparent exclusion of the Ukrainian government—suggests either deliberate leverage-building or operational friction that could destabilize the already fragile military balance. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/c6pvg4jyz1m0o">BBC</a>, <a href="https://www.lemonde.fr/international/article/2026/10/12/apres-l-accord-entre-donald-trump-et-vladimir-poutine-sur-le-diesel-russe-l-ukraine-et-l-europe-s-efforcent-de-maintenir-la-pression-sur-le-kremlin_6792418_3210.html">Le Monde</a></p>
+<h3>Houthis Execute Successive Strikes on Saudi Capital; Energy Infrastructure at Risk</h3>
+<p>Iranian-backed Houthi militants from Yemen conducted at least two attacks on Riyadh's King Khalid International Airport within 48 hours, killing at least one person and forcing closure of the facility. Dammam airport was also targeted. The Yemen-based group warned "worse is yet to come," and neither Saudi Arabia nor UAE has publicly articulated a viable countermeasure, underscoring the asymmetry of the conflict. Oil markets reacted with volatility; wheat prices declined on ceasefire optimism, but broader energy security remains fragile. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cr93znyk44e1o">BBC</a>, <a href="https://www.nytimes.com/2026/10/11/world/middleeast/saudi-arabia-options-houthis.html">NYT</a></p>
+<h3>North Korea Fires Missiles After Seoul's Hypersonic Test; October Escalation Continues</h3>
+<p>South Korea's military confirmed North Korea conducted its fourth ballistic missile launch in October, characterizing it as a "show of force" following Seoul's successful test of a hypersonic glider system. The pattern signals Kim Jong Un's intention to maintain technical parity and deter US–South Korean coordination. Escalation frequency (4 launches in one month) exceeds historical norms and raises accident risk in one of the world's most militarized borders. <strong>Source:</strong> <a href="https://www.dw.com/en/north-korea-fires-missiles-after-seoul-s-hypersonic-test/a-79636110">DW</a></p>
+<h3>European Climate Commissioner Backs "Made in Europe" Nuclear Stance; Germany–France Divide Persists</h3>
+<p>EU Climate Commissioner Wopke Hoekstra, visiting Paris, endorsed France's position favoring European industrial preference and nuclear energy to counter Chinese manufacturing dominance in green tech. The move signals Brussels is tilting toward protectionism and strategic decoupling, but Germany remains reluctant on nuclear expansion. This divergence complicates EU-wide decarbonization targets and creates regulatory fragmentation that raises compliance costs for deeptech ventures spanning multiple Member States. <strong>Source:</strong> <a href="https://www.lemonde.fr/economie/article/2026/10/12/le-commissaire-europeen-au-climat-compte-sur-le-made-in-europe-et-le-nucleaire-pour-reduire-les-emissions-de-carbone_6792422_3234.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Wiremind Closes €35M Series A After 12-Year Bootstrap; AI Profitability Model Validated</h3>
+<p>Paris-based AI software company Wiremind, serving transport/air cargo/events sectors, raised €35 million in its first institutional funding round after over a decade of bootstrapped growth. Round led by IronWave (formerly Wendel Growth) and Bpifrance Investissement. The deal signals investor appetite for profitable, capital-efficient European AI businesses with sticky B2B revenue and demonstrates that 12-year paths to growth-stage funding remain viable if unit economics are defensible. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/profitable-french-scale-up-wiremind-raises-e35-million-after-12-years-of-bootstrapping/">EU-Startups</a></p>
+<h3>Gaius Capital Closes €50M Debut Fund; DACH Mittelstand Succession Play Gaining Traction</h3>
+<p>Berlin-based PE firm Gaius Capital closed its inaugural fund, Gaius Nachfolgekapital I, at €50 million hard cap, with an additional €6 million raised through co-investment vehicles. Focus: business succession in German/Austrian/Swiss mid-market. The oversubscribed close reflects institutional confidence in legacy-business M&amp;A as demographic shifts force founder exits across Central Europe. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/gaius-capital-closes-debut-fund-at-e50-million-raises-another-e6-million-via-co-investment-vehicle/">EU-Startups</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>RBI Deploys Currency Defense; Rupee Strengthens 1% as Foreign Outflows, Oil Costs Persist</h3>
+<p>India's rupee jumped approximately 1%—the largest gain in six months—after the Reserve Bank of India took aggressive measures to support the currency amid persistent foreign portfolio outflows and elevated crude-oil prices. RBI actions included intervention in offshore markets. The move addresses immediate depreciation but does not resolve underlying macro imbalances: crude remains elevated, and foreign investors continue net selling. Wall Street banks remain bullish on India's IPO pipeline and domestic capital-market depth, but rupee volatility poses structural risk to dollar-denominated returns. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026/10/12/indian-rupee-strengthens-in-offshore-market-after-rbi-measures">Bloomberg</a></p>
+<h3>Oil Retreats as Trump's Energy Ceasefire Dims Geopolitical Premium; Wheat Extends Decline</h3>
+<p>Crude oil fell in volatile early-week trading after Trump claimed a Russia–Ukraine energy ceasefire, lowering Middle East supply-disruption fears despite fresh Houthi strikes. Wheat extended a four-day decline on Black Sea ceasefire optimism. The divergence signals market belief that geopolitical risk has peaked, but Houthi escalation and Mideast tensions suggest that confidence is fragile. Traders are repricing energy risk downward, benefiting long-duration assets (bonds, select equities) but leaving commodity hedges oversold. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026/10/12/wheat-extends-drop-as-trump-remarks-fuel-black-sea-truce-hopes">Bloomberg</a></p>
+<h3>Gold Edges Up as Falling Oil Eases Rate-Hike Expectations</h3>
+<p>Gold prices ticked higher as crude-oil retreat reduced inflation concerns, giving the Federal Reserve breathing room to hold rates steady. Traders are pricing in lower policy urgency over the medium term, supporting duration assets. However, elevated geopolitical tension (Houthis, Korea, Middle East) could reverse this dynamic quickly if supply shocks resurface. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026/10/12/gold-edges-up-as-traders-weigh-russia-ukraine-energy-ceasefire">Bloomberg</a></p>
+<h3>South Korean Won Hits Two-Year High; Dollar Sales by Local Firms Outpace Oil Decline</h3>
+<p>South Korea's won strengthened to a two-year high on lower oil prices and heavy dollar selling by domestic companies. The move signals sentiment recovery among Korean exporters but also suggests confidence may be premature given North Korea's ongoing missile tests and external demand uncertainty. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026/10/12/south-korean-won-hits-two-year-high-on-lower-oil-dollar-sales">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Amazon in Talks to Acquire Decart AI at ~$7 Billion Valuation</h3>
+<p>Amazon is negotiating acquisition of Decart AI, an artificial-intelligence startup, at an estimated ~$7 billion valuation, per Wall Street Journal. The deal would add generative-AI capabilities to Amazon's cloud and retail operations. Price tag reflects continued mega-cap appetite for frontier AI assets despite recent repricing concerns around AI-financing risks (per DBS CEO warnings on market discipline tightening). <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026/10/11/amazon-is-in-talks-to-buy-ai-startup-decart-wsj-reports">Bloomberg</a></p>
+<h3>Bridge Data Centres Seeks to Double Debt to $6.6 Billion; AI Capex Cycle Straining Financing</h3>
+<p>Bain Capital-backed Bridge Data Centres is negotiating with lenders to expand an existing facility loan to approximately $6.6 billion, one of Asia's largest data-center debt packages. Expansion finances AI-era infrastructure build-out. DBS CEO warned markets are repricing AI-financing risks and demanding more discipline; Bridge's upsizing signals conviction but also reveals leverage concentration risk if utilization or pricing disappoints. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026/10/12/bain-s-bridge-data-centres-seeks-to-upsize-loan-to-6-6-billion">Bloomberg</a></p>
+<h3>Printed Circuit Board Maker Dongshan Gauges HK IPO at $2–3 Billion</h3>
+<p>Suzhou Dongshan Precision Manufacturing Co., a PCB specialist, has begun investor roadshow for a Hong Kong listing targeting $2–3 billion in capital. Deal timing signals Chinese tech-hardware vendors are testing public-market appetite amid US–China trade friction. Success would validate that offshore Chinese listings remain viable for supply-chain companies, even as tariff uncertainty persists. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026/10/12/dongshan-said-to-gauge-demand-for-up-to-3-billion-hk-listing">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>"Energy Ceasefire" as Geopolitical Petrodollar Reset</strong></p>
+<p>Trump's announcement of a Russia–Ukraine energy ceasefire—made unilaterally via social media and without prior coordination with Kyiv—signals a structural pivot in how Washington is recalibrating great-power competition. The move collapses traditional alliance consensus (NATO, EU, G7) and substitutes bilateral dealmaking between the US and revisionist powers (Russia, China). Simultaneously, his cited agreement with China to curb hybrid-car exports reflects selective protectionism dressed as managed trade, not free-market opening.</p>
+<p>Beneath these headlines lies a larger shift: the dollar-based order that underwrote 40 years of energy-price stability and predictable supply chains is fragmenting. Geopolitical risk premiums—once smoothed by US security guarantees—are now being auctioned off bilaterally. Saudi Arabia cannot stop Houthi strikes; South Korea faces repeated North Korean tests; Europe must hedge against both Russia and US unpredictability. Commodity hedging, regional arms races, and supply-chain regionalization will all accelerate.</p>
+<p>For an early-stage deeptech founder, this means: 1) US government procurement and strategic partnerships are now negotiable based on Trump's personal dealmaking priorities—not stable policy. 2) European strategic autonomy is rising but fragmented (nuclear vs. renewables debate persists). 3) Supply chains for AI (chips, energy, rare earths) will regionalize faster than previously modeled. Build for scenario flexibility, not legacy supply-chain assumptions.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://www.lemonde.fr/international/article/2026/10/12/apres-l-accord-entre-donald-trump-et-vladimir-poutine-sur-le-diesel-russe-l-ukraine-et-l-europe-s-efforcent-de-maintenir-la-pression-sur-le-kremlin_6792418_3210.html">The Energy Architecture Beneath Great Power Dealmaking</a></strong> — Le Monde analysis of Trump–Putin petroleum negotiations and European countermeasures.</p>
+</li>
+<li>
+<p><strong><a href="https://www.nytimes.com/2026/10/11/world/middleeast/saudi-arabia-options-houthis.html">Asymmetric Warfare and the Limits of Air Defense</a></strong> — NYT long-form on Houthi escalation, Saudi vulnerabilities, and regional power asymmetries.</p>
+</li>
+<li>
+<p><strong><a href="https://www.lemonde.fr/economie/article/2026/10/12/le-commissaire-europeen-au-climat-compte-sur-le-made-in-europe-et-le-nucleaire-pour-reduire-les-emissions-de-carbone_6792422_3234.html">European Climate Policy Fragmentation</a></strong> — Le Monde on Hoekstra's nuclear endorsement and France–Germany divergence.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, Le Monde, The New York Times, BBC, DW, FT, Sifted, EU-Startups — October 11–12, 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
