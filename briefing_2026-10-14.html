@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>Middle East energy infrastructure under sustained attack.</strong> Saudi oil and power assets are being targeted across Yemen escalation (Houthis struck Aramco HQ, Saudi coalition hit fuel depot, missiles intercepted near Riyadh). Oil pricing is spiking past $100/barrel, feeding into producer inflation globally. This hedges commodity/energy exposure in your portfolio; energy stocks and inflation-linked instruments benefit while AI capex margins compress. NASDAQ-heavy allocations may face headwinds if energy costs crimp semiconductor margins further.</p>
+</li>
+<li>
+<p><strong>European tech funding is consolidating into two tiers: Silicon Valley-scale capital (Nvidia's €1B+ entry into Doctolib, Scaleway partnerships) versus micro-fund fragmentation (refugee VC £300k, pre-seed networks).</strong> This signals bifurcation—only founders with US-tier runway or European AI defensibility survive. Regulatory friction (Anthropic security row, EU AI Act) is not slowing capital but <em>sorting</em> it toward geography-hedged, data-sovereign plays.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Houthis siege Taïz; Saudi coalition strikes fuel depot; missiles intercepted near Riyadh.
+- Nvidia invests €1B+ in European tech, including Doctolib stake and Scaleway partnerships.
+- China's exports surge 36% YoY; trade surplus tracking record levels.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Houthi siege of Taïz threatens Yemen's fragile authority</h3>
+<p>The Iran-backed militia is tightening control of Taïz, Yemen's third-largest city. Coalition airstrikes continue (fuel depot near Sanaa targeted; ballistic missiles intercepted over Riyadh, four civilians injured). Aramco's Riyadh headquarters was struck in a coordinated attack after Houthi warnings. If Taïz falls, the path to Aden—and effective control of Yemen's coast—opens significantly. This is the most direct threat to Saudi energy infrastructure this year; sustained disruption will keep oil &gt;$100 and pressure global manufacturing costs. <strong>Source:</strong> <a href="https://legrandcontinent.eu/fr/2026/10/14/le-siege-houthiste-de-taiz-menace-le-gouvernement-yemenite/">Le Grand Continent</a>, <a href="https://www.bbc.co.uk/news/articles/crx2d60y1py3o">BBC</a>, <a href="https://www.ft.com/content/a25417b3-d4e4-4b89-b14d-6370a85ce3c4">Financial Times</a></p>
+<h3>Russia arrests Japanese journalist on espionage allegations</h3>
+<p>A Hokkaido Shimbun reporter was detained in Moscow on charges of collecting information on Russian defense capabilities for Tokyo. The arrest signals rising friction between Russia and US-aligned intelligence partners, even as diplomatic channels remain technically open. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cwp9g1el7x9zo">BBC</a></p>
+<h3>Ethiopia and Eritrea edge toward conflict despite recent alliance</h3>
+<p>Two years after fighting alongside each other in Tigray (which killed hundreds of thousands), both nations are now mobilizing forces. This regional destabilization, paired with Yemen escalation, creates a multipolar crisis environment that diverts US and European attention from Asia. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/10/14/world/africa/ethiopia-eritrea-tigray-invasion.html">New York Times</a></p>
+<h3>French climate policy faces structural deadlock ahead of 2027 election</h3>
+<p>Engineer and Shift Project founder Jean-Marc Jancovici warned that without broad public consensus on climate urgency, political action will stall. This matters for EU green capex and carbon pricing—expect volatility in ESG-tilted holdings if France shifts rightward (Le Pen is running; RN now supports Lecornu's budget). <strong>Source:</strong> <a href="https://www.lemonde.fr/politique/article/2026/10/14/jean-marc-jancovici-tant-qu-il-n-y-a-pas-dans-la-population-une-comprehension-partagee-du-climat-le-politique-ne-bougera-pas_6793395_823448.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Nvidia deploys €1B+ across European ecosystem; stakes Doctolib</h3>
+<p>CEO Jensen Huang announced major capital commitments to France, including an equity stake in Doctolib (the leading European health-tech unicorn) and infrastructure partnerships with Scaleway (hosting + AMD/Nvidia chips for sovereign AI compute). This is the most significant US tech anchor investment in Europe this year. It signals that Nvidia sees EU data sovereignty and healthcare digitalization as margin-accretive; it also pressures European chip startups to either raise at US scale or specialize in narrow verticals. <strong>Source:</strong> <a href="https://www.lemonde.fr/economie/article/2026/10/14/le-patron-de-nvidia-jensen-huang-s-assume-en-optimiste-sur-les-risques-de-l-ia-la-souverainete-ou-l-emploi_6793390_3234.html">Le Monde</a>, <a href="https://www.maddyness.com/2026/10/13/a-station-f-mistral-defend-son-nouveau-modele-et-scaleway-renforce-ses-capacites-de-calcul-avec-nvidia-et-amd/">Maddyness</a></p>
+<h3>Deeptech climate and biotech draws mid-stage capital</h3>
+<p>HyLight (autonomous hydrogen airships for infrastructure inspection) raised €13M; Epyr (industrial heat storage) closed €15M Series A; Undecimal Bio (targeted RNA therapeutics) landed €16M. These represent the European deeptech sweet spot—tangible climate/health impact, 3–5 year path to revenue, and defensible IP. CarbonFarm's €7M round for methane reduction in rice farming shows that carbon-mitigation biotech is now fundable at seed scale. <strong>Source:</strong> <a href="https://tech.eu/2026/10/13/french-deeptech-hylight-raises-eur13m-to-industrialise-autonomous-hydrogen-powered-airships/">Tech.eu</a>, <a href="https://tech.eu/2026/10/13/french-startup-epyr-raises-eur15m-following-successful-industrial-heat-storage-deployment/">Tech.eu</a>, <a href="https://www.maddyness.com/2026/10/13/carbonfarm-leve-7-millions-deuros-pour-reduire-les-emissions-de-methane-dans-les-rizieres/">Maddyness</a></p>
+<h3>UK refugee VC fund launches with £300k initial capital</h3>
+<p>Backed by Atomico, the Refugee Venture Fund opens with modest seed capital but signals institutional appetite for founder diversity in a tightening fundraising environment. This is symbolic rather than capital-efficient; the real signal is that scarcity in engineering talent is pushing LPs toward non-traditional sourcing. <strong>Source:</strong> <a href="https://sifted.eu/articles/refugee-vc-fund-atomico-investment-uk/">Sifted</a>, <a href="https://tech.eu/2026/10/13/uk-launches-refugee-focused-venture-fund-with-initial-ps300000-investment/">Tech.eu</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>China's exports surge 36% YoY; trade surplus on track for record</h3>
+<p>September shipments grew at the fastest pace since 2009, driven by AI-related chip demand and industrial goods. Imports also surged 33%, lifted by oil prices (now &gt;$100 from Middle East conflict). China's trade surplus will likely exceed $500B annually if this pace holds. For your portfolio: this extends the earnings cycle for semiconductor cap-equipment makers (Applied Materials, ASML proxies) but signals demand destruction risk if oil &gt;$120 persists. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/10/14/business/china-exports-trade-surplus.html">New York Times</a>, <a href="https://www.ft.com/content/4eab6c20-60d6-46b6-accd-2e04edfa541d">Financial Times</a></p>
+<h3>Bank of America fined $1.2B for money-laundering negligence</h3>
+<p>Federal regulators said the bank failed to flag suspicious transactions linked to Chinese networks. This is the largest banking compliance fine of 2026. It signals that geopolitical fragmentation (US–China decoupling, sanctions enforcement) is making compliance capital-intensive for large banks. Expect pressure on financial services margins; this supports fintech disruption narratives (ID Finance's €545M raise for Plazo in Spain exemplifies this). <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cm3wvxy6n3z8o">BBC</a>, <a href="https://www.nytimes.com/2026/10/13/business/bank-of-america-money-laundering-fine.html">New York Times</a></p>
+<h3>Indian rupee under pressure; RBI extends intervention into imports</h3>
+<p>The central bank is now directly discouraging importers' dollar hedging to shore up the rupee. This is a shift from financial-markets intervention to real-economy capital controls. It reflects broader currency instability across emerging markets and limits forex upside for India-focused investors (though it may support equity prices if CapEx becomes cheaper for domestic firms). <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-14/rupee-s-relentless-slide-draws-importers-into-rbi-currency-fight">Bloomberg</a></p>
+<h3>Copper strike looms at world's largest mine (BHP Escondida, Chile)</h3>
+<p>Wage talks failed; workers at the Atacama Desert megamine are set to strike after midnight. Escondida produces ~5% of global copper. A sustained stoppage would lift copper &gt;$4.50/lb and pressure electric-vehicle and renewable-grid margins. This is a tail-risk trigger for energy-transition stocks. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-14/world-s-top-copper-mine-faces-strike-as-wage-talks-break-down">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Justice Department warns North Korean hackers have infiltrated dozens of US tech firms</h3>
+<p>Federal authorities announced that sanctioned Pyongyang-linked actors are recruiting Americans as intermediaries to exfiltrate data from breached companies. This signals a shift in attack surface: rather than direct infiltration, NK operatives are now using social engineering and financial incentives. Companies in semiconductors, biotech, and defense will face increased insider-threat scrutiny and compliance costs. <strong>Source:</strong> <a href="https://techcrunch.com/2026/10/13/justice-department-says-north-koreans-have-infiltrated-dozens-of-u-s-companies/">TechCrunch</a></p>
+<h3>Science Corporation implants vision-restoration chip in first Stargardt patient</h3>
+<p>Max Hodak's company (backed by his exit from Neuralink) deployed PRIMA—a retinal implant—in a patient with Stargardt macular degeneration. This is the first commercial BCI-adjacent application in vision restoration. It validates the Neuralink-adjacent market (neural interfaces for sensory restoration) and signals that FDA pathways for high-risk implants are opening. Expect a wave of medtech startups in this space by 2028. <strong>Source:</strong> <a href="https://techcrunch.com/2026/10/13/science-corporation-implants-its-vision-restoring-chip-in-its-first-stargardt-disease-patient/">TechCrunch</a></p>
+<h3>Cerebras CEO argues personal AI assistants will become household appliances</h3>
+<p>Andrew Feldman predicted that locally-run + cloud-hybrid AI assistants will commoditize by 2028, driven by improved inference efficiency. He also pushed back on AI doomsday narratives, arguing the industry's risk-focus drowns out potential. This reflects the emerging consensus among chip builders: consumer AI is the next frontier after enterprise, but requires 10–100x more efficient inference. Your ETF exposure to semiconductor cap-equipment (TNO, PAEEM, WPEA) benefits from this thesis. <strong>Source:</strong> <a href="https://techcrunch.com/2026/10/13/cerebras-ceo-says-were-nearing-a-future-where-everyone-has-a-personal-ai-assistant-at-home/">TechCrunch</a></p>
+<h3>Anthropic challenges Trump security designation in appeals court</h3>
+<p>The AI company asked the federal appeals court to rehear its case against the administration's labeling of Anthropic as a supply-chain risk. This legal battle will likely become a proxy for broader AI sovereignty / national-security debates. Anthropic's pre-IPO investor day is imminent; this regulatory friction will weigh on valuation until resolved. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-13/anthropic-asks-appeals-court-to-rehear-fight-over-security-risk">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The bifurcation of European tech: why geographic arbitrage no longer works</strong></p>
+<p>Today's cluster—Nvidia's €1B+ anchor investment, HyLight/Epyr/Undecimal's €13–16M raises, and Anthropic's legal stand against US security designations—reveals a structural shift in European tech funding. A year ago, European startups could raise at 0.7x US multiples and ship globally. That arbitrage is collapsing. </p>
+<p>Why? Three pressures converge: (1) US capital is now directly entering Europe (Nvidia, tier-1 VCs), eliminating the discount; (2) EU regulatory complexity (AI Act, data residency, antitrust) makes European startups <em>more expensive</em> to scale, not cheaper; (3) geopolitical fragmentation means US and EU tech stacks are slowly decoupling (Anthropic's security row exemplifies this). </p>
+<p>For an entrepreneur, this means: if you're building in Europe, you either need US-tier defensibility (proprietary data, regulatory moats like Doctolib, or deeptech IP) <em>or</em> you must accept being an acqui-hire target for US players. Mid-tier European SaaS founders—the ones who raised $5–20M expecting a 5–7 year exit to a US acquirer—are now crowded out. The winners are either (a) European founders raising Series A+ from US VCs at US valuation, or (b) founders solving EU-specific problems (climate, healthcare, financial regulation) with deep local networks. Geographic arbitrage is dead; defensibility is everything.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://www.ft.com/content/4eab6c20-60d6-46b6-accd-2e04edfa541d">China trade surge and Middle East energy crisis: structural drivers</a></strong> — How the collision of AI-chip demand and Yemen escalation reshapes 2026 margins. <em>Financial Times</em></p>
+</li>
+<li>
+<p><strong><a href="https://tech.eu/2026/10/13/french-deeptech-hylight-raises-eur13m-to-industrialise-autonomous-hydrogen-powered-airships/">Nvidia's European bet and the end of VC discount models</a></strong> — Why tier-1 US capital is directly funding European deeptech, collapsing traditional fundraising arbitrage.</p>
+</li>
+<li>
+<p><strong><a href="https://www.bloomberg.com/news/articles/2026-10-13/anthropic-asks-appeals-court-to-rehear-fight-over-security-risk">Geopolitical fragmentation in AI infrastructure: Anthropic's legal battle as canary</a></strong> — US security designations are reshaping capital flows and regulatory calculus for global AI companies.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS feeds 24h — Wednesday, October 14 2026</em><br />
+<em>Next briefing: Thursday, October 15 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
