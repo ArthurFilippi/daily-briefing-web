@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>South Korea equity index tumbles 8%; semiconductor shares crater on AI-debt fears.</li><li>Anthropic signals $16.8B quarterly revenue as IPO nears; slower AI growth persists.</li><li>Starlink Ukraine throttling alleged by Musk; India blocks entry via political pressure.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Musk alleges US government behind Starlink speed limits to Ukraine</h3>
+<p>Ukraine reports improved Starlink access but faces persistent speed constraints disrupting combat operations. Musk publicly attributed the slowdown to US government intervention. This escalates the question of whether satellite internet is geopolitical infrastructure or a commodity utility—a critical dependency for Kyiv now uncertain. <a href="https://www.bbc.co.uk/news/articles/c8wy9veedgygo">Source: BBC</a></p>
+<h3>North Korea tests submarine-launched cruise missiles</h3>
+<p>Pyongyang conducted successful test-fires of strategic cruise missiles designed for submarine launch, with state media releasing photos of horizontal flight over open water. The escalation reflects accelerating weapons development amid rising regional tensions and underscores the peninsula's role in the broader US-China-Russia strategic triangle. <a href="https://www.dw.com/en/north-korea-says-it-tested-cruise-missiles-to-be-launched-from-sub/a-79664436">Source: DW</a></p>
+<h3>Ukraine resumes strikes on Russian refineries as US intelligence sharing weakens</h3>
+<p>Zelenskyy expressed public anger in an FT interview at the "dangerous" withdrawal of US intelligence-sharing and degradation of Starlink service at a critical moment. Ukraine now plans to resume refinery strikes independently, signaling a pivot toward self-sufficiency even as Western support softens. <a href="https://www.ft.com/content/4d79b52f-1f0d-4739-82ab-7ecfb4251326">Source: FT</a></p>
+<h3>Indonesia's megafires blanket region in toxic haze; health crisis mounts</h3>
+<p>Millions across Indonesia and neighboring countries face severe air pollution from ongoing wildfires exacerbated by El Niño and human deforestation. Authorities face mounting criticism over inadequate fire prevention despite months of dense smog and documented health impacts. The crisis reveals governance failures in managing transnational environmental risks. <a href="https://www.lemonde.fr/planete/article/2026/10/15/des-incendies-geants-continuent-de-ravager-l-indonesie-plongeant-la-region-dans-un-brouillard-toxique_6794074_3244.html">Source: Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Dougs raises €50M to scale AI-driven accounting automation</h3>
+<p>Lyon-based fintech Dougs closed a €50M Series B from Expedition Growth Capital three years after its initial €25M raise. The platform, claiming 50,000+ businesses served, will deploy capital into AI and process automation to capture mid-market accounting spend. Strong domestic traction creates a path to European market consolidation. <a href="https://www.frenchweb.fr/dougs-leve-50-millions-deuros-aupres-dexpedition-growth-capital-pour-changer-dechelle/463938">Source: FrenchWeb</a></p>
+<h3>Skeleton Technologies hits $1B+ valuation; Siemens backs European AI infrastructure play</h3>
+<p>Estonia-based Skeleton Technologies, builder of high-power systems for AI data centers, announced a "9-digit investment" from Siemens, crossing the €899M valuation threshold. Capital prioritizes US expansion, positioning the company as a strategic European alternative to American incumbents in mission-critical compute infrastructure. <a href="https://tech.eu/2026/10/14/skeleton-technologies-surpasses-1b-valuation-with-siemens-backing-for-us-expansion/">Source: Tech.eu</a></p>
+<h3>Nvidia invests in four French startups; commits €250M UK compute donation</h3>
+<p>Jensen Huang's European tour yielded strategic bets in Doctolib, Genesis AI, Pigment, and Entalpic, alongside a €250M compute commitment to UK AI safety research. The moves signal Nvidia's dual playbook: direct venture participation in pre-IPO scaling and institutional capture via government-backed safety initiatives. French deeptech gains Nvidia validation but faces margin pressure from subsidy competition. <a href="https://tech.eu/2026/10/14/nvidia-invests-in-four-french-tech-companies-makes-ps250m-uk-compute-donation/">Source: Tech.eu</a></p>
+<h3>European deeptech spinouts scaling amid patient-capital shortage; female founders underrepresented</h3>
+<p>Analysis identifies three critical gaps blocking European spinout momentum: venture capital unwilling to sustain unprofitable scaling (especially post-AI repricing), customer acquisition friction in fragmented markets, and systemic underrepresentation of female founders in capital allocation. The pattern mirrors VC's structural bias toward narrative over unit economics—now correcting sharply. <a href="https://sifted.eu/articles/europes-spinouts-capitalise-deeptech-boom/">Source: Sifted</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Global AI sell-off deepens; Kospi halts after 8% drop, Nikkei sinks 5%</h3>
+<p>South Korean equities tumbled Thursday as semiconductor and AI hardware stocks cratered globally. Kospi triggered trading halts; Japan's Nikkei fell 5%. Currency weakness in Taiwan dollar and won reflected investor exodus from frothy AI supply-chain plays amid rising rate and debt-sustainability concerns. <a href="https://www.bloomberg.com/news/articles/2026-10-15/global-ai-sell-off-deepens-as-asian-markets-tumble">Source: Bloomberg</a></p>
+<h3>Anthropic Q3 revenue reaches $16.8B; IPO path solidifies despite AI trade doubts</h3>
+<p>The AI safety company signaled third-quarter revenue of $16.8B to prospective investors, though growth of ~50% quarter-over-quarter is slower than some anticipated. Analysts warn that strong financials may not dispel broader doubts about the AI trade's sustainability, as infrastructure capex races against demand realization. <a href="https://www.bloomberg.com/news/articles/2026-10-15/anthropic-results-may-aid-ipo-but-not-ai-trade-analysts-say">Source: Bloomberg</a></p>
+<h3>India's IDBI Bank sale offers fiscal buffer against rising oil, forex pressure</h3>
+<p>India's long-delayed IDBI Bank stake sale delivers government liquidity relief as surging fuel prices and weakening foreign inflows strain New Delhi's fiscal position. The rupee defense effort now requires RBI rate hikes, with bond yields hitting 7.41%—a three-year high—as traders price in further tightening. <a href="https://www.bloomberg.com/news/articles/2026-10-15/india-s-idbi-stake-sale-brings-timely-buffer-against-100-oil">Source: Bloomberg</a></p>
+<h3>Iron ore slides below $90/ton; lithium extends deep selloff on demand fears</h3>
+<p>Chinese commodity futures extended weakness as demand anxiety grips raw materials tied to energy transition and infrastructure. Iron ore reached two-year lows; lithium selloff accelerated on battery-demand concerns. Signal: market is repricing capital intensity of green transition and AI infrastructure simultaneously. <a href="https://www.bloomberg.com/news/articles/2026-10-15/iron-ore-trades-below-90-a-ton-for-first-time-since-2024">Source: Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>ByteDance in talks to secure MediaTek AI chips; Taiwanese foundry gains leverage</h3>
+<p>TikTok's parent is close to securing MediaTek data-center semiconductors, a deal that diversifies ByteDance's chip supply and strengthens MediaTek's competitive position against Qualcomm in AI infrastructure. The negotiation reflects both US export pressure and Taiwan's strategic role as a non-American compute supplier. <a href="https://www.bloomberg.com/news/articles/2026-10-15/bytedance-in-talks-to-secure-mediatek-ai-chips-for-data-centers">Source: Bloomberg</a></p>
+<h3>Smartphone shipments crash 22% in worst quarter ever; memory costs blamed</h3>
+<p>The September quarter recorded the worst smartphone decline on record at -22% YoY as rising memory costs compressed margins and delayed new-model launches. IDC warns worse declines may follow, suggesting consumer device refresh cycles are stalling as discretionary spending cools. <a href="https://www.bloomberg.com/news/articles/2026-10-15/smartphone-shipments-crash-22-in-worst-quarter-ever-idc-says">Source: Bloomberg</a></p>
+<h3>Figma releases agent-framework features; code-layers beta expands platform reach</h3>
+<p>Design platform Figma introduced new guardrails for AI agents operating within its workspace, alongside open-beta release of code-layers capability. The moves position Figma as an AI-first design infrastructure play, reducing friction for teams using generative tooling in product workflows. <a href="https://techcrunch.com/2026/10/14/figma-announces-new-features-to-define-how-agents-work-on-its-platform/">Source: TechCrunch</a></p>
+<h3>McKinsey deploys AI client simulation in entry-level interviews</h3>
+<p>The consulting giant now requires some entry-level candidates to hold a 10-minute conversation with an AI simulation of a client, designed to replicate ~80% of real McKinsey consulting scenarios. The move signals how fast large professional-services firms are embedding LLM-based screening into hiring, potentially reshaping talent-funnel dynamics. <a href="https://www.theverge.com/news/1011654/mckinsey-ai-client-interview">Source: The Verge</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Geopolitical infrastructure now trumps neutral-platform ideology</strong></p>
+<p>The convergence of three events Thursday reveals a structural shift: Musk publicly blamed the US government for Starlink throttles to Ukraine; OpenAI's fired engineer advised Saudi Arabia's government on AI policy; and India's telecom regulator blocked Starlink via political pressure from Ambani-backed competitors. Simultaneously, North Korea tested submarine-missile capability and the US announced an execution livestream.</p>
+<p>These are not isolated incidents—they reflect a hardening norm that critical infrastructure (satellite, compute, energy networks) is now treated as geopolitical leverage, not neutral plumbing. Silicon Valley's decade-long narrative that technology transcends borders has collided with state power reasserting control over connectivity and compute.</p>
+<p>For entrepreneurs: this creates both risk and opportunity. Risk is obvious—regulatory capture, forced localization, export controls on chips and models. But opportunity lies in the European and allied-nation pivot toward <em>sovereign AI infrastructure</em>—domestically hosted models, European satellite networks (OneWeb, etc.), and defense-grade compute. French and European deeptech founders building in semiconductors, quantum, space, and secure comms now have explicit policy backing (see Nvidia's €250M commitment, UK sovereign VC fund backing Augur, DARPA-style European initiatives). The 2026–2028 window may be peak funding for "strategic autonomy" infrastructure plays—before geopolitical fragmentation becomes fully priced into venture markets.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong>On AI infrastructure capex and returns:</strong> <a href="https://www.ft.com/content/11632d03-358c-454b-af95-d06d4072932b">FT analysis of Anthropic IPO vs. AI trade uncertainty</a> — essential reading on whether revenue growth justifies the scale of compute spending.</li>
+<li><strong>On satellite geopolitics:</strong> <a href="https://www.nytimes.com/2026/10/14/world/europe/ukraine-starlink-energy.html">NYT investigation into Starlink Ukraine restrictions</a> — tracks how Pentagon-funded comms are now constrained by political risk.</li>
+<li><strong>On European deeptech ecosystem gaps:</strong> <a href="https://sifted.eu/articles/europes-spinouts-capitalise-deeptech-boom/">Sifted report on spinout capital shortfalls</a> — maps precisely where patient capital and founder support are failing relative to US/China.</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, FT, BBC, DW, Le Monde, TechCrunch, Tech.eu, Sifted, FrenchWeb — Thursday, October 15 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
