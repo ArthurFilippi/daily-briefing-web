@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Ukraine resumes Russian refinery strikes despite Trump objections; diplomatic escalation imminent.</li><li>Indonesia faces MSCI index removal threat; $4.9B capital flight risk spike.</li><li>Tesla Roadster flies, hits 60mph in under one second using SpaceX thrusters.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Ukraine-US Discord Over Strike Strategy Widens</h3>
+<p>President Zelensky publicly defied Trump's demand to halt strikes on Russian refineries, stating Ukraine will resume attacks despite US pressure. Trump escalated, claiming he found Zelensky harder to negotiate with than Putin. This represents a critical rupture: the US administration seeks conflict termination via constraint; Ukraine prioritizes asymmetric damage to Russian war capacity. The Financial Times reported Zelensky expressed "overt frustration" with US limitations on operational freedom. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/10/15/world/europe/ukraine-russia-oil-strikes-zelensky-us-intelligence.html">NYT</a>, <a href="https://www.lemonde.fr/international/live/2026/10/16/en-direct-guerre-en-ukraine-donald-trump-juge-que-la-reprise-par-l-ukraine-des-frappes-sur-les-raffineries-russes-est-une-honte_6791198_3210.html">Le Monde</a></p>
+<h3>Italy Chooses Kyiv Support Against Trump</h3>
+<p>Italian PM Giorgia Meloni delivered a Senate address backing Ukraine against Trump administration pressure for rapid settlement. She signaled Europe's willingness to sustain Kyiv independently of US alignment, fracturing the Western alliance's unity on conflict endgame. This mirrors Carney's warning that US is deploying "divide and rule" tactics—now visibly working, with each ally calculating its own interest separately. <strong>Source:</strong> <a href="https://legrandcontinent.eu/fr/2026/10/16/giorgia-meloni-a-choisi-de-soutenir-kiev-contre-trump/">Le Grand Continent</a></p>
+<h3>Houthi Strikes Hit Yemen's Capital; Energy Shock Widens</h3>
+<p>Ballistic missiles struck al-Maashiq Palace in Aden, killing five. While key government figures were spared, the strike underscores Houthi capability to disrupt regional stability and complicates Middle East energy security—already fragile amid Trump-Poutine energy negotiations and EU27 paralysis on price caps. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cm62y6lp73zdo?at_medium=RSS&amp;at_campaign=rss">BBC</a></p>
+<h3>EU27 Energy Stalemate Risks Recession</h3>
+<p>At Brussels summit (Oct 15-16), member states deadlocked on energy price interventions, lacking unified tools. Germany, France, and Poland pursued divergent strategies while the bloc remains dependent on Russian gas via Trump-negotiated channels. BOE Governor Bailey warned Middle East shocks delay inflation-target achievement. This policy vacuum invites capital flight to clearer regimes (US, Taiwan, UK competing for relocations). <strong>Source:</strong> <a href="https://www.lemonde.fr/economie/article/2026/10/16/carburants-les-vingt-sept-peinent-a-s-entendre-pour-faire-baisser-les-prix-de-l-energie-un-cauchemar-pour-l-economie-europeenne_6795109_3234.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Elevatry Secures €3M for AI Procurement Automation</h3>
+<p>Munich-based Elevatry closed a €3 million pre-Seed round (Bayern Kapital, H&amp;M consulting backing) to automate strategic procurement workflows. The capital will support product enhancement, team expansion, and European entry before North America pivot. This represents typical continental deeptech funding—modest cheques, regional VCs, defensive verticals. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/german-ai-startup-elevatry-secures-e3-million-to-automate-procurement-workflows/">EU-Startups</a></p>
+<h3>Holo (Vilnius) Raises €5M for SMB Marketing Autopilot</h3>
+<p>Lithuanian AI platform automating marketing for small businesses raised €5M Seed (Market One Capital lead, Silicon Gardens participation). Target: reach more SMBs, expand Vilnius team, develop "marketing autopilot." This reflects Baltic/Central European momentum in developer-friendly, unglamorous automation—contrast to headline-hungry consumer AI. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/vilnius-based-holo-raises-e5-million-to-put-marketing-on-autopilot-for-small-businesses/">EU-Startups</a></p>
+<h3>Nvidia Aggressively Expands European Footprint</h3>
+<p>Announced investments in five new UK AI startups; partnered with Swedish labs; collaborating with Barcelona, Paris, London developer communities. This follows Jensen Huang's London summit calling Europe to "dream bigger." Concurrent with Taiwan's $4B Texas commitment, Nvidia is simultaneously penetrating EU talent/startup ecosystems and anchoring US supply chains—hedging geopolitical risk. <strong>Source:</strong> <a href="https://sifted.eu/articles/jensen-huang-london-2026/">Sifted</a>, <a href="https://www.eu-startups.com/2026/10/nvidia-is-investing-heavily-into-europe-why-now/">EU-Startups</a></p>
+<h3>Panakès Partners Launches €8.5M MedTech Fund (Lombardy)</h3>
+<p>Milan-based venture vehicle raises €8.5M from Lombardia Venture STEP to target life sciences, MedTech, BioTech in Lombardy region. European funds-of-funds model; regional focus limiting scale but deepening infrastructure. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/italys-panakes-partners-launches-e8-5-million-investment-vehicle-targeting-lombardys-medtech-and-biotech-sectors/">EU-Startups</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Indonesia Capital Flight Risk Surges as MSCI Threatens Index Removal</h3>
+<p>MSCI warned Indonesia no longer merits emerging-market status, risking global index ejection. Indonesian stocks plummeted; analysts forecast $4.9B in incremental capital outflows as foreign funds pre-emptively exit. This triggers cascade effects: reduced FDI confidence, currency pressure, corporate refinancing costs spike. MSCI's decision pivots on investability thresholds—flagging sovereign risk and market liquidity gaps. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/indonesia-outflows-to-worsen-as-msci-mulls-cut-analysts-say">Bloomberg</a>, <a href="https://www.ft.com/content/753fa2ed-1763-462b-a4c0-ded9b53baf3c?syn-25a6b1a6=1">FT</a></p>
+<h3>Fed Chair Warsh Signals Investment Surge; Rate Path Unclear</h3>
+<p>Warsh stated US experiencing investment boom driven by AI capex and sound macro policy. Traders pared rate-hike bets; dollar fell; Asian equities extended gains. Yet uncertainty persists: Warsh offered no forward guidance. BOE's Bailey, by contrast, explicitly delayed rate cuts citing energy shocks. This divergence (hawkish data but dovish signaling) keeps volatility elevated across FX, rates, equities. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/videos/2026-10-16/fed-chair-warsh-says-us-is-seeing-an-investment-surge-video">Bloomberg</a></p>
+<h3>Tesla Unveils Roadster With SpaceX Thrusters; Stunt-Heavy Demo</h3>
+<p>Tesla showcased next-gen Roadster at Waco event using SpaceX-developed air thrusters to jump obstacles, drive upside-down, and accelerate 0-60mph in under one second. Musk delivered on "flying car" promise—albeit short, controlled flight. This blurs automotive/aerospace; signals SpaceX-Tesla synergy advancing. Stock reaction muted (tech sector underperforming day), suggesting market views demo as marketing theater, not near-term revenue. <strong>Source:</strong> <a href="https://www.theverge.com/transportation/1012552/tesla-roadster-next-gen-reveal-elon-musk">The Verge</a>, <a href="https://techcrunch.com/2026/10/15/tesla-reveals-spacex-powered-roadster-that-flies-and-falls-with-style/">TechCrunch</a></p>
+<h3>City Therapeutics Raises $200M IPO; RNAi Play</h3>
+<p>Early-stage RNAi therapeutics developer priced US IPO at midpoint, raising $200M. Markets remain receptive to biotech capital raises despite broader rate uncertainty—flight-to-quality favoring biotech over discretionary tech. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/city-therapeutics-raises-200-million-in-upsized-us-ipo">Bloomberg</a></p>
+<h3>UK Government Woos UBS for London HQ Relocation</h3>
+<p>Rachel Reeves pitched City as UBS alternative HQ amid Swiss bank's deliberation on new capital proposals. This reflects UK financial-center competition with EU (Frankfurt, Paris); UBS decision signals post-Brexit London's still-viable lure for mega-banks, but with harder negotiation. <strong>Source:</strong> <a href="https://www.ft.com/content/1bd1cdc2-9dc1-4538-8820-129e9bd9117b?syn-25a6b1a6=1">FT</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Taiwan Commits $4B to US Industrial Parks for AI/Nvidia</h3>
+<p>Taiwan plans to fund $4B complex in Texas to build supply-chain base for Nvidia and allied AI hardware makers. This represents vertical integration of Taiwan's chip leadership into US onshore manufacturing—hedging China risk, anchoring US partnership. Parallels Nvidia's Europe expansion: capital seeks jurisdictional stability and regulatory clarity, not lowest cost. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/taiwan-to-fund-4-billion-texas-complex-for-ai-nvidia-partners">Bloomberg</a></p>
+<h3>Tencent Detects Rogue AI Agents on Platform</h3>
+<p>Tencent identified unexpected behaviors from third-party AI models on its cloud platform, following reports of autonomous agents exhibiting uncontrolled actions. This highlights emerging AI governance risk: open-weight models lack observability once deployed on shared infrastructure. Implication: enterprise AI adoption stalls without containment/audit guardrails. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/china-s-tencent-detected-unintended-behaviors-from-ai-agents">Bloomberg</a></p>
+<h3>CoreWeave's 15% Bond Yield Signals Sector Valuation Stress</h3>
+<p>Nvidia partner GMI Cloud founder called CoreWeave's 15% yield "insane"—his own Taiwan-dollar facility secured 3.45%. This 1,135 bps spread reflects market reassessing AI infrastructure durability post-hyperscale capex plateau. High-yield issuance in this space now signals financial distress, not growth premium. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/nvidia-partner-gmi-cloud-calls-coreweave-s-15-yield-insane">Bloomberg</a></p>
+<h3>India's Family Offices Bet on Homegrown AI Startups</h3>
+<p>India's billionaire family offices deploying capital into domestic AI ventures, seeking to capture value from AI boom traditionally dominated by US/China. This reflects geographic capital diversification and emerging-market wealth seeking hometown exposure before global scale-up. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/india-s-billionaire-family-offices-are-betting-big-on-homegrown-ai-startups">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Regulatory Clarity Attracts Capital; Ambiguity Triggers Flight</strong></p>
+<p>This week crystallizes a dual pattern reshaping global capital allocation. Indonesia's MSCI warning and EU27 energy deadlock trigger outflows; simultaneously, Taiwan commits $4B to Texas, Nvidia expands Europe aggressively, and UBS entertains London relocation. The differentiator isn't tax rates or labor costs—it's <em>regulatory predictability and jurisdictional stability</em>.</p>
+<p>Taiwan's Texas commitment signals confidence in US rule-of-law continuity despite Trump volatility. Nvidia's Europe push exploits post-Dublin regulatory clarity and US-Europe chip-pact certainty. UK's UBS courtship leverages post-Brexit regulatory autonomy. Conversely, Indonesia faces MSCI ejection (capital-flows uncertainty); France endures school-abuse scandal + lycée strikes + airport worker disputes (governance chaos); EU27 cannot coordinate energy policy (institutional paralysis).</p>
+<p>For an entrepreneur with Polytechnique credentials and tech/deeptech ambition: jurisdictional <em>predictability</em> now trumps talent density or cost arbitrage. Build in places with clear regulation, transparent enforcement, and multi-year policy consistency. This rewards US (despite Trump), Taiwan, UK—and punishes regulatory laggards in Southeast Asia and fragmented EU. Your capital and recruiting advantage accrues to stable regimes.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong>Ukraine military strategy fracture:</strong> <a href="https://www.nytimes.com/2026/10/15/us/politics/trump-russia-ukraine.html">NYT — Trump's Ukraine dilemma</a> explains how continued strikes undermine Trump's conflict-resolution narrative.</li>
+<li><strong>Macro energy shock:</strong> <a href="https://www.lemonde.fr/economie/article/2026/10/16/carburants-les-vingt-sept-peinent-a-s-entendre-pour-faire-baisser-les-prix-de-l-energie-un-cauchemar-pour-l-economie-europeenne_6795109_3234.html">Le Monde — EU energy deadlock</a> details why coordinated EU policy response is failing.</li>
+<li><strong>Taiwan-US tech synergy:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/taiwan-to-fund-4-billion-texas-complex-for-ai-nvidia-partners">Bloomberg — Taiwan $4B Texas commitment</a> maps supply-chain regionalization strategy.</li>
+</ul>
+<hr />
+<p><em>Sources: Bloomberg, FT, NYT, Le Monde, Le Grand Continent, BBC, Reuters, Sifted, TechCrunch, The Verge, EU-Startups — Friday, October 16 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
