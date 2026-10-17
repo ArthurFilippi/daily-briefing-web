@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Trump waives Russia sanctions citing national security; Macron calls move "inappropriate, ineffective."</li><li>Amazon deforestation drops to lowest in 40 years; Brazil claims "historic achievement."</li><li>Anthropic seeks double-digit yields for chip-financing debt amid AI rout concerns.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Trump waives Russia sanctions as geopolitical consensus splinters</h3>
+<p>Trump signed a national-interest waiver exempting Russia from congressionally-mandated sanctions tied to Ukraine aid, specifically targeting energy measures tied to diesel sales. Macron responded publicly, labeling the accord "inappropriate and inefficacy," while Italy's Defence Minister Guido Crosetto told the BBC that restricting US support prolongs—rather than shortens—the war. This marks the sharpest transatlantic rupture on Ukraine since 2022, with Europe signaling it will not follow US lead on Moscow dealmaking. <a href="https://www.bbc.co.uk/news/articles/cxr5yvzv7rp0o?at_medium=RSS&amp;at_campaign=rss">Source: BBC, DW</a></p>
+<h3>UN Secretary-General succession deadlocked; Grynspan leads non-binding vote</h3>
+<p>All seven candidates for the UN Secretary-General role received vetoes from at least one permanent Security Council member (China, US, France, UK, or Russia). Costa Rican diplomat Rebeca Grynspan holds a narrow lead in an indicative ballot, but consensus remains absent. The stalemate reflects deeper fractures between Washington, Beijing, Moscow, and Europe—none willing to endorse rivals' preferences. <a href="https://www.lemonde.fr/international/article/2026/10/17/prochain-secretaire-general-de-l-onu-aucun-candidat-ne-fait-consensus-pour-succeder-a-antonio-guterres_6795742_3210.html">Source: Le Monde</a></p>
+<h3>Brazil records Amazon deforestation at 40-year low</h3>
+<p>Brazil's National Institute reported 3,335 km² cleared in the 12 months ending July—the lowest since 1988. Incoming presidential elections loom as observers track whether the trend reversal reflects durable policy or cyclical commodity prices. This signals a potential reputational reset for Brazil's environmental governance ahead of COP deliberations. <a href="https://www.dw.com/en/brazil-amazon-deforestation-lowest-in-nearly-40-years/a-79684906">Source: DW, BBC</a></p>
+<h3>Pakistan school roof collapse triggers nationwide safety inspections</h3>
+<p>A roof collapse killed 32 children and one teacher in Peshawar, prompting emergency structural audits across northwest Pakistan. The incident exposes enforcement gaps in building codes and raises questions about infrastructure accountability in conflict-affected regions. <a href="https://www.nytimes.com/2026/10/16/world/asia/pakistan-peshawar-school-roof-collapse.html">Source: NYT</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>ID Finance raises €545M; European deeptech landscape fragments</h3>
+<p>ID Finance's €545M round anchors the week's €1.8B+ cross-European funding. Elsewhere, Goodweek (Strasbourg-founded, LA-HQ) closed a €10.69M seed for SMB AI management; Microbiotica secured €42M in Series C for microbiome therapeutics; and Dublin's LearnUpon locked €44.5M growth debt. These raises span geography (UK biotech OMass: €275M Series C; Norwegian Neonomics: €3.56M) yet share a pattern: founders are optimizing for unit economics <em>first</em>, capital velocity <em>second</em>. European startups appear to be correcting 2021-era "raise fast, prove later" momentum. <a href="https://tech.eu/2026/10/16/id-finance-lands-545m-uk-launches-refugee-focused-vc-fund-and-the-race-to-save-eu-inc/">Source: tech.eu, eu-startups</a></p>
+<h3>French startups raised €58.5M this week amid regulatory scrutiny</h3>
+<p>Maddyness reported aggregate French VC funding at €58.5M for the week ending Oct 16—steady but not exceptional. However, simultaneous reporting on French Tech 2030 deeptech promotions and Mistral AI's fourth acquisition in eight months suggests consolidation over proliferation. Mistral's M&amp;A velocity (likely defensive moves to expand modeling capabilities or talent retention) contrasts with earlier-stage capital constraints. <a href="https://www.maddyness.com/2026/10/16/les-startups-francaises-ont-leve-585-millions-deuros-cette-semaine/">Source: Maddyness</a></p>
+<h3>AWS European Sovereign Cloud tests operational independence; EU Inc negotiations stall</h3>
+<p>Amazon announced trials of its European Sovereign Cloud operating independently from US infrastructure—a direct response to EU digital sovereignty demands. Simultaneously, EU-INC founders issued urgent appeals to Europe's heads of state warning that ongoing negotiations are "stripping away provisions" that would support startup competitiveness. The divergence reflects tension: large cloud providers (AWS, Azure) are institutionalizing compliance; early-stage European tech lacks the capital to follow suit. <a href="https://eu-startups.com/2026/10/aws-wants-to-prove-its-cloud-can-survive-without-the-us-european-startups-are-already-there/">Source: eu-startups, tech.eu</a></p>
+<h3>A16z-backed Sequence exits to Intuit for ~$200M (UK AI fintech, female co-founder)</h3>
+<p>The revenue-optimization fintech was acquired by US software giant Intuit, marking one of the largest AI-startup exits with female leadership. This validates London's position as a secondary AI hub (after San Francisco) but also underscores the exit-acquisition model: UK founders build, US acquirers scale. <a href="https://tech.eu/2026/10/16/a16z-backed-uk-fintech-sequence-sold-to-intuit-in-reported-200m-deal/">Source: tech.eu</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Anthropic demands double-digit yields from Blackstone on chip financing</h3>
+<p>Anthropic offered Blackstone double-digit returns on a chip-financing facility to support its compute expansion, signaling elevated borrowing costs and investor caution around AI capex returns. The high yield reflects debt markets pricing in both existential risk and execution uncertainty—a sharp divergence from 2024's cheap capital environment. <a href="https://www.ft.com/content/cb4034e1-475f-40b9-a5f9-256e91aacb89">Source: FT</a></p>
+<h3>Big Tech stocks suffer worst weekly drop since "liberation day"; AI rout spreads to debt</h3>
+<p>Equities tracking AI leaders (Nvidia, Tesla, Super Micro) fell sharply as investors scrambled for Treasury bonds, halting months of sustained equity rallies. CoreWave slid 25% in a single week. The repricing signals growing skepticism about near-term AI capex ROI and questions around whether trillion-dollar revenue assumptions remain credible. <a href="https://www.ft.com/content/4c4f03f4-f878-4bd6-8128-5be7e3bb8ca1">Source: FT, Bloomberg</a></p>
+<h3>Brent oil climbs to $110 for first time since May; geopolitical escalation risks mount</h3>
+<p>Saudi-led forces intercepted and destroyed missiles aimed at critical energy infrastructure as Houthi attacks intensified. Traders ramp bets ahead of weekend risk; energy shocks compound AI sector's repricing jitters. Inflation implications remain unresolved. <a href="https://www.ft.com/content/8ee22d89-03eb-48dc-99a5-27555373a89c">Source: FT, Bloomberg</a></p>
+<h3>Netflix cuts 1,000 jobs and fires chief content officer Bela Bajaria amid stock pressure</h3>
+<p>Despite revenue and profit growth, the streamer executed layoffs in response to stock-price declines and viewer engagement erosion. The move signals that growth narratives alone no longer justify capital structures—execution and unit economics now dominate equity-market sentiment. <a href="https://www.nytimes.com/2026/10/16/business/media/netflix-layoffs-bela-bajaria.html">Source: NYT</a></p>
+<h3>SoftBank in talks to acquire Allied Universal ($3.2B implied valuation)</h3>
+<p>Masayoshi Son accelerates robotics and AI bets via the US security provider's acquisition. This represents SoftBank's strategic pivot from telecom/internet holdings toward physical infrastructure automation—a structural shift positioning the fund for long-term deeptech exposure. <a href="https://www.ft.com/content/e44a17f9-5be0-4a78-89fb-41c4578838ca">Source: FT</a></p>
+<h3>Vietnam Prime Minister targets 10%+ GDP growth for 2027</h3>
+<p>Vietnam's economic ambitions signal regional competition for FDI amid US-China decoupling narratives. This supports semiconductor and manufacturing relocation narratives, benefiting ETFs tracking emerging-market industrial shifts (e.g., BRES in your portfolio). <a href="https://www.bloomberg.com/news/articles/2026-10-17/vietnam-prime-minister-targets-2027-gdp-growth-of-at-least-10">Source: Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Apple foldable iPhone Duo sells out within hours; supply constraints persist</h3>
+<p>Apple's $2,000 foldable model moved to 2027 delivery dates immediately after launch, citing "extraordinary demand." The sell-out signals sustained hardware enthusiasm despite macro jitters and validates foldable form-factors as a premium product category. <a href="https://www.theverge.com/tech/1013314/apple-app-store-nudify-ai-apps-harassment">Source: The Verge, FT</a></p>
+<h3>Apple updates App Store rules to ban "nudify" AI apps</h3>
+<p>In response to earlier Grok-enabled deepfake harassment waves, Apple now explicitly prohibits intimate image generation without consent. This regulatory move—ahead of legislative action—signals app-store gatekeepers taking proactive safety stances. <a href="https://www.theverge.com/tech/1013314/apple-app-store-nudify-ai-apps-harassment">Source: The Verge</a></p>
+<h3>Anthropic pitches AI safety bill to US lawmakers</h3>
+<p>Anthropic presented its own draft legislation to Congress outlining a framework for AI safety and security regulation. This positions the lab as a credible policy actor rather than purely a commercial player—a strategic diversification amid equity-market skepticism. <a href="https://www.bloomberg.com/news/articles/2026/10/16/anthropic-pitches-ai-safety-bill-to-lawmakers-politico-says">Source: Bloomberg</a></p>
+<h3>Replit exits Anthropic partnership; cites cost concerns</h3>
+<p>CEO Masad disclosed that Replit is no longer collaborating with Anthropic, citing multiple cost-related factors. The move follows Replit's August pivot to OpenAI partnership, suggesting model-provider switching is becoming standard practice as startups arbitrage pricing and performance. <a href="https://techcrunch.com/2026/10/16/replit-is-no-longer-working-with-anthropic-ceo-says/">Source: TechCrunch</a></p>
+<h3>Tesla Roadster prototype debuts with SpaceX air thrusters; production timeline unclear</h3>
+<p>Tesla showcased a SpaceX-collaboration Roadster prototype featuring vertical thrusters in a stunt reveal. The announcement blurs the line between product development and marketing theater—a signature Musk strategy. Actual production and commercial viability remain unspecified. <a href="https://www.bloomberg.com/news/videos/2026-10-16/tesla-showcases-long-awaited-roadster-with-aerial-tricks-video-mvbe4ufl">Source: Bloomberg</a></p>
+<h3>Porsche Macan Turbo EV: 630 hp, 100 kWh battery, two rows</h3>
+<p>Porsche's latest electric crossover positions performance-over-volume in the EV crossover segment, signaling premium automakers' strategy to defend margin share via technology differentiation rather than volume conquest. <a href="https://techcrunch.com/2026/10/16/porsches-electric-macan-turbo-is-an-automotive-existential-crisis/">Source: TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>When Venture Capital Reprices: The Death of "Move Fast" in AI</strong></p>
+<p>The convergence of Anthropic's double-digit debt yields, CoreWave's 25% weekly collapse, Netflix's layoff-via-success, and Replit's cost-driven exit from Anthropic tells a single story: capital markets are recalibrating AI assumptions downward. Six months ago, "scale at any cost" remained the Silicon Valley default. Today, investors demand proof of unit economics and clear paths to profitability <em>before</em> committing nine-figure cheques.</p>
+<p>This repricing is structural, not cyclical. The AI narrative bump (2023–2025) rested on two assumptions: (1) that large-model inference would yield immediate $100B+ revenue streams, and (2) that first-mover moat effects would sustain venture returns. Both assumptions are now contested. Inference margins compress as models commoditize. The moat story collapses once multiple viable open-weight and closed-source alternatives exist. Debt markets, which cannot be spun with narrative alone, are signaling this first.</p>
+<p>For you as a Polytechnique founder, this moment is clarifying. Your deeptech startup no longer competes primarily on <em>capital velocity</em> or <em>narrative sophistication</em>. You compete on <em>unit economic clarity</em>. Investors will ask: What is your cost per inference? Per training run? Can you demonstrate customer lock-in <em>before</em> spending your Series B? The founders who thrive in 2026–2028 will be those who treat capital as a scarce input to be optimized, not a renewable resource to be burned. French and European deeptech ecosystems, structurally smaller than Silicon Valley's, may actually benefit from this repricing—constrained capital forces discipline earlier, selecting for founders who can build sustainable unit economics from day one.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>On AI financing stress:</strong> <a href="https://www.ft.com/content/3f982af9-3eec-476f-9d29-39145ac485c4?syn-25a6b1a6=1">FT — "The dress rehearsal for an AI reckoning"</a> — Analysis of how debt-market turbulence in AI financing foreshadows broader equity repricing.</p>
+</li>
+<li>
+<p><strong>On Ukraine/US divergence:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-16/wall-street-anxiety-spreads-as-ai-rout-meets-110-oil-shock">Bloomberg — "Wall Street Anxiety Spreads as AI Rout Meets $110 Oil Shock"</a> — Macro context linking geopolitical escalation and asset-class volatility.</p>
+</li>
+<li>
+<p><strong>On European startup discipline:</strong> <a href="https://tech.eu/2026/10/16/eu-inc-will-europe-blow-its-biggest-chance-to-get-startups-right/">tech.eu — "EU Inc: Will Europe blow its biggest chance to get startups right?"</a> — Governance analysis of EU regulatory frameworks vs. founder needs.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: NYT, FT, Bloomberg, BBC, DW, Le Monde, TechCrunch, The Verge, eu-startups, tech.eu, Maddyness — Saturday, October 17 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
