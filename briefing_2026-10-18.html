@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Trump temporarily waives Russia sanctions; Zelensky row intensifies over Starlink restrictions.</li><li>France nationwide protests descend into rioting; 1,000+ arrested across cities.</li><li>US AI infrastructure financing shows structural cracks; debt servicing concerns mount.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Trump Halts Russia Sanctions as Ukraine Tensions Peak</h3>
+<p>President Trump has frozen enforcement of Congressional sanctions on Russian hydrocarbon importers, citing "national security" concerns, after a 7 October agreement to purchase Russian diesel. Simultaneously, Zelensky accused Trump of deliberately throttling Starlink speeds in Ukraine, hampering interception of Russian attacks on energy infrastructure. The move directly contradicts Congressional will and signals transactional rather than strategic alignment with NATO partners. <strong>Source: <a href="https://www.lemonde.fr/international/article/2026/10/18/trump-exempte-la-russie-de-nouvelles-sanctions-alors-que-moscou-cible-les-infrastructures-energetiques-ukrainiennes_6796993_3210.html">Le Monde</a>, <a href="https://www.bbc.co.uk/news/articles/cxr5yvzv7rp0o?at_medium=RSS&amp;at_campaign=rss">BBC</a></strong></p>
+<h3>France's October 17 Mobilisation Spirals into Coordinated Rioting</h3>
+<p>An estimated 550,000–800,000 people marched across France to protest living costs and education conditions; riots followed in multiple cities with cars torched, shops ransacked, and over 1,000 arrested. The pattern—organised marches adjacent to breakaway autonomous groups—suggests sustained rather than spontaneous disorder, raising questions about police capacity and protest coordination beyond student networks. <strong>Source: <a href="https://www.lemonde.fr/societe/article/2026/10/18/mobilisation-du-17-octobre-des-manifestations-d-ampleur-conclues-dans-le-chaos_6797034_3224.html">Le Monde</a>, <a href="https://www.bbc.co.uk/news/articles/c6d937wedj7jo?at_medium=RSS&amp;at_campaign=rss">BBC</a></strong></p>
+<h3>Israeli Settlers Attack European Diplomats in West Bank</h3>
+<p>Extremist settlers assaulted Palestinian residents and broke European diplomatic vehicle windows during the olive harvest season; a 78-year-old French mayor (Bernard Baudoux) was beaten. Netanyahu's office dismissed the incidents as a "smear campaign," while the IDF condemned but did not intervene. <strong>Source: <a href="https://www.lemonde.fr/international/article/2026/10/18/en-cisjordanie-des-colons-attaquent-un-convoi-diplomatique-europeen-et-frappent-un-maire-du-nord-de-la-france_6796789_3210.html">Le Monde</a>, <a href="https://www.nytimes.com/2026/10/17/world/middleeast/israeli-settlers-attack-palestinians-diplomats-west-bank.html">NYT</a></strong></p>
+<h3>Major Fire at Canadian Military Base; Defence Minister Confirms Casualties</h3>
+<p>A serious incident at CFB Wainwright in Alberta triggered a major fire with fatalities and injuries; Prime Minister Mark Carney did not disclose the cause. The base hosts NATO training operations and serves as a staging point for Arctic surveillance. <strong>Source: <a href="https://www.bbc.co.uk/news/articles/cr86z0w4lxdxo?at_medium=RSS&amp;at_campaign=rss">BBC</a>, <a href="https://www.dw.com/en/canada-major-fire-reported-at-military-base-in-alberta/a-79690515">DW</a></strong></p>
+<h3>Kenya Confirms Fourth Ebola Case; First Domestic Outbreak</h3>
+<p>Kenya confirmed four Ebola infections this month—the nation's first indigenous cases after zero prior domestic transmission history. Seven infections now confirmed across the region, raising international epidemiological concern. <strong>Source: <a href="https://www.nytimes.com/2026/10/17/world/africa/kenya-ebola.html">NYT</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>America's $10 Trillion AI Capex Bet Meets Economic Reality</h3>
+<p>Infrastructure spending for AI data centres is confronting unforgiving physics: power constraints, cooling costs, and geography-dependent electricity pricing are compressing project economics. Financing deterioration (CoreWeave, Oracle, SoftBank all showing debt stress) suggests the capex cycle may have peaked before ROI models validated. <strong>Source: <a href="https://www.ft.com/content/9ea5a37d-15c9-4d5b-94d6-719048c9cd3c">FT</a>, <a href="https://www.nytimes.com/2026/10/17/business/ai-debt-coreweave-oracle-softbank.html">NYT</a></strong></p>
+<h3>Asia's AI Supply-Chain Stocks Falter as Financing Costs Rise</h3>
+<p>Deepening US tech selloffs expose a structural vulnerability: Asia's semiconductor and infrastructure plays (South Korea, Taiwan, Japan) depend on sustained US capex that now faces higher borrowing costs. Mount financing strain threatens downstream earnings across a region powered by the AI boom. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-18/ai-trade-reversal-pierces-asia-s-star-picks-and-shovels-stocks">Bloomberg</a></strong></p>
+<h3>Russian Shadow Fleet Deploys Coordinated Deception Tactics</h3>
+<p>Satellite data shows Moscow's circumvention tankers now use GPS spoofing to appear in two locations simultaneously, suggesting centralised coordination over spontaneous opacity. This indicates Moscow is tightening control over sanctions-evasion infrastructure and normalising deceptive techniques. <strong>Source: <a href="https://www.ft.com/content/f9dd0c26-3de3-4ecc-8a08-7d08f0946d08">FT</a></strong></p>
+<h3>China Railways Log Record 3.71 Billion Trips in 9M 2026</h3>
+<p>Passenger rail carried 3.71 billion journeys in the first three quarters, up 4.8% YoY and marking a historical record for the period. Urban and inter-city mobility remains robust despite economic headwinds. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-18/china-rail-logs-record-3-71-billion-trips-in-first-nine-months">Bloomberg</a></strong></p>
+<h3>94 Economists Forecast AI-Driven Global Growth Beyond US–China Duopoly</h3>
+<p>FT survey of 94 economists projects near-term productivity gains will diffuse across geographies, not remain concentrated in Silicon Valley or Shenzhen. This suggests diversified exposure to European/Japanese deeptech and emerging-market digital infrastructure outperforms concentrated bets. <strong>Source: <a href="https://www.ft.com/content/c6aeb3a1-1874-4947-8ffc-4d993301244a">FT</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Anthropic Workforce Composition Shifts; Meeting Burden Rises</h3>
+<p>Anthropic's staff has skewed less junior and spend increased time in meetings, a sign of growing operational complexity and bureaucratisation at a 2-year-old AI lab. Typically a harbinger of slowing shipping velocity. <strong>Source: <a href="https://techcrunch.com/2026/10/17/anthropic-says-its-workforce-has-become-less-junior-and-is-spending-more-time-in-meetings/">TechCrunch</a></strong></p>
+<h3>Replit Adopts OpenAI as Default LLM Provider Over Anthropic</h3>
+<p>Replit CEO clarified that OpenAI replaced Anthropic as the platform's default model, though Claude remains available as an alternative. A significant market signal for LLM adoption hierarchy in developer tools; suggests inference cost or inference speed favour OpenAI's offering. <strong>Source: <a href="https://techcrunch.com/2026/10/17/replit-is-no-longer-working-with-anthropic-ceo-says/">TechCrunch</a></strong></p>
+<h3>DeepSeek Releases Faster, Leaner AI Model Update</h3>
+<p>Chinese AI firm DeepSeek published an updated model claiming speed and efficiency gains, escalating competition with Anthropic, OpenAI, and domestic rivals Moonshot and Z.ai. Signals acceleration of non-Western LLM capability on efficiency frontiers. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-17/deepseek-pushes-out-updated-ai-model-it-says-is-faster-leaner">Bloomberg</a></strong></p>
+<h3>New York Legislature Drafts Game Ownership Bill</h3>
+<p>A NY representative has introduced legislation requiring publishers to sell actual ownership of digital games (not licences) and maintain game functionality post-support. If enacted, this creates liability for publishers and disruptive precedent for SaaS licensing models. <strong>Source: <a href="https://www.tomshardware.com/video-games/new-york-rep-announces-game-ownership-bill-that-would-require-consumer-ownership-rather-than-sale-of-licenses-would-also-require-publishers-to-keep-the-game-functional-after-support-ends">Tom's Hardware</a></strong></p>
+<h3>Meta Removes Language Allowing Content Scraping for AI Training</h3>
+<p>After backlash, Meta deleted terms permitting scraping of news sites and web domains for AI model training. Reversal signals regulatory sensitivity on copyright liability and suggests publishers now exert sufficient leverage to push back on unilateral data harvesting. <strong>Source: <a href="https://techcrunch.com/2026/10/17/meta-removes-language-that-raised-scraping-and-ai-training-concerns/">TechCrunch</a>, <a href="https://www.theverge.com/tech/1013409/meta-removes-language-that-may-have-allowed-it-to-scrape-news-sites">The Verge</a></strong></p>
+<h3>Solar Generation Surpasses Nuclear Globally for First Time</h3>
+<p>Solar capacity now exceeds nuclear power generation on a global basis, marking a structural energy transition milestone. Energy infrastructure exposure should reflect declining nuclear utility valuations and rising renewable equipment/grid-balancing opportunities. <strong>Source: <a href="https://www.pv-magazine.com/2026/09/29/solar-surpasses-nuclear-power-globally-for-first-time/">PV Magazine</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>When AI Infrastructure Financing Breaks, Smaller Competitors Inherit Runway</strong></p>
+<p>The stress signals in AI capex financing—CoreWeave struggling with debt servicing, Oracle and SoftBank showing balance-sheet strain—are not signs of AI winter. They signal that the initial incumbents (hyperscalers + tier-1 infrastructure vendors) over-leveraged on capex assumptions that have not yet justified ROI. Smaller, capital-efficient AI labs (Anthropic, DeepSeek, Replit's LLM stack) now enjoy paradoxical advantage: they face higher marginal borrowing costs but lower total debt exposure, and can operate at smaller scale longer.</p>
+<p>The broader pattern is a bifurcation in the AI market structure: <strong>capex-intensive (hyperscaler data centres, GPU cloud) consolidates among best-funded players, while model development and inference efficiency decentralise to capital-light labs.</strong> This explains why DeepSeek can compete on speed/efficiency with OpenAI, and why Anthropic still attracts institutional backing despite Replit pivoting to OpenAI—the value creation has migrated from infrastructure to algorithm and user experience.</p>
+<p><strong>For you as an early-stage entrepreneur:</strong> this window favours deep-tech teams that solve <strong>unit economics first, scale second.</strong> If your business requires sub-$100M capex to achieve first revenue dollar, you're positioned to survive the financing tightening that will thin AI startups over the next 12 months. Conversely, any deeptech play requiring capex &gt;$500M upfront (fusion energy, chip fabs, orbital manufacturing) faces severely compressed funding timelines. Your SP500/NASDAQ tilt should rotate from infrastructure ETFs (TNO, PUST) toward software/algorithm plays (software in energy, biotech, space logistics) where capital efficiency, not scale, drives defensibility.</p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>FT: "America's $10tn AI infrastructure boom is starting to fray"</strong> — Essential anatomy of capex cycle deterioration and financing stress signals across CoreWeave, Oracle, SoftBank. Read for structural economics, not speculation. <a href="https://www.ft.com/content/9ea5a37d-15c9-4d5b-94d6-719048c9cd3c">Link</a></p>
+</li>
+<li>
+<p><strong>Bloomberg: "AI Trade Reversal Pierces Asia's Star Picks-and-Shovels Stocks"</strong> — Direct impact analysis on your portfolio exposure (semiconductor / infrastructure supply chain). <a href="https://www.bloomberg.com/news/articles/2026-10-18/ai-trade-reversal-pierces-asia-s-star-picks-and-shovels-stocks">Link</a></p>
+</li>
+<li>
+<p><strong>Le Monde: "Économie russe : les dépenses publiques se rapprochent de la moyenne de l'OCDE"</strong> — Critical geopolitical economy: Russia's fiscal convergence disguises militarisation; understand the macro context for energy/commodities volatility ahead. <a href="https://legrandcontinent.eu/fr/2026/10/18/economie-russe-les-depenses-publiques-se-rapprochent-de-la-moyenne-de-locde/">Link</a></p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Sunday, October 18 2026. Briefing compiled from FT, BBC, NYT, Le Monde, Bloomberg, TechCrunch, The Verge, DW.</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
