@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Kiev struck overnight; casualties reported as Russian offensive escalates.</li><li>French social violence spreads across five European nations; elections loom.</li><li>DeepSeek model triggers chip rout; Samsung, SK Hynix down hard.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Ukraine Under Sustained Attack; Russia-US Sanctions Standoff Hardens</h3>
+<p>Russian forces conducted fresh strikes on Kyiv overnight Sunday-Monday, killing a 21-year-old woman and injuring multiple civilians, according to Mayor Vitali Klitschko. Concurrently, Trump defended suspension of planned Russian sanctions, framing the move as necessary to maintain peace negotiations and accusing President Zelenskyy of prolonging conflict. The symmetry of escalating military pressure with diplomatic de-escalation rhetoric signals a deliberate negotiating posture from Moscow and Washington, constraining Ukraine's operational space. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/live/2026/10/19/en-direct-guerre-en-ukraine-la-capitale-kiev-visee-par-de-nouvelles-frappes-russes-au-cours-de-la-nuit_6796922_3210.html">Le Monde</a></p>
+<h3>European Cost-of-Living Protests Turn Violent; Far-Right and Kremlin Exploit Narrative</h3>
+<p>France experienced widespread rioting this weekend after protests over cost of living and public service deterioration devolved into looting and arson. The unrest synchronised across five European nations, with elections scheduled in at least half a dozen countries next year. Trump's circle and Kremlin officials have aligned messaging, framing demonstrations as consequences of "immigration" and "Western civilisation decline," while younger protesters frame state violence and economic hardship as justification for property destruction. Emmanuel Macron sought to reassert authority Sunday evening but drew opposition criticism. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/crwyd02yz22vo">BBC</a>; <a href="https://www.lemonde.fr/international/article/2026/10/19/mobilisation-du-17-octobre-trump-et-le-kremlin-main-dans-la-main-pour-denoncer-le-chaos-migratoire-et-la-decadence-de-l-europe_6797410_3210.html">Le Monde</a>; <a href="https://www.bloomberg.com/news/articles/2026-10-19/french-violence-raises-alert-as-protests-flare-across-europe">Bloomberg</a></p>
+<h3>Austrian Airlines Flight Diverted After Bomb Threat; Security Escalates</h3>
+<p>An Austrian Airlines flight from Tel Aviv to Vienna made an emergency landing in Sofia, Bulgaria, after a bomb threat was reported near the Bulgarian-Romanian border. A MiG-29 fighter jet escorted the aircraft; all passengers and crew remained unharmed. The incident reflects heightened risk in Eastern European airspace amid regional tensions. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/c680zdmn100lo">BBC</a></p>
+<h3>Canadian Military Base Fire Kills Four; Worst Peacetime Tragedy in Decades</h3>
+<p>A "violent, fast-moving" fire at Canadian Forces Base Wainwright in Alberta killed four personnel and left 19 others in critical condition, with 39 hospitalised total. Prime Minister Mark Carney called it "one of the worst tragedies" affecting Canada's armed forces on domestic soil during peacetime. Investigation ongoing; cause undetermined. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/article/2026/10/19/canada-quatre-morts-et-19-blesses-dans-un-etat-critique-apres-un-incendie-sur-une-base-militaire-en-alberta_6797056_3211.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Fintech Qonto HQ Damaged During October 17 Riots</h3>
+<p>Qonto's new headquarters was vandalised and set alight during the October 17 nationwide protests. No further details on impact or damage assessment yet released. The incident underscores broader vulnerabilities facing high-profile European startups amid social instability. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/10/18/manifestations-du-17-octobre-le-nouveau-qg-de-qonto-vandalise-et-incendie/">Maddyness</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>China's Q3 GDP Beats Forecast; Export Dependency Masks Domestic Weakness</h3>
+<p>China's economy expanded 4.5% year-on-year in Q3, exceeding expectations, driven primarily by strong exports. However, the prolonged housing crash, sluggish consumer spending, and collapsing investment levels reveal the nation's acute structural imbalance. China's dominance in rare-earth production gives Beijing significant leverage in US trade negotiations, according to Peterson Institute analyst Mary Lovely. <strong>Source:</strong> <a href="https://www.ft.com/content/cf113314-1077-4ab4-b667-9912656684f1">FT</a>; <a href="https://www.bloomberg.com/news/videos/2026-10-19/piie-s-lovely-on-china-us-trade-video">Bloomberg</a></p>
+<h3>Indonesia Faces MSCI Downgrade Threat; Markets in Free Fall</h3>
+<p>Indonesian officials are meeting with MSCI Inc. executives Monday to discuss potential index reclassification, a move far more severe than initially suggested. Indonesian stocks have posted their worst rout in nearly 30 years, extending losses into bonds and currency. The rupiah weakened materially alongside equities. This reclassification risk could trigger significant EM fund rebalancing and capital flight from ASEAN. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-19/indonesia-said-to-meet-monday-with-msci-over-shock-index-threat">Bloomberg</a></p>
+<h3>Vietnam Plans Index Options; Seeks Deepening After FTSE Upgrade</h3>
+<p>Vietnam aims to introduce stock index options in Q1 2027 following FTSE's upgrade of Vietnamese equities. The move reflects ambitions to deepen capital markets and attract foreign investors, widening derivative offerings to improve market microstructure. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-19/vietnam-plans-index-options-for-next-year-after-ftse-upgrade">Bloomberg</a></p>
+<h3>BoE Scrutinises Barclays Over Private Credit Exposure Misrepresentation</h3>
+<p>The Bank of England has launched a probe into Barclays following claims that traders misrepresented private credit derivatives exposure used to finance leveraged loans. Regulator received formal complaint alleging risk understating. This signals intensifying scrutiny of how systemically-important banks manage and disclose alternative asset exposure. <strong>Source:</strong> <a href="https://www.ft.com/content/f3127b4f-d33a-4431-acff-021829f3aa72">FT</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Anthropic Commits 5% of IPO-Bound Shares to 'Public Benefit Fund'</h3>
+<p>Anthropic announced it will allocate 5% of equity to a new "public benefit fund" capable of making donations addressing public good, including AI's labour-market impact and safety research. The structural move precedes a blockbuster IPO filing and signals pre-emptive liability hedging against public backlash over AI's economic and safety implications. This framework allows the company to decouple shareholder returns from philanthropic commitments, a novel governance precedent for deeptech unicorns heading to market. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cm2kez327gdko">BBC</a>; <a href="https://www.ft.com/content/3beab58d-4269-4722-b299-8fa5a93f5a52">FT</a></p>
+<h3>Asian Semiconductor Stocks Crater on DeepSeek Model, AI Financing Fears</h3>
+<p>Korean and Taiwanese chip stocks tumbled as DeepSeek's latest inference model sparked renewed concerns about AI capex ROI and VC funding availability for AI infrastructure plays. Samsung and SK Hynix losses contributed to a 182 trillion won ($137 billion) hit to South Korea's main pension fund. The move reflects broader market doubts about hyperscaler spending justifying current valuations. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-19/samsung-sk-hynix-slide-causes-137-billion-hit-to-korea-pension">Bloomberg</a></p>
+<h3>Meta's Automated Systems Wrongly Suspended No Kings Coalition Instagram During Protests</h3>
+<p>Meta confirmed that its automated security systems mistakenly suspended the Instagram account of the No Kings Coalition at peak nationwide demonstrations. The error illustrates gaps in content moderation logic during high-velocity political events and raises questions about algorithmic bias in suppressing activist coordination. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-18/meta-says-claude-ai-tool-triggered-no-kings-instagram-suspension">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Qonto's Physical Infrastructure Becomes Protest Target; Startup Geography Now Risk Factor</strong></p>
+<p>Qonto's new Paris headquarters was torched during October 17 rioting, marking the first major deeptech unicorn to suffer physical damage during European social unrest. The fintech—valued at &gt;€5 billion in recent funding rounds—occupied high-profile real estate precisely to signal maturity and permanence to institutional investors and regulators.</p>
+<p>This incident reveals a structural blind spot in European startup risk models: venture firms and founders optimise for regulatory compliance, tax efficiency, and talent concentration in major cities, but discount political fragility. As social discontent spreads synchronously across five nations and geopolitical actors instrumentalise anti-establishment narratives, physical plant becomes a vector of exposure for founders with public profiles. Qonto's damage underscores that European deeptech companies—particularly in fintech, which triggers populist ire during cost-of-living crises—now face a new class of infrastructure risk absent from standard pitch decks.</p>
+<p><strong>For an aspiring entrepreneur:</strong> the lesson is not to avoid cities, but to architect your operations with distributed resilience in mind. Early-stage founders should model political tail risks alongside regulatory scenarios, stress-test supply chains and office footprints for disruption, and consider whether your company's public narrative (tech solving inequality vs. tech concentrating wealth) creates heightened protest vulnerability. The next 18 months of European elections will test this calculus severely.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>Indonesia's MSCI reclassification risk explained:</strong> MSCI's two-step downgrade threat could trigger $10–15B in forced fund rebalancing. <a href="https://www.bloomberg.com/news/articles/2026-10-19/indonesian-stocks-tumble-to-lowest-since-2020-after-msci-warning">Bloomberg tracking</a></p>
+</li>
+<li>
+<p><strong>Why European social unrest matters for deeptech founders:</strong> Geopolitical analysts flagging October 17 protests as inflection point for 2026 election cycles. <a href="https://legrandcontinent.eu/fr/2026/10/19/au-dela-de-la-france-la-crise-du-cout-de-la-vie-embrase-leurope/">Le Grand Continent</a></p>
+</li>
+<li>
+<p><strong>Anthropic's public benefit structure as governance model:</strong> First major AI unicorn pre-IPO to formally separate charitable mission from shareholder value. <a href="https://www.ft.com/content/3beab58d-4269-4722-b299-8fa5a93f5a52">FT analysis</a></p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, FT, BBC, Le Monde, Maddyness — Monday, October 19 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
