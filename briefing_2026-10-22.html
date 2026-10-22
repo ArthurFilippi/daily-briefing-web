@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>AI capital concentration creating structural scarcity elsewhere.</strong> Massive venture-stage funding rounds in AI (DeepSeek $15B, Legora $550M, Pigment $250M) are siphoning capital from non-AI sectors, while simultaneously driving valuations for three-month-old AI startups into the billions with tranched rounds. This creates a two-tier VC market: AI founders bypass traditional diligence; others face funding drought. <em>Portfolio implication: heavy NASDAQ/tech weighting amplifies exposure to AI-driven repricing risk if sentiment shifts on capital efficiency.</em></p>
+</li>
+<li>
+<p><strong>Supply-chain infrastructure becoming AI's new bottleneck battlefield.</strong> Beyond chip access, optical interconnect (Photon Bridge €10M), energy supply (Kinder Morgan $4.2B Texas gas pipeline), and data-center site prep now dominate investment flows. This shifts capital from software to physical deeptech—and reveals that the AI arms race is moving from compute to logistics. France/Europe remain marginal in this layer.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- DeepSeek raises $15B, escalating Chinese AI challenge to US labs.
+- Legora hits $8.8B valuation on $550M Series E legal-AI round.
+- Long-end US yields hit one-month low as AI trade durability questioned.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Afghanistan-Pakistan proxy conflict escalates after eight months of direct warfare</h3>
+<p>The two nations have shifted toward proxy group operations following a half-year conflict that has inflicted severe civilian casualties. The escalation reflects deepening mistrust and inability to reach diplomatic resolution despite international mediation efforts. This destabilization risks creating new ungoverned spaces for militant groups and complicates US withdrawal strategies from the region.
+<em>Source: <a href="https://www.nytimes.com/2026/10/22/world/asia/afghanistan-pakistan-proxy-war.html">New York Times</a></em></p>
+<h3>Indonesia rainforest fires trigger mass protests over agricultural practices</h3>
+<p>Smoke from ongoing blazes has sickened hundreds of thousands across Southeast Asia and neighboring countries. Demonstrators demand government action to halt destructive agricultural expansion and peatland degradation driving the fires. The crisis exposes weak enforcement of environmental regulations and raises emissions concerns ahead of COP climate negotiations.
+<em>Source: <a href="https://www.nytimes.com/2026/10/22/world/asia/indonesia-protests-rainforest-haze.html">New York Times</a></em></p>
+<h3>US orders diplomatic drawdown from Saudi Arabia amid escalating Houthi attacks</h3>
+<p>At least three personnel were killed in recent drone and missile strikes targeting Shaybah oilfield and airport infrastructure. The decision reflects elevated threat assessment and signals US recalibration of regional security commitments. Houthi capability escalation poses renewed risks to global oil markets and Red Sea shipping routes.
+<em>Source: <a href="https://www.bbc.co.uk/news/articles/c6x2vpk93770?at_medium=RSS">BBC</a></em></p>
+<h3>France's education minister faces pressure on youth unrest ahead of reform deadline</h3>
+<p>Édouard Geffray must present policy measures by October 26 to address demands from ongoing lycéen protests—the most acute youth movement in two decades. Political tension centers on curriculum reform, school autonomy, and resource allocation. The crisis tests whether technocratic governance can resolve structural education discontent without broader political concessions.
+<em>Source: <a href="https://www.lemonde.fr/politique/article/2026/10/22/brillant-mais-pas-politique-le-ministre-de-l-education-edouard-geffray-se-retrouve-sur-la-breche_6798552_823448.html">Le Monde</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Legora secures €489M Series E at €7.8B valuation, accelerating legal-AI expansion</h3>
+<p>The Stockholm-based agentic operating system for legal professionals raised $550 million in capital, demonstrating mature Series E scale and sustained investor conviction in AI-native enterprise software. The round was led by major institutional backers and signals sustained appetite for applied AI in high-friction professional services.
+<em>Source: <a href="https://sifted.eu/articles/legora-funding-round-series-e-legal-tech/">Sifted</a></em></p>
+<h3>Pigment raises €223M ($250M) Series E backed by Nvidia and Scaleup Europe Fund</h3>
+<p>The Paris-based planning and forecasting software company crossed $100M annual recurring revenue threshold before closing the mega-round, attracting strategic chip vendor participation. Valuation crosses $1B+ threshold, positioning Pigment as a leading European software unicorn and demonstrating sustained Series E appetite for enterprise AI infrastructure plays.
+<em>Source: <a href="https://www.maddyness.com/2026/10/21/pigment-leve-250-millions-de-dollars-avec-nvidia-au-tour-de-table/">Maddyness</a></em></p>
+<h3>French startup Omi partners with Nvidia on AI infrastructure initiative</h3>
+<p>The partnership signals Nvidia's deepening focus on French ecosystem developer support and positions Omi as a key entry point for European enterprises adopting GPU-accelerated workflows. Details remain limited, but the move reflects Nvidia's strategy to de-risk European supply-chain exposure.
+<em>Source: <a href="https://www.maddyness.com/2026/10/21/nvidia-noue-un-partenariat-avec-la-startup-francaise-omi/">Maddyness</a></em></p>
+<h3>Elax Énergie raises €30M for water-heater efficiency optimization</h3>
+<p>The French deeptech company targeting residential thermal efficiency secured funding to scale hardware-software integration for energy-load management. Round size and investor base suggest venture-backed approach to climate-tech, though market adoption remains early-stage and regulatory tailwinds unclear.
+<em>Source: <a href="https://www.maddyness.com/2026/10/21/elax-energie-leve-30-millions-deuros-pour-rendre-les-chauffe-eau-plus-economes/">Maddyness</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Long-end US Treasury yields hit one-month low as AI trade durability questioned</h3>
+<p>The 10-year yield slumped on renewed skepticism over artificial-intelligence capital deployment efficiency and profitability timelines. Flight-to-safety demand benefited bonds even as copper and risk assets sold off on concern that AI buildout capex may not translate to near-term earnings. This repricing dynamics affect real rates and refinancing costs for leveraged tech companies.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-22/long-end-us-yield-hits-one-month-low-as-ai-fears-fuel-haven-bid">Bloomberg</a></em></p>
+<h3>Alibaba shares drop steeply as China tightens product-quality standards and consumer protections</h3>
+<p>The e-commerce giant suffered its steepest two-month decline on regulatory tightening that raises compliance costs and limits platform monetization flexibility. The move reflects Beijing's continued pressure on tech giants and signals macroeconomic caution ahead of year-end fiscal measures. China's CSI 300 equity index risks entering bear-market territory amid policy uncertainty.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-22/alibaba-shares-post-steepest-drop-in-two-months-on-china-curbs">Bloomberg</a></em></p>
+<h3>France and US fiscal position deterioration headlining G7 concerns</h3>
+<p>Both nations face structural budget-deficit trajectories amid elevated debt servicing costs and pressure on social spending. France's deficit position mirrors US trajectory, raising refinancing risk and limiting fiscal stimulus capacity for cyclical shocks. Market implications include eurozone sovereign spread widening and currency volatility if ECB diverges from Fed on rate policy.
+<em>Source: <a href="https://www.ft.com/content/43a2e871-2e82-4af7-8d56-2f00202df949">Financial Times</a></em></p>
+<h3>Jio IPO records overwhelming first-day demand despite broader Indian equity weakness</h3>
+<p>Reliance Industries' digital subsidiary attracted massive subscription despite NIFTY 50 underperformance, signaling investor appetite for telecom-scale AI infrastructure plays concentrated in individual mega-caps. The divergence reflects selective risk appetite and concentration dynamics in Indian capital markets.
+<em>Source: <a href="https://www.bloomberg.com/news/newsletters/2026-10-22/jio-ipo-sees-overwhelming-demand-on-day-one-even-as-nifty-struggles">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>DeepSeek raises $15B in latest round, mounting serious challenge to US AI labs</h3>
+<p>China's leading AI pioneer secured approximately 100 billion yuan ($15B) in capital, one of the nation's largest fundraising rounds ever and a direct escalation of competition against Anthropic and OpenAI. The round reflects Beijing's strategic priority to develop indigenous large-language-model capability independent of US export controls. Valuation and capital scale signal investor confidence in Chinese AI technical progress and cost-structure advantages.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-22/deepseek-raises-15-billion-in-challenge-to-leading-us-labs">Bloomberg</a></em></p>
+<h3>Venture capitalists push AI startup Emulate to billion-dollar valuation at three-month-old stage</h3>
+<p>VCs are employing tranched, two-step funding structures to accelerate valuation ramps and secure allocation in high-demand AI companies before product launch or website completion. The practice bypasses traditional Series A diligence gates and reflects acute competition for AI-sector cap allocation. This dynamic creates valuation inflation and distributes execution risk across multiple tranches rather than single commitment gates.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-22/venture-capitalists-push-up-ai-startup-valuations-with-tranched-two-step-rounds">Bloomberg</a></em></p>
+<h3>Tesla commits to Cybercab customer sales by year-end despite federal safety investigation</h3>
+<p>The company plans to begin commercial delivery of its two-seat autonomous vehicle lacking steering wheel or traditional controls while federal regulators assess safety compliance. Parallel Tesla announcement of customer-owned vehicle robotaxi-fleet integration for 2027 marks aggressive autonomy timeline despite unresolved regulatory and technical questions around liability and remote operation.
+<em>Source: <a href="https://techcrunch.com/2026/10/21/tesla-says-it-will-start-selling-cybercabs-by-end-of-year/">TechCrunch</a></em></p>
+<h3>Photon Bridge secures €10M to address AI infrastructure optical-interconnect bottleneck</h3>
+<p>The Eindhoven-based photonics startup is tackling a new constraint in AI buildout: producing millions of lasers required to connect expanding clusters of processors. Capital enables development of optical engines for data-center-scale AI compute, positioning optical interconnect as emerging hardware category alongside semiconductor and memory. This reflects shift from chip scarcity to system-integration bottlenecks.
+<em>Source: <a href="https://www.eu-startups.com/2026/10/eindhoven-based-photon-bridge-raises-e10-million-to-build-optical-engines-for-ai-and-telecom/">EU-Startups</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>AI Capital Concentration: From Software Scarcity to Infrastructure Desperation</strong></p>
+<p>Three distinct funding patterns converge on October 22 to reveal a deeper supply-chain crisis beneath the AI boom narrative. First: DeepSeek's $15B round and Legora's $550M Series E reflect mature venture-stage capital flowing into AI companies at scales that used to require 7–10 years of revenue traction. Second: Photon Bridge's €10M seed and Kinder Morgan's $4.2B Texas gas pipeline both target the same problem—not chips or models, but the "boring" infrastructure to connect chips and power facilities. Third: across equity markets, traditional tech stocks retreated as long-end Treasury yields fell, suggesting investors are pricing in that AI capex may not translate to earnings within investment horizons.</p>
+<p>The pattern: capital is flowing <em>backward</em> through the stack. Six months ago, venture focused on AI applications (reasoning models, multimodal agents). Now, every major VC is racing to own the optical networks, energy pipelines, and data-center real estate that sit beneath compute clusters. This mirrors 2010–2015 infrastructure plays (CDNs, colocation) but with 3x the capital intensity because AI workloads demand continuous power and sub-microsecond latency.</p>
+<p>For an aspiring deeptech founder: this is a warning and an opportunity. Aspiring to build an AI model or applications layer now means competing for capital against $15B incumbents. But building the unglamorous infrastructure to power AI—cooling systems, optical interconnects, modular nuclear plants, carbon-neutral energy—faces less competition and commands structural pricing power. The bottleneck has moved from software to physics.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>AI Geopolitics: DeepSeek's $15B and the logic of indigenous AI stacks.</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-22/deepseek-raises-15-billion-in-challenge-to-leading-us-labs">Bloomberg article</a> places Chinese funding within US export-control escalation context; critical for understanding capital flows and regulatory hedging across US/China tech rivalry.</p>
+</li>
+<li>
+<p><strong>VC Valuation Inflation: Tranched rounds and the death of Series A diligence.</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-22/venture-capitalists-push-up-ai-startup-valuations-with-tranched-two-step-rounds">Bloomberg analysis</a> documents how tranched funding structures collapse risk distribution and accelerate mark-ups; relevant for portfolio risk assessment of late-stage AI company valuations.</p>
+</li>
+<li>
+<p><strong>Infrastructure as the New Constraint: Optical, Energy, and Physical Buildout.</strong> Cross-reference Photon Bridge optical networking, Kinder Morgan gas pipeline, and data-center pollution concerns (<a href="https://www.theverge.com/ai-artificial-intelligence/1015958/data-center-pollution-rising-report">The Verge</a>) to understand why 2027–2028 CapEx will concentrate on unsexy but capital-intensive physical systems rather than software.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, Financial Times, Le Monde, Sifted, TechCrunch, Maddyness — 24h aggregation, Thursday, October 22 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
