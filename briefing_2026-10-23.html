@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Meta capital raise triggers AI spending ROI doubts across equities.</li><li>Geopolitical rivalry reshapes tech regulation and defense investment allocation.</li><li>European deeptech founders raise record pre-seeds amid strategic autonomy push.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Arms Race Intensifies in Korea as Russia Emboldens North</h3>
+<p>North and South Korea are ramping lethal arsenals across the heavily fortified border, with North Korea strengthened by its Russia alliance. The rare escalation exposed escalating drone and missile capabilities on both sides. Russia's support amplifies Pyongyang's confidence to test new weapons systems. [Source: <em>New York Times</em>, 2026-10-23]</p>
+<h3>En Ukraine, le piège du cessez-le-feu trumpiste</h3>
+<p>A Trump-backed ceasefire without credible European deterrence would create conditions for renewed conflict, not lasting peace. Without NATO/EU military backing, Kyiv would face permanent territorial loss and strategic vulnerability. The absence of a binding security architecture makes any truce a prelude to the next war. [Source: <em>Le Grand Continent</em>, 2026-10-23]</p>
+<h3>France's Protest Restrictions Test Rule of Law</h3>
+<p>Authorities nationwide have banned demonstrations ahead of Saturday's protests, citing fears of rioting and looting. Critics warn blanket restrictions undermine freedom of assembly; Macron has personally intervened to limit permits only to union-organized marches. At least 50,000 deaths from heat this summer (two-thirds climate-attributed) have fueled youth unrest. [Source: <em>Le Monde</em>, 2026-10-23]</p>
+<h3>Serbia's Snap Election Becomes Vucic vs. Student Movement Referendum</h3>
+<p>Tens of thousands rallied as Serbia prepares elections pitting strongman Aleksandar Vucic against two years of student-led protests. Observers frame it as a referendum on democratic reform vs. nationalist continuity. Results could reshape Balkans' EU trajectory. [Source: <em>Deutsche Welle</em>, 2026-10-23]</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Zurich's Enact Intelligence Exits Stealth with €26.68M for Physical AI</h3>
+<p>Backed by Yann LeCun and Arthur Mensch, Enact raised one of Europe's largest pre-Seed rounds to build robots with enhanced tactile sensing. The pre-Seed size ($30M USD) signals institutional confidence in physical AI as non-commoditized alternative to LLM infrastructure. Institutional backers include redalpine and Notion Capital. [Source: <em>EU Startups</em>, 2026-10-22]</p>
+<h3>Lisbon's Beyond Vision Completes €28M Round for AI Drones</h3>
+<p>The unmanned aerial vehicle maker closed funding co-led by Índico Capital and Lince Capital, with prior backing from ActiveCap. Round targets civilian and defence markets across Europe. Drone autonomy and swarm logic compete with Chinese models in NATO-allied regions. [Source: <em>EU Startups</em>, 2026-10-22]</p>
+<h3>Indurex Raises €7M for Cyber-Physical Systems Security</h3>
+<p>Amsterdam-based Indurex emerged from stealth with €7M from Contrarian Ventures (energy/industrial-focused) to secure industrial IoT and operational technology. Pre-Series A round validates market demand for AI-native CPS defense amid geopolitical tensions. [Source: <em>EU Startups</em>, 2026-10-22]</p>
+<h3>Spanish VC Seaya Closes €600M Growth Fund in Six Months</h3>
+<p>Seaya Nova achieved first close in half the typical timeline, backed by EIF under European Tech Champions programme. Tickets range €20–50M per company; momentum reflects investor appetite for European scale-ups amid US AI uncertainty. [Source: <em>EU Startups</em>, 2026-10-22]</p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Meta's AI Capex Pivot Triggers Broad Tech Selloff</h3>
+<p>Meta announced a massive fresh capital raise to fund "immense" AI infrastructure investments, shocking investors already skeptical of ROI timelines. Nasdaq dropped on doubts hyperscalers will monetize sprawling data centers before 2028. Calpers slashed Magnificent 7 holdings as valuations appear increasingly untethered from near-term earnings. [Source: <em>Le Monde</em>, <em>Bloomberg</em>, 2026-10-23]</p>
+<h3>Global Credit Spreads Hit 17-Month High on AI Tech Fears</h3>
+<p>Credit markets signaled biggest risk-off sentiment since May 2025 as AI stock selloff deepened geopolitical tensions. Yen, Japanese bonds, and Treasuries rallied as haven demand surged; copper headed for third weekly loss as risk appetite collapsed. [Source: <em>Bloomberg</em>, 2026-10-23]</p>
+<h3>Calpers Retreats from Big Tech as AI Rally Falters</h3>
+<p>California's largest pension fund cut Magnificent 7 positions amid lofty valuations and soaring capex with uncertain payoff. Move signals institutional skepticism about AI spending discipline. [Source: <em>Financial Times</em>, 2026-10-23]</p>
+<h3>US Treasury Tightens Investment Rules on Chinese Tech</h3>
+<p>New restrictions target US capital flows into sensitive Chinese sectors: AI, hypersonic weapons, biotech. Measure reflects broader bifurcation of tech ecosystems along geopolitical lines. [Source: <em>Financial Times</em>, 2026-10-22]</p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>SK Hyper Targets $350B AI Data Center Buildout</h3>
+<p>SK Group's data center arm is in talks with major tech firms and financial investors to secure funding for envisioned massive infrastructure deployment. Chung Suk-geun, SK Hyper CEO, confirmed talks amid global rush to deploy AI compute despite capex ROI concerns. [Source: <em>Bloomberg</em>, 2026-10-23]</p>
+<h3>DeepSeek, MiniMax Win Approval for Global Deployment</h3>
+<p>Chinese state media confirmed two homegrown AI models approved for overseas deployment, signaling Beijing's confidence in locally developed alternatives to Western LLMs. Part of broader wave of Chinese AI technologies cleared for global use. [Source: <em>Bloomberg</em>, 2026-10-23]</p>
+<h3>Warhound Raises $200M to Engineer Military Dogs</h3>
+<p>Palmer Luckey (Anduril co-founder) and Ben Lamm's startup emerged from stealth targeting genetically enhanced working canines for US military and law enforcement. Record biotech-defense crossover funding signals investor appetite for unconventional defense-tech fusion. [Source: <em>TechCrunch</em>, <em>Bloomberg</em>, 2026-10-22]</p>
+<h3>OpenAI Targets $1.25T Valuation in $30B Funding Round</h3>
+<p>Final negotiations place OpenAI's next round at $1.25 trillion, up from $80B+ in prior round. Valuation reflects confidence in LLM scaling and enterprise adoption despite broader AI capex skepticism. [Source: <em>Bloomberg</em>, 2026-10-22]</p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>European Deeptech's Escape from Nvidia Dependency</strong></p>
+<p>The cluster of €26–28M raises in Zurich (Enact—tactile robotics), Lisbon (Beyond Vision—drones), and Amsterdam (Indurex—industrial cyber-security) in one week reveals a deliberate repositioning by European VCs and corporates. Rather than betting on LLM commoditization, founders are raising at seed/pre-Series A scale for <em>physical embodiment</em> and <em>industrial robustness</em>—layers that require domain expertise and regulatory compliance, not just compute scaling.</p>
+<p>This matters because it inverts the 2023–25 playbook: instead of chasing API access to Nvidia GPUs and training tokenizers, 2026's winners are building moats in perception (tactile sensing), autonomy (swarm logic, defensive UAVs), and compliance (CPS security for grid/manufacturing). The US Treasury's new China tech restrictions and NATO's pivot toward allied supply chains create regulatory tailwinds for European players who aren't purely reliant on Nvidia's margins.</p>
+<p>For a 21-year-old founder: this signals a 3–5 year window to build in physical AI, defense-adjacent robotics, and industrial automation <em>before</em> US hyperscalers (Tesla, Boston Dynamics spin-offs, etc.) consolidate. You'd need 18–24 months to raise €5–10M, hire PhDs, and ship a credible prototype. The capital is flowing. The regulation is forcing diversification away from pure compute. But the window is finite—China will replicate within 18 months if you don't.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>Economist: "AI compute is the new oil—and needs a new market"</strong> – On why capex discipline matters more than model parameters in 2027 valuations. <a href="https://news.ycombinator.com/item?id=50202671">HN discussion</a></p>
+</li>
+<li>
+<p><strong>Anthropic: LLMs enabling formal software verification at scale</strong> – How AI is reshaping infrastructure trust, critical for defense and industrial adoption. <a href="https://www.anthropic.com/research/formal-verification">Research</a></p>
+</li>
+<li>
+<p><strong>Bloomberg Tech Asia roundtable on AI data center demand realism</strong> – Delta Electronics VP on whether capex thesis survives 2027 earnings tests. <a href="https://www.bloomberg.com/news/videos/2026-10-23/delta-electronics-vp-on-data-centre-demand-video">Video</a></p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, Financial Times, Le Monde, Le Grand Continent, EU-Startups, Sifted, TechCrunch, BBC, Deutsche Welle — Friday, October 23 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
