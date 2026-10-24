@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Netanyahu awaits Oct 27 Israeli election verdict; military ops ordered in West Bank.</li><li>France avoids Moody's downgrade; political crisis persists despite 70K police deployed.</li><li>UK commits £100M to AI Biosecurity Lab with OpenAI, Anthropic, DeepMind.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Iran Escalates Threat to US Personnel; Diplomatic Exodus Ordered</h3>
+<p>The US intelligence community assesses Iranian plotting against Americans has reached "advanced stages," prompting State Department orders for diplomatic staff withdrawal from Saudi Arabia and reductions across the Middle East. No specific incident has occurred, but the threat level mirrors 2020 escalations post-Soleimani. Implications extend beyond immediate security: regional M&amp;A, energy deals, and tech partnerships face execution risk. <a href="https://www.ft.com/content/e2e82393-c7ca-4bc1-b270-022b3702d9e7">Source: Financial Times</a></p>
+<h3>Netanyahu Repositions for Oct 27 Vote; Military Ops Announced</h3>
+<p>With Israeli elections three days away, Prime Minister Netanyahu ordered large-scale West Bank operations ("house to house" in Hebron refugee camps) after two soldiers were killed. This hawkish pivot seeks to counter centrist challenger Gadi Eisenkot (Yashar party), who polls suggest is in a tight race. Expansion of settlements and military footprint may signal Netanyahu's campaign messaging. <a href="https://foreignpolicy.com/2026/10/23/netanyahu-israel-military-operation-west-bank-hebron-refugee-camps/">Source: Foreign Policy</a>; <a href="https://www.nytimes.com/2026/10/24/world/middleeast/netanyahu-has-reinvented-himself-will-voters-think-its-enough.html">NYT</a></p>
+<h3>France Mobilizes 70,000 Officers; Social Unrest Persists Despite Moody's Relief</h3>
+<p>Police deployment for Saturday's protests reflects prior week's intensity: 550,000 marchers, government fears of looting and vandalism. Moody's maintained France's Aa3 rating Friday, assuming a deficit-reducing 2027 budget—conditional stabilization amid deep political uncertainty. Capital markets digested this as relief, but street-level volatility and parliamentary fragmentation remain acute. <a href="https://www.lemonde.fr/societe/live/2026/10/24/">Source: Le Monde</a>; <a href="https://www.ft.com/content/840f9c94-cb41-4340-9fc4-41e76d908831">FT</a></p>
+<h3>Hitler's Eagle's Nest Destroyed; Criminal Investigation Opened</h3>
+<p>Alpine retreat in Bavaria caught fire Friday evening; 200 emergency personnel deployed; one suspect arrested. Authorities examining arson hypothesis. Historic site significance minimal (post-war monument) but symbolic resonance in German politics and security. <a href="https://www.bbc.co.uk/news/articles/cr93zwjw1k4qo">Source: BBC</a>; <a href="https://www.dw.com/en/hitler-s-eagle-s-nest-catches-fire-police-say/a-79747820">DW</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Pigment-Led French Tech Week: €271M Raised in Seven Days</h3>
+<p>Fintech and business intelligence startup Pigment anchored a strong funding cycle: €271 million capital deployed across French tech ecosystem Oct 19–23. Includes: Phononic Vibes (Milan, noise control) €25M Series B; Cognitive Credit (London, credit data/AI) €35.73M; Cygrid (Berlin, identity-access security) €2.66M pre-Seed. Pattern reflects investor appetite for B2B infrastructure and deeptech, despite macro headwinds. <a href="https://www.maddyness.com/2026/10/23/french-tech-pres-de-271-millions-deuros-leves-en-une-semaine-portes-par-pigment/">Source: Maddyness</a></p>
+<h3>ICEYE Expands Defense Footprint; Ukraine Partnership Signals Sovereign Satellite Strategy</h3>
+<p>Finnish unicorn ICEYE signed Letter of Intent with Nokia and Ukraine's Ministry of Defence to explore sovereign satellite communications—a direct response to reliance on US/Western infrastructure. Simultaneously expanding wildfire monitoring. Reflects post-2022 reorientation: European defense startups attracting venture capital (EU-Startups ecosystem piece documents 15+ firms defending Ukraine with VC backing). <a href="https://www.eu-startups.com/2026/10/iceye-strengthens-ukraines-satellite-communications-ambitions-while-expanding-wildfire-monitoring-capabilities/">Source: EU-Startups</a></p>
+<h3>UK Pledges £100M to AI Biosecurity Lab; OpenAI, Anthropic, DeepMind Collaborate</h3>
+<p>Government announces funding for joint research initiative tackling AI-driven biosecurity risks. Participants include OpenAI, Anthropic, Google DeepMind. Positions UK as regulatory-friendly hub for AI safety research while binding frontier labs into public-private governance. Signals EU's and allies' counter-move to US AI monopoly framing. <a href="https://www.bloomberg.com/news/articles/2026-10-23/uk-vows-100-million-for-biosecurity-lab-with-openai-anthropic">Source: Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>France Retains Aa3 from Moody's; Conditional Reprieve Masks Implementation Fragility</h3>
+<p>Despite political turmoil and rising borrowing costs, Moody's held France's sovereign rating steady Friday. Agency assumes "deficit-reducing budget for 2027 will be adopted"—a bet against current parliamentary fragmentation. S&amp;P and Fitch had already downgraded; this outlier move buoyed markets but carries material risk: if 2027 budget fails parliamentary approval, downgrades follow. For NASDAQ/SP500-heavy portfolios, French sovereign stress would ripple through EU bank equities and cross-asset volatility. <a href="https://www.ft.com/content/840f9c94-cb41-4340-9fc4-41e76d908831">Source: FT</a>; <a href="https://www.nytimes.com/2026/10/23/business/france-debt-moodys-protests.html">NYT</a></p>
+<h3>Trump Eases Canada Tariffs; Political Calculus Trumps Trade Doctrine</h3>
+<p>US President reduced levies on Canadian goods ahead of midterm Senate elections—specifically to aid Republican candidates facing defection risk. A key GOP nominee had lobbied for relief. Reversal signals pragmatism over tariff-as-policy: electoral mathematics override ideological consistency. Implications for auto, energy, and agricultural supply chains moderate but material through 2026. <a href="https://www.ft.com/content/d3d12f54-fcf0-400c-96f1-484aea980be5">Source: FT</a>; <a href="https://www.dw.com/en/trump-eases-canada-tariffs-ahead-of-us-midterms/">DW</a></p>
+<h3>S&amp;P Reshuffles Growth/Value Classifications; Index Methodology Shift Incoming</h3>
+<p>S&amp;P Dow Jones Indices adopted new rules for sorting equities between growth and value buckets. Reshuffles portfolios mechanically; funds tracking indices face rebalancing flows. Impact modest but observable for value-tilted holdings (your VAL, BRES holdings). <a href="https://www.bloomberg.com/news/articles/2026-10-24/growth-value-stocks-set-for-reshuffle-as-s-p-adopts-new-rules">Source: Bloomberg</a></p>
+<h3>US AI Workforce Concerns; Congressional Unemployment Measures Proposed</h3>
+<p>House members drafting bills to bolster unemployment insurance amid concern over "mass AI layoffs." Reflects genuine anxiety about displacement timing/scale—no consensus on severity. Fed will monitor labor data; if displacement accelerates, rate-cut odds shift. <a href="https://www.nytimes.com/2026/10/23/business/ai-jobs-layoffs-congress.html">Source: NYT</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>OpenAI Trains Frontier Models Offline; Internet Isolation Policy Reversed</h3>
+<p>After rogue hacking incidents, OpenAI now trains advanced models in isolated environments using indexed/cached web content—severing live internet access. Reversal of prior stance (engineer had said offline training impractical). Reflects tension between capability, safety, and operational security. Relevant for your portfolio's exposure to AI infrastructure (ETZ, PAEEM): offline-first approaches may constrain real-time model adaptability but reduce systemic risk. <a href="https://www.theverge.com/ai-artificial-intelligence/1018021/openai-training-top-ai-models-no-internet">Source: The Verge</a></p>
+<h3>Shalev Hulio (NSO Group Founder) Rebrands as Sovereign AI Champion</h3>
+<p>Former Pegasus spyware kingpin now pitches "sovereign AI and national security" as alternative to US-dominated systems. Seeks to position himself as statecraft technologist rather than surveillance-for-hire operator. Emblematic of deeptech's geopolitical realignment: ex-offensive actors repositioning as defensive/sovereignty-aligned. <a href="https://www.ft.com/content/f9592534-1a3d-409d-9a57-f05919440032">Source: FT</a></p>
+<h3>Malaysia Widens Waze Ban; Extends Israel-Linked Tech Restrictions</h3>
+<p>Prime Minister Anwar Ibrahim signaled potential expansion of Waze navigation app restrictions, citing security concerns. Initial ban was partial; signals broader decoupling from Israeli tech. Follows pattern: geopolitical alignment (Malaysia–Iran ties) drives tech ecosystem fracture. <a href="https://www.bloomberg.com/news/articles/2026-10-24/malaysia-may-widen-ban-on-israel-based-waze-traffic-app-pm-says">Source: Bloomberg</a></p>
+<h3>Xbox COO Helen Chiang Exits After Months; Organizational Churn Signals</h3>
+<p>Microsoft's newly created Xbox COO role (Helen Chiang, 21-year tenure) dissolved after brief tenure. Reflects internal realignment post-Activision integration; suggests operations consolidation or strategy pivot. Gaming studios remain in flux. <a href="https://www.theverge.com/news/1018037/xbox-chief-operating-officer-helen-chiang-departure">Source: The Verge</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Sovereign Tech Redefinition Is Real, Not Rhetorical</strong></p>
+<p>The week's convergence of three signals—ICEYE's Ukraine satellite partnership, UK's £100M AI Biosecurity Lab with OpenAI/Anthropic, and Shalev Hulio's pivot toward "national security AI"—reveals a genuine structural shift in deeptech geopolitics.</p>
+<p>Historically, "sovereign tech" meant data residency compliance. Now it means <em>capability ownership at the edge</em>. Europe, Ukraine, and other allies are not trying to build clones of US systems; they're investing in <em>independent</em> fault lines—satellite comms without STARLINK dependency, biosecurity research integrated into government from day one, cybersecurity that doesn't leak through US cloud providers. The irony: this requires <em>partnering with</em> US frontier labs (OpenAI, Anthropic) while negotiating contractual autonomy.</p>
+<p>For entrepreneurs, this opens two pathways: (1) <strong>Defense adjacency without weapons</strong> — build the infrastructure (satellite, autonomous systems, sensing) that governments fund in peacetime and rapidly deploy in crisis. (2) <strong>Compliance-as-moat</strong> — design systems that anticipate regulatory fragmentation (Malaysia banning Waze, EU AI Act liability rules, India's data residency mandates). Neither is cheap; both require 18–36 month sales cycles and government relationships. But venture capital is repricing these as <em>structural</em> not <em>cyclical</em> opportunities. Your deeptech allocation (ETZ, PAEEM) benefits if this thesis holds through 2027–28.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>"The European startups defending Ukraine in 2026, and the VCs funding them"</strong> — Maps 15+ European defense-tech firms receiving VC; key insight on autonomous drones, counter-drone systems, and satellite intelligence as fastest-growing categories. <a href="https://www.eu-startups.com/2026/10/the-european-startups-defending-ukraine-in-2026-and-the-vcs-funding-them/">EU-Startups</a></p>
+</li>
+<li>
+<p><strong>"France is in revolt. But the real storm is yet to come"</strong> — FT analysis connecting social unrest, budget fragility, and Le Pen positioning; essential macro context for France's 2027 trajectory. <a href="https://www.ft.com/content/62b83fcf-efad-418d-ba6a-569344fa7ecb">FT</a></p>
+</li>
+<li>
+<p><strong>OpenAI Offline Training Blog</strong> (referenced) — Technical deep dive on air-gapped model development; relevant if you're evaluating AI infrastructure security investments.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Saturday, October 24 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
