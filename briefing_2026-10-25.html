@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>Political volatility and resource nationalism are converging across emerging markets.</strong> Brazil's Flávio Bolsonaro surge threatens Amazon conservation; Tanzania's Lissu imprisonment signals democratic backsliding; Nigeria's Tinubu seeks re-election amid economic collapse; Serbia's student-led opposition challenges a decade of incumbency. Each reflects weaker institutional checks on executive power and rising pressure to exploit natural/fiscal resources for short-term political gain. For NASDAQ/S&amp;P500 portfolios tilted to tech and consumer goods, this increases volatility in growth-market revenue streams (Brazil consumer exposure, commodity tail risk) and regulatory uncertainty for US multinationals.</p>
+</li>
+<li>
+<p><strong>Capacity constraints in critical infrastructure—energy, water, satellites, shipping—are becoming acute policy flashpoints rather than gradual transitions.</strong> France faces unprecedented water scarcity (Pontarlier near total supply collapse); Black Sea shipping fatalities exceed Gulf rates; Starlink's civil-vs-military mandate collision with Ukraine's needs; Venezuela restarting power grids with Chinese help; Riyadh airport disruption from Houthi attacks. These aren't marginal disruptions—they're forcing real-time trade-offs between security, sovereignty, and continuity. Tech founders pursuing deeptech in energy, logistics, or resilience infrastructure have concrete policy urgency as tailwind.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong></p>
+<ul>
+<li>Brazil's Bolsonaro and Lula locked in knife-edge runoff; Amazon deforestation at risk of acceleration.</li>
+<li>France protests swell to 410,000; water crisis forces rationing in Pontarlier.</li>
+<li>Luxury sector loses €250bn as China demand collapses and global equities cool.</li>
+</ul>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3><strong>Brazil Election: Bolsonaro Challenges Lula for Fourth-Term Comeback</strong></h3>
+<p>Flávio Bolsonaro narrowed the race with Lula after trailing significantly post-first-round voting on October 4. Both camps mobilized massively; the runoff outcome will pivot on whether voters prioritize Lula's anti-poverty record against right-wing erosion of checks or embrace Bolsonaro's alignment with Trump and resource extraction. Deforestation of Amazon accelerated under previous Bolsonaro governance (Greek-territory equivalent cleared in 18 years); reversion to that model would reshape global carbon accounting and soy export dynamics. <strong>Source:</strong> <a href="https://legrandcontinent.eu/fr/2026/10/25/au-bresil-la-victoire-de-flavio-bolsonaro-relancerait-la-deforestation-de-lamazonie/">Le Grand Continent</a>, <a href="https://www.lemonde.fr/international/article/2026/10/25/au-bresil-lula-et-flavio-bolsonaro-sont-au-coude-a-coude-apres-une-campagne-de-l-entre-deux-tours-a-couteaux-tires_6799995_3210.html">Le Monde</a></p>
+<h3><strong>France Protests Escalate: 410,000 Mobilize Despite Last-Minute Route Chaos</strong></h3>
+<p>Mass demonstrations erupted Saturday across French cities on cost-of-living, student freedoms, and public services. Nearly 410,000 demonstrated (CGT claims 800,000); police dispersed crowds in Marseille, Nantes, Rennes with tear gas after looting on the Rue Paradis commercial strip. Merchants fear escalation if unrest continues; 950+ arrests nationwide. The scale underscores public fury over inflation and austerity despite government messaging. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/c95ynd587ynzo">BBC</a>, <a href="https://www.lemonde.fr/politique/article/2026/10/25/une-journee-de-forte-mobilisation-sans-incidents-majeurs-le-droit-de-manifester-est-aussi-important-que-le-droit-de-vote_6799929_823448.html">Le Monde</a></p>
+<h3><strong>France's Water Crisis Deepens: Pontarlier Faces Unprecedented Scarcity</strong></h3>
+<p>The Haut-Doubs capital (18,000 residents) now confronts "unprecedented" supply strain, forcing authorities to plan complete tap-water shutoffs as contingency. Regional officials confirmed drought has no recent parallel; water rationing and industrial cuts loom. This signals climate-driven infrastructure fragility across Western Europe and foreshadows similar crises in water-stressed regions. <strong>Source:</strong> <a href="https://www.lemonde.fr/planete/article/2026/10/25/personne-n-avait-imagine-qu-on-manque-d-eau-a-ce-point-a-pontarlier-la-population-invitee-a-la-sobriete-sous-peine-de-coupures_6800035_3244.html">Le Monde</a></p>
+<h3><strong>Israel Deploys Buffer Zones in Gaza, Lebanon, Syria Post-October 2025 Ceasefire</strong></h3>
+<p>Since last year's ceasefire, Tel Aviv frames occupied territories as "security belts," but they entail massive demolitions, mass displacement, and systemic destruction. Gaza, Hebron, and southern Lebanon see ongoing home demolitions following sporadic armed clashes. This de facto territorial control expansion without formal annexation creates long-term occupation dynamics and regional destabilization. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/article/2026/10/25/a-gaza-au-liban-et-en-syrie-comment-israel-utilise-les-zones-tampons-pour-etendre-sa-domination-regionale_6800032_3210.html">Le Monde</a>, <a href="https://www.bbc.co.uk/news/articles/cqd09k1k7532o">BBC</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3><strong>Luxury Sector Hemorrhages €250bn as China Demand Falters</strong></h3>
+<p>European luxury conglomerates' valuations collapsed as Chinese consumer spending retreated and global equity markets cooled. The slowdown compounds exposure to a single geography; diversification into other emerging markets insufficient to offset China's magnitude. This cascades to LVMH, Kering, and mid-cap challengers, each re-pricing growth assumptions downward. <strong>Source:</strong> <a href="https://www.ft.com/content/1c3065cf-538f-433a-9749-0355a3642c7c">Financial Times</a></p>
+<h3><strong>Audi Commits to $4 Billion Georgia Factory Despite US Tariff Pressure</strong></h3>
+<p>Volkswagen's Audi division announced a new US manufacturing plant in Georgia after Trump's rally endorsement, targeting early 2030s production startup. The move signals German auto capital seeking tariff shield via domestic manufacturing—though capex intensity and long payback horizons create balance-sheet strain. <strong>Source:</strong> <a href="https://www.dw.com/en/trump-announces-audi-will-build-4-billion-factory-in-us/a-79753479">DW</a>, <a href="https://www.nytimes.com/2026/10/24/business/audi-factory-georgia-trump.html">NY Times</a></p>
+<h3><strong>British Columbia Swings Conservative After 98 Years; Leftist Leader's Gambit Fails</strong></h3>
+<p>BC voters delivered the Conservative Party its first majority in nearly a century, rejecting the incumbent left-wing premier's snap election call. The reversal signals rightward political momentum across Canada's third-largest province and reflects cost-of-living dissatisfaction. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-25/bc-s-left-wing-leader-loses-to-conservatives-in-vote-he-called">Bloomberg</a></p>
+<h3><strong>Black Sea Now Deadliest Commercial Shipping Route Globally</strong></h3>
+<p>Fatalities among merchant sailors in the Russia-Ukraine Black Sea theater now exceed Gulf of Aden death rates. Continued drone strikes, mining, and naval presence make transit prohibitively risky for non-state-backed convoys. Insurance premiums and rerouting costs inflate food/commodity delivery timelines into Europe. <strong>Source:</strong> <a href="https://www.ft.com/content/8c874f60-0041-476d-9c53-8524c374443f">Financial Times</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">📄 Additional Geopolitical Notes</div>
+  <p><strong>Iran Braces for Renewed Strikes.</strong> US-Israel planning appears underway; Iranian civilians report anxiety and military readiness. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/10/24/world/middleeast/iranians-face-anxious-wait-as-threat-of-attack-looms.html">NY Times</a></p>
+<p><strong>Starlink-Ukraine Friction Persists.</strong> Elon Musk reiterated civilian-only mandate for Starlink; Ukraine claims service restrictions were lifted. The clash highlights private infrastructure's geopolitical entanglement and corporate control over war logistics. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/live/2026/10/25/en-direct-guerre-en-ukraine-elon-musk-accuse-kiev-de-violer-les-conditions-d-utilisation-du-reseau-starlink_6799896_3210.html">Le Monde</a>, <a href="https://www.ft.com/content/5b5592f4-c59d-4eb1-af78-078dc32fcab8">Financial Times</a></p>
+<p><strong>Kim Jong-un Visits China via New Bridge.</strong> First trip in 1+ year; signals DPRK-PRC deepening ties and potential military alignment. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/10/24/world/asia/north-korea-kim-jong-un-china.html">NY Times</a></p>
+<p><strong>Nigeria's Tinubu Seeks Re-election Amid Economic Collapse.</strong> President launched 2027 bid campaign while blaming rivals for widespread poverty. Structural fiscal weakness and currency volatility persist. <strong>Source:</strong> <a href="https://www.dw.com/en/nigeria-tinubu-launches-reelection-bid-amid-economic-woes/a-79753063">DW</a></p>
+<p><strong>Gabon Restores Social Media After 8-Month Blackout.</strong> Government mandated mandatory ID verification for all users, ending anonymity. <strong>Source:</strong> <a href="https://www.lemonde.fr/afrique/article/2026/10/25/le-gabon-retablit-les-reseaux-sociaux-apres-huit-mois-de-suspension_6799863_3212.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3><strong>Cerebras Deploys Trillion-Parameter AI Models</strong></h3>
+<p>Cerebras unveiled frontier-scale AI inference on proprietary wafer-scale hardware, hitting the 1-trillion-parameter threshold. The architecture sidesteps traditional distributed training bottlenecks; commercially relevant for real-time LLM serving in enterprise settings. <strong>Source:</strong> <a href="https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras">Cerebras Blog</a> (HN discussion)</p>
+<h3><strong>Meta Employees Allege Lula Account Restrictions in Brazil Election</strong></h3>
+<p>Internal reports surfaced suggesting Meta throttled President Lula's account reach during Brazil's runoff campaign. If verified, it underscores corporate platform bias in politically sensitive markets and potential election interference via algorithmic suppression. <strong>Source:</strong> <a href="https://www.aljazeera.com/economy/2026/10/16/meta-employees-say-lulas-accounts-restricted-in-brazil-election-report">Al Jazeera/HN</a></p>
+<h3><strong>Pennsylvania Mandates AI-Generated Ad Labeling</strong></h3>
+<p>Governor Shapiro signed the Artificial Intelligence Deceptive Advertising Act, requiring disclosure of AI-modified or AI-created ads (images, video, audio, text). First state-level enforcement of synthetic media transparency; likely spawns multi-state compliance architecture for adtech platforms. <strong>Source:</strong> <a href="https://www.theverge.com/ai-artificial-intelligence/1018187/pennsylvania-ai-deceptive-advertising-act">The Verge</a></p>
+<h3><strong>AI Projects Graveyard Grows: OpenAI, Apple, Others Shutter or Miss Targets</strong></h3>
+<p>TechCrunch catalogued repeated AI startup/project failures, from Apple's delayed Siri overhaul to OpenAI's stalled "super app" launch. Pattern suggests execution risk and misalignment between hype cycles and product-market fit timelines. <strong>Source:</strong> <a href="https://techcrunch.com/2026/10/24/the-ai-graveyard-a-running-list-of-projects-and-startups-that-didnt-make-it/">TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <h3><strong>Infrastructure Fragility as Accelerant for Deeptech Funding</strong></h3>
+<p><strong>The fact:</strong> Across geographies—France's water scarcity forcing shutoff contingencies, Black Sea shipping fatalities, Starlink's civil-military bandwidth collision, Riyadh airport disruption, Venezuelan power-grid restart with Chinese engineering—critical infrastructure is hitting operational ceilings. Each is no longer a long-term transition problem but an immediate policy crisis.</p>
+<p><strong>Broader pattern:</strong> Western and emerging-market governments are discovering that legacy infrastructure (water grids, power plants, satellite networks, maritime logistics) cannot elastically absorb simultaneous shocks: climate volatility, geopolitical tension, energy transition, population demand. Private capital and new tech are being pulled into gaps where public budgets or institutional capacity fail. Venture funding for water tech, microgrid resilience, logistics optionality, and energy storage is therefore moving from "nice-to-have sustainability" to "survival-critical infrastructure."</p>
+<p><strong>Implication for future entrepreneurs:</strong> A 21-year-old deeptech founder with conviction in energy, water, or logistics resilience now has visible political cover and capex appetite from governments facing crisis. The barrier is no longer proving product viability (that's established) but demonstrating scalability into sovereign procurement cycles. Your portfolio tilt toward infrastructure plays (via ETFs tracking industrials, energy infrastructure) aligns with this shift—regulatory and fiscal tailwinds are real. Explore not pitch decks but government contracting pathways; they're opening.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>"A Fabulous Debt: How Bonds Built the Modern World"</strong> (Robin Wigglesworth, Financial Times Alphaville). Relevant amid Black Sea shipping crisis and infrastructure financing: how credit markets price geopolitical risk and enable state capacity. <strong><a href="https://www.bloomberg.com/news/videos/2026-10-24/embracing-the-bond-market-masters-in-business-with-robin-wigglesworth">Bloomberg interview</a></strong></p>
+</li>
+<li>
+<p><strong>"The Total Meltdown in Riskiest Debt"</strong> (Bloomberg Credit Weekly). High-yield bond market stress signals broader refinancing pressure on leveraged corporates amid rate environment shift. Watch for M&amp;A slowdown. <strong><a href="https://www.bloomberg.com/news/articles/2026-10-24/-total-meltdown-in-riskiest-debt-unnerves-market-credit-weekly">Article</a></strong></p>
+</li>
+<li>
+<p><strong>"Will AI Expose the Rickety Infrastructure of the Internet?"</strong> (TechCrunch). Underrated deeptech signal: AI inference at scale is stressing undersea fiber, CDN capacity, and legacy DNS—creating venture opportunity in network resilience and edge computing. <strong><a href="https://techcrunch.com/2026/10/24/will-ai-expose-the-rickety-infrastructure-of-the-internet/">Article</a></strong></p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Sunday, October 25, 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "💼 Business & Finance", "📄 Additional Geopolitical Notes", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
