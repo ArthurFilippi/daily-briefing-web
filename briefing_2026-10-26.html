@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>Leftist resurgence reshaping Latin America's geopolitical center of gravity.</strong> Lula's razor-margin reelection in Brazil, combined with Serbia's student-led ouster of a 12-year populist regime and Venezuela's opposition returning from exile, signal a counter-swing against the right-wing momentum of 2022–2024. This tilts the region away from Trump-aligned policies on trade, Amazon stewardship, and China relations—dampening commodity export prices and triggering emerging-market currency volatility. For NASDAQ/SP500-heavy portfolios, expect near-term headwinds to soybean valuations, energy stocks, and EM-linked ETFs; defensive positioning in tech and defensives warranted ahead of earnings clarity.</p>
+</li>
+<li>
+<p><strong>AI infrastructure demand hitting a liquidity cliff as commodity and equity volatility spike.</strong> SK Hynix's leveraged AI ETFs delisting, Morgan Stanley's China downside call, and record Australian dollar shorts signal that capital is rotating away from pure AI capex plays into safety. Simultaneously, open-weight model pricing (OpenAI, Anthropic down 80% in months) and IBM's assertion that on-prem solutions are now "irresistibly cheap" suggest the capex supercycle may face structural headwinds. Implications: large-cap semiconductor and cloud providers face margin pressure; watch for margin compression in Q4 earnings.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Lula defeats Bolsonaro in chaotic Brazil runoff; Bolsonaro refuses concession, demands annulment.
+- Serbia's student-led movement topples Vučić after 12 years; concedes defeat in rare democratic breakthrough.
+- Machado returns to Venezuela after 10 months exile; Nobel laureate faces entrenched interim government.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Brazil: Lula's Narrow Comeback Reshapes Latin American Alignment</h3>
+<p>Leftist President Luiz Inácio Lula da Silva defeated right-wing challenger Flávio Bolsonaro in a runoff marred by chaotic ballot delays, securing another term after trailing in the first round. Bolsonaro's son has rejected the result and called for annulment, setting up institutional tension. The victory is a geopolitical setback for Trump's regional influence and likely signals a warming of Brazilian-Chinese trade ties—reversing the rightward tilt that dominated 2022–2024 across the continent. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/10/26/world/americas/lula-brazil-election-2026.html">NYT</a>, <a href="https://www.lemonde.fr/international/article/2026/10/26/bresil-lula-reelu-president_6800431_3210.html">Le Monde</a></p>
+<h3>Serbia's Democratic Inflection: Student Movement Ousts Populist Vučić</h3>
+<p>Aleksandar Vučić, who led Serbia for 12 years, conceded defeat to a student-led protest movement in parliamentary elections described as a referendum on democratic governance. Early and gracious concession—rare for populist executives—suggests genuine electoral rout. The transition could catalyze stabilization in Balkans relations and EU alignment, breaking two decades of political stalemate. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cw5yn3xlprpmo">BBC</a>, <a href="https://www.nytimes.com/2026/10/25/world/europe/serbia-vucic-election-defeat.html">NYT</a></p>
+<h3>Machado Returns to Venezuela; Nobel Laureate Challenges Interim Authority</h3>
+<p>María Corina Machado, a Nobel laureate opposition leader, returned from nearly 10 months in exile to press for new elections and challenge the Trump-backed interim government installed after the US seized Maduro's assets. Her return raises stakes for institutional legitimacy and highlights continued fracture in Venezuelan state authority. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cq8ez592pp0eo">BBC</a>, <a href="https://www.nytimes.com/2026/10/25/world/americas/machado-venezuela-return.html">NYT</a></p>
+<h3>Israel Faces Pivotal Election Amid War and Identity Crisis</h3>
+<p>Israeli voters confront a deeply polarized choice between Benjamin Netanyahu and Gadi Eisenkot as prime minister, with anxieties over isolation abroad, domestic security, and the state's foundational identity dominating the race after three years of regional conflict. The election reflects fracture between security hawks and those demanding democratic restoration. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/ckpdgy6pl7xlo">BBC</a>, <a href="https://www.nytimes.com/2026/10/26/world/middleeast/israel-election-stakes.html">NYT</a></p>
+<h3>France Braces for Sustained Industrial Unrest</h3>
+<p>French labor actions on October 24 drew massive participation; fresh mobilization is scheduled for October 31 and November 5. Prime Minister Sébastien Lecornu will meet student representatives Monday to offer "concrete responses," but the pattern signals prolonged autumn of strike risk. <strong>Source:</strong> <a href="https://www.lemonde.fr/politique/article/2026/10/26/apres-les-manifestations-du-24-octobre_6800384_823448.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>European VC Hits Third Consecutive Record Quarter; Paris and Munich Lead</h3>
+<p>Europe posted its third consecutive record fundraising quarter, with Paris and Munich outpacing London in capital concentration. The data reflects both sovereign wealth fund activity (particularly EU-backed initiatives) and a structural shift in founder geography away from the UK post-Brexit. <strong>Source:</strong> <a href="https://sifted.eu/articles/europe-third-consecutive-record-quarter-paris-munich-outstrip-london/">Sifted</a></p>
+<h3>General Catalyst–Backed Strawberry Launches Browser Agent Product</h3>
+<p>Strawberry, backed by General Catalyst, shipped its first full product: a browser agent positioned as "the European alternative to US AI agents," addressing the EU's deeptech sovereignty mandate. The move signals VC's pivot from pure research toward applied European stacks in an increasingly fragmented AI market. <strong>Source:</strong> <a href="https://sifted.eu/articles/strawberry-browser-1-0/">Sifted</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Brazil Markets Priced for Sharp Correction on Lula Victory</h3>
+<p>Brazilian financial markets are set for steep losses Monday following Lula's win—the outcome investors had not priced. The real weakened ahead of the result; equities and fixed income face a Monday rout as capital repositions away from the rightist fiscal orthodoxy traders had positioned for. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-26/brazil-markets-brace-for-rout-on-lula-s-improbable-election-win">Bloomberg</a></p>
+<h3>Germany to Acquire Ukrainian-Developed Strike System</h3>
+<p>Germany will purchase a domestically-designed offensive weapon system from Ukraine—the first Ukrainian-origin system to enter Bundeswehr inventory. This signals both Ukraine's technical maturation and Germany's defense-industrial integration with Kyiv, a strategic pivot from pre-2022 posture. <strong>Source:</strong> <a href="https://www.ft.com/content/f9476b15-c2b6-4b8b-86fc-58ae5795fb87">Financial Times</a></p>
+<h3>China's State Funds Post Heaviest Buying Since April 2025 Rout</h3>
+<p>China's national team funds stepped into markets with record-scale purchases (largest since the April 2025 drawdown), attempting to stem a sustained stock market decline. Morgan Stanley, however, projects further downside before valuations bottom, suggesting official intervention is fighting structural weakness in consumption and growth. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-26/china-national-team-etfs-draw-most-inflows-since-trade-war-rout">Bloomberg</a></p>
+<h3>Copper Extends Losses; Sentiment Weakens Ahead of Fed Meeting</h3>
+<p>Copper fell for a second week as AI equity weakness sapped risk appetite and demand expectations dimmed ahead of the Federal Reserve's policy decision. The move signals broader commodity demand destruction tied to recession fears and tech earnings disappointment. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-26/copper-extends-drop-as-ai-stocks-weigh-ahead-of-fed-meeting">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>SK Hynix Leveraged ETFs Face Liquidation as AI Rally Cools</h3>
+<p>Two leveraged exchange-traded funds tracking SK Hynix will be delisted and liquidated just months after launch, as investor appetite for AI-trade exposure has collapsed. The move reflects both mean reversion in semiconductor valuations and a broader repricing of capex-heavy AI narratives. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-26/sk-hynix-leveraged-funds-to-be-delisted-in-us-as-ai-rally-cools">Bloomberg</a></p>
+<h3>OpenAI and Anthropic Cut LLM Pricing 80% in Months; IBM Touts On-Prem Viability</h3>
+<p>Large language model providers have slashed pricing by up to 80% within a narrow window, while IBM's CEO asserted that open-weight models are now "irresistibly good and cheap" for on-premises deployment. The dynamic signals structural margin pressure in cloud LLM inference and a shift toward self-hosted solutions, potentially eroding cloud provider pricing power in 2027. <strong>Source:</strong> <a href="https://news.ycombinator.com/item?id=50236102">Hacker News</a>, <a href="https://www.theregister.com/systems/2026/10/22/ibm-ceo-says-open-weight-models-are-now-irresistibly-good-and-cheap-on-prem">The Register</a></p>
+<h3>SpaceX Claims $40 Billion Chip Financing Closed; Talks Allegedly Ongoing</h3>
+<p>Elon Musk announced SpaceX has closed a $40 billion debt facility for AI chip procurement, but sources report pricing negotiations were still unresolved at announcement. The opacity suggests either posturing or genuine last-minute terms fluidity—either way, it highlights the scale of capex gravity required to compete in frontier AI. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-25/musk-says-spacex-closed-40-billion-debt-deal-blasts-neoclouds">Bloomberg</a></p>
+<h3>Japan Plans Cybersecurity Response to Growing Breach Epidemic</h3>
+<p>Japan's government will convene a ministerial meeting Monday to address a rising tide of data breaches, signaling policy recognition of offshore and state-sponsored attack risk. The meeting reflects both nation-state pressure and the maturation of Japan's cyber-threat surface as it deepens tech and defense partnerships. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-26/japan-s-takaichi-to-hold-cybersecurity-meeting-as-attacks-grow">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <h3><strong>The AI Capex Cycle Hits a Margin Cliff</strong></h3>
+<p>Two converging signals arrived Monday that together reframe the AI infrastructure narrative: (1) SK Hynix's leveraged AI ETFs are being liquidated after months, and (2) OpenAI and Anthropic have cut model pricing by up to 80% in recent months, while IBM claims on-prem open-weight solutions now deliver irresistible value.</p>
+<p>What this reveals: The capex supercycle that justified $40 billion SpaceX chip deals and trillion-dollar datacenter rollouts is running into a brutal margin compression loop. As inference costs crater due to commodity open-weight models, cloud providers lose pricing leverage; as leverage erodes, investors rotate out of pure-capex plays into safety. The liquidation of leveraged semiconductor funds is the canary—retail conviction in the 2024–2025 AI bull narrative has evaporated.</p>
+<p>For an entrepreneur: This is not a signal to avoid AI infrastructure. Rather, it's confirmation that differentiation now lives <em>below</em> commodity model provision. Winners will be (a) companies owning proprietary training datasets and fine-tuning pipelines that command pricing above commodity LLMs, (b) enterprises embedding AI into domain-specific workflows (supply chain, biotech, manufacturing) where switching costs are high, and (c) infrastructure players solving <em>after</em> inference (RAG, vector search, multi-modal orchestration). Commodity model provision is becoming a cost center, not a margin driver.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>Lula's fiscal and debt constraints</strong> (Financial Times): <a href="https://www.ft.com/content/5c283ba4-37cf-4b0e-81f3-6df04b29529b">After stunning victory, Lula will face a deep hangover</a> — on the political economy of his slim mandate and congressional battles ahead.</p>
+</li>
+<li>
+<p><strong>AI pricing collapse and open-weight model viability</strong> (Hacker News discussion): <a href="https://news.ycombinator.com/item?id=50236102">OpenAI and Anthropic cut LLM prices by up to 80%</a> — 255 comments parsing margin dynamics and on-prem TCO shifts.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS feeds, Bloomberg, Financial Times, Sifted, BBC, NYT, Le Monde, Hacker News — October 26 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
