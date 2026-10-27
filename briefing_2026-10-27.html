@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>Election cycles are reshuffling ideological poles globally.</strong> Brazil's Lula victory, Serbia's nationalist retreat, and Israel's competing visions of national identity reveal that the 2020s "authoritarian surge" narrative has fractured. Democratic incumbents are stabilizing where they can demonstrate economic management; far-right challengers are losing when isolated from institutional power or mainstream party support. For a NASDAQ-tilted portfolio, this reduces medium-term policy whipsaw risk in emerging markets (Brazil, Serbia) while extending regulatory uncertainty in Israel around settlement expansion and tech sector oversight.</p>
+</li>
+<li>
+<p><strong>AI infrastructure spending is now decoupling from traditional energy constraints via new financing models.</strong> Anthropic's IPO filing, combined with AirTrunk's A$4.25B green loan and South Korea's semiconductor-backed AI fund, signals that the bottleneck is shifting from capex availability to grid capacity and geopolitical access. Investors are racing to pre-position capital in data center locations (Malaysia, Australia, Spain) before regulatory tightening or energy rationing. This favors semiconductors (chip demand certainty) and infrastructure plays over pure software SaaS, reshaping near-term rotation dynamics within your ETF basket (WPEA, ESE, PUST).</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Anthropic files for IPO; equity market sentiment rebounds, semiconductor stocks surge across Asia.
+- Brazil's Lula defeats Bolsonaro; far-right challenger accepts defeat after party isolation.
+- Israel votes amid identity clash between founding democracy and hard-right nationalism.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Israeli Election: Identity and Governance Collide</h3>
+<p>Prime Minister Benjamin Netanyahu faces voters for the first time since October 7, 2023, in a contest framed as a choice between liberal democratic foundations and nationalist consolidation. Opposition centralist Gadi Eisenkot, a former military chief, runs neck-and-neck with Netanyahu's bloc in polls. The outcome will shape settlement policy, judicial independence, and tech-sector governance—three domains where Israeli founders operate under structural uncertainty. <a href="https://www.lemonde.fr/international/article/2026/10/27/legislatives-en-israel-benyamin-netanyahou-face-aux-electeurs-pour-la-premiere-fois-depuis-les-attaques-du-7-octobre_6801101_3210.html"><em>Source: Le Monde</em></a></p>
+<h3>Brazil's Democratic Stabilization; Bolsonaro's Isolation</h3>
+<p>Lula secured a surprise victory over far-right challenger Flavio Bolsonaro, whose Liberal Party and allied movements conceded the result—a critical institutional guardrail absent in 2022. Global leaders, including Germany's Friedrich Merz, congratulated Lula; Bolsonaro's son faces passport seizure and corruption probes. The Brazilian real endured its worst day in 25+ years post-election, but institutional coherence in democratic transfer signals medium-term macro stabilization risk is lower than markets initially priced. <a href="https://www.dw.com/en/brazil-elections-merz-world-leaders-congratulate-lula-on-his-win/live-79755630"><em>Source: DW, Le Monde</em></a></p>
+<h3>Jordan Strikes Syrian Positions; Middle East Escalation Ladder Climbs</h3>
+<p>Following a deadly attack on a Greek Orthodox church in Amman that killed nine people, Jordan conducted retaliatory airstrikes on Syria, killing at least five civilians and injuring others. The strike underscores how non-state actor sanctuaries in Syria remain a source of state-level military action, with civilian casualty blowback complicating regional diplomacy. Ukraine-Russia humanitarian ceasefires (Oleshky) proceed in parallel, showing fragmented conflict resolution timelines. <a href="https://www.bbc.co.uk/news/articles/cq8ezg6dy6xlo?at_medium=RSS&amp;at_campaign=rss"><em>Source: BBC, Le Monde</em></a></p>
+<h3>Commonwealth Reparations Pressure; King Charles on Defensive</h3>
+<p>King Charles III attends a Commonwealth Heads of Government Meeting in the Caribbean while facing formal legal action from Jamaica over slavery reparations and the "triangular trade." Multiple nations are signaling demands for apologies and financial compensation. The king's tour is framed as a test of institutional legitimacy in former colonies, with real geopolitical implications for UK soft power and the Commonwealth's continued coherence. <a href="https://www.nytimes.com/2026/10/27/world/europe/king-charles-caribbean-tour-uk-commonwealth.html"><em>Source: NYT, Le Monde</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Nevis Wealthtech Raises €62M Series B; AI-Driven Advisory Gains Traction</h3>
+<p>London/New York-based Nevis, an AI OS for wealth management automation, secured €62M ($70M) led by EQT Ventures to deepen custodian integrations and expand its agent capabilities. The round signals institutional appetite for AI-native financial advisory tools targeting the €10T+ global advisory market. For French/European founders, the round underscores that vertical AI automation in regulated sectors (wealth, insurance, compliance) attracts tier-one capital if regulatory moats are clear and enterprise GTM is proven. <a href="https://www.eu-startups.com/2026/10/wealthtech-startup-nevis-secures-e62-million-to-automate-financial-advisory-workflows-with-ai/"><em>Source: Sifted, EU-Startups</em></a></p>
+<h3>Italy's Z_One Fund Closes €35M+ for AI and UrbanTech</h3>
+<p>Italian VC fund Z_One (managed by Eureka! Venture) announced first close at €35M+ with €60M total target, backed by institutional investors including CDP Venture Capital. The fund targets AI and urban technology startups, signaling renewed confidence in Southern European deeptech despite macro headwinds. <a href="https://www.eu-startups.com/2026/10/italys-z_one-fund-secures-over-e35-million-at-first-close-to-back-ai-and-urbantech-startups/"><em>Source: EU-Startups</em></a></p>
+<h3>Finland's Volare Opens 5,000-Tonne Insect Protein Factory; €7.1M Funding</h3>
+<p>Volare, a Finnish deeptech firm converting food-industry byproducts into insect protein, inaugurated its first industrial-scale facility in Pori and raised €7.1M. The capital deployment from Springvest, coupled with operational proof-of-concept, signals that alternative protein infrastructure is maturing beyond pilot stage in Nordic markets. <a href="https://www.eu-startups.com/2026/10/finlands-volare-raises-e7-1-million-and-opens-5000-tonne-insect-protein-factory/"><em>Source: EU-Startups</em></a></p>
+<h3>Helsing Unveils AI-Powered Missile Defence; German Deeptech Pivots to NATO</h3>
+<p>German military AI startup Helsing announced Contra, an autonomous air defence system targeting scaled drone and missile threats, alongside interceptor missiles (AD-1). The shift from cyber to kinetic defense reflects NATO's re-armament cycle post-Russia-Iran escalation and de facto subsidy via government procurement for European deeptech founders in defense. <a href="https://www.eu-startups.com/2026/10/with-the-eu-now-in-range-of-russian-attacks-helsing-unveils-new-ai-powered-missile-defence-system/"><em>Source: EU-Startups</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Anthropic IPO Filing Triggers Sentiment Rebound; Chip Stocks Rally</h3>
+<p>Anthropic PBC filed for its long-awaited IPO on Monday, reigniting institutional appetite for AI infrastructure plays. Asian equity markets rallied; semiconductor stocks in South Korea and Japan gained as investors repriced AI capex demand and valuation risk. Commonwealth Bank of Australia (CBA), which holds an early-stage stake purchased &gt;1 year ago, stands to realize multi-billion dollar gains. The filing validates but also exposes the AI business model's extremes: extraordinary growth paired with sustained losses and uncertain unit economics. <a href="https://www.bloomberg.com/news/articles/2026-10-26/anthropic-s-ipo-sets-up-defining-moment-for-wall-street-and-ai-boom"><em>Source: Bloomberg, FT</em></a></p>
+<h3>HSBC Q3 Profits Surge 32%; Cost Discipline Yields Buybacks</h3>
+<p>Europe's largest bank reported quarterly profit growth of 32% amid aggressive cost-cutting, with operating expenses declining. HSBC is planning share buybacks of up to $1B, signaling confidence in capital deployment despite global macro volatility. The result underscores that large, diversified financials with cost discipline are outpacing peers, supporting your ETF exposure to developed-market banking. <a href="https://www.ft.com/content/fd23db26-a45b-4a98-b771-4234a30b7937"><em>Source: FT</em></a></p>
+<h3>Jio IPO (India Record $3.1B) Indicated 22% Higher in Gray Market</h3>
+<p>Mukesh Ambani's Jio Platforms Ltd. is seeking $3.1B in its IPO, India's largest ever, with unofficial market trading suggesting a 22% pop at debut. The scale signals retail demand for digital/telecom infrastructure plays in India and validates the mega-cap IPO window in Asia despite macro uncertainty. <a href="https://www.bloomberg.com/news/articles/2026-10-27/jio-shares-mukesh-ambani-india-gray-market-trading"><em>Source: Bloomberg</em></a></p>
+<h3>Lula Faces Fiscal Reckoning; Markets Rout Currency</h3>
+<p>Brazil's worst currency day in 25+ years followed Lula's election as investors fret over fiscal management and budget discipline. Finance Minister Roland Lescure (France) signaled that government relief for protesting students must come without widening deficits—a structural constraint now visible across Western democracies managing inflation via austerity while facing electoral pressure. <a href="https://www.ft.com/content/0231b234-14dc-4ff0-8263-e1063b0a25d5"><em>Source: FT</em></a></p>
+<h3>South Korea's AI Fund as "Fiscal Dam"; Debt Reduction via Semiconductor Taxes</h3>
+<p>South Korea's budget minister announced that a new AI infrastructure fund, financed by semiconductor-sector tax gains, will cushion against higher yields by reducing overall debt issuance. The mechanism decouples fiscal policy from central bank rate cycles, a novel arbitrage unavailable to most nations. For SP500/NASDAQ portfolios, this signals South Korean semi-strength and reduced currency volatility risk in won-denominated assets. <a href="https://www.bloomberg.com/news/articles/2026-10-27/south-korea-s-ai-fund-offers-fiscal-dam-against-higher-yields"><em>Source: Bloomberg</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Anthropic's Energy Dependency Exposed in IPO Filing</h3>
+<p>Anthropic's S-1 filing makes explicit its reliance on methane-powered data centers and intense competition for grid capacity. The company faces structural headwinds: power scarcity, geopolitical fragmentation of semiconductor supply, and rising cooling costs. The filing underscores that the AI boom's bottleneck has shifted from capital to kilowatt-hours, benefiting locales with stable power (Australia, Malaysia, Nordic countries) and harming those dependent on contested grids. <a href="https://www.theverge.com/ai-artificial-intelligence/1018994/anthropic-ipo-ai-data-center-energy-climate-risk"><em>Source: The Verge</em></a></p>
+<h3>AirTrunk Secures A$4.25B Green Loan for Sydney Data Center</h3>
+<p>Australian data center operator AirTrunk closed a A$4.25B ($3B USD) green loan to finance a Sydney campus expansion, signaling sustained institutional confidence in regional AI infrastructure despite recent sector volatility. The deal's scale and green-bond framing suggest that energy-efficient data center financing is becoming a distinct asset class. <a href="https://www.bloomberg.com/news/articles/2026-10-26/airtrunk-secures-3-billion-green-loan-for-sydney-data-center"><em>Source: Bloomberg</em></a></p>
+<h3>OpenAI Claims Major Breakthroughs in Math and Physics; External Validation Model Debuts</h3>
+<p>OpenAI announced three "major" discoveries in mathematics, computer science, and physics, backed this time by external expert validation—a methodological shift from its prior manuscript dump. The company released a proof that the Exponential Time Hypothesis is false, signaling that generative AI is now producing publishable results in hard sciences. For deeptech founders, this validates AI-as-research-tool positioning and may accelerate academic credibility for AI-native science startups. <a href="https://www.theverge.com/ai-artificial-intelligence/1019143/openai-eth-kaseya-science-math-physics"><em>Source: The Verge</em></a></p>
+<h3>BlackRock's Rieder: AI Infrastructure Debt Eclipses Long-Dated Treasuries</h3>
+<p>Rick Rieder (BlackRock) flagged that AI-driven debt issuance is creating the most attractive fixed-income opportunities in years, outpacing appeal of 10-30yr US Treasuries. The AI capex cycle is thus shifting institutional allocations away from duration and into corporate credit, a macro signal of sustained infrastructure spending and the persistence of "Magnificent Seven" capex demands into 2027. For your bond exposure within ETFs, this suggests shorter-duration, higher-yielding AI-linked corporates may outperform vanilla Treasuries. <a href="https://www.bloomberg.com/news/articles/2026-10-27/blackrock-s-rieder-spent-all-weekend-doing-deals-in-ai-debt-rush"><em>Source: Bloomberg</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The Energy Arbitrage: How Geopolitics and Data Centers Are Reshaping Regional Tech Dominance</strong></p>
+<p>Anthropic's IPO filing unwittingly exposed the AI boom's dirty secret: generative intelligence requires sustained, abundant, and stable electricity. Simultaneously, AirTrunk's A$4.25B loan, South Korea's semiconductor-backed AI fund, Spain's data-center energy rule relaxation, and Malaysia's position as a post-Iran-war data-center haven all point to the same reality: <strong>the next frontier of tech competitiveness is not chips or talent, but kilowatts and geopolitical stability.</strong></p>
+<p>This creates a second-order advantage for nations with regulated grids (Australia, Nordic countries, parts of Spain) and a structural headwind for energy-constrained regions (much of continental Europe in winter, parts of Asia dependent on contested supplies). For European deeptech founders, this means: (1) your pitch to VCs now includes grid-access guarantees, not just technology; (2) founders in France, Germany, and Switzerland should actively model data-center co-location or hybrid cloud strategies early; (3) the narrative that "talent follows universities" is being superseded by "teams follow power."</p>
+<p>The implication: if you're scaling a generative AI application or foundation model startup in 2026, your Series A diligence should include energy contracts and geopolitical risk mapping as core components. Venture capitalists are beginning to price this in—Anthropic's transparency around power dependency will become table-stakes for future AI-infrastructure rounds. The founders who move fastest to secure power and grid access will capture outsized returns, while those who ignore it will face hidden margins and geographic lock-in.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>Anthropic S-1 Filing &amp; AI Infrastructure Economics</strong> – Full regulatory disclosure highlighting capex intensity, power-dependency, and competitive dynamics in generative AI. <a href="https://www.bloomberg.com/news/articles/2026-10-26/anthropic-s-ipo-sets-up-defining-moment-for-wall-street-and-ai-boom">Bloomberg</a></p>
+</li>
+<li>
+<p><strong>South Korea's Semiconductor-Financed AI Fund</strong> – Novel fiscal mechanism decoupling debt issuance from rate cycles; useful model for European policy makers. <a href="https://www.bloomberg.com/news/articles/2026-10-27/south-korea-s-ai-fund-offers-fiscal-dam-against-higher-yields">Bloomberg</a></p>
+</li>
+<li>
+<p><strong>Geopolitics of Election Cycles: Brazil, Israel, Serbia</strong> – Long-form comparison of how institutional fragility, plutocratic entrenchment, and electoral legitimacy are reshaping the 2026 political landscape globally. <a href="https://www.nytimes.com/2026/10/27/world/middleeast/israel-election-identity.html">NYT, Le Monde, DW</a></p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Tuesday, October 27 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
