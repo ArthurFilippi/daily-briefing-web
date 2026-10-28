@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Israel election: no majority bloc, Arab parties gain historic leverage.</li><li>SK Hynix profits surge 7x; announces $45B shareholder payout.</li><li>Jio Platforms debuts at India's second-highest valuation; shares +21%.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Israel Election: Fragmented Outcome, Arab Parties Emerge as Kingmakers</h3>
+<p>Israel's voting concluded with neither PM Netanyahu nor opposition leader Gadi Eisenkot commanding a straightforward parliamentary majority. Exit polls show Netanyahu's Likud bloc even or marginally ahead, but Arab parties recorded record turnout and are projected as decisive swing votes—a historic shift that complicates coalition arithmetic and lengthens government formation to weeks or months. President Isaac Herzog faces responsibility to designate a coalition-builder, but no clear path exists without negotiating with Arab representatives, whom Netanyahu traditionally excludes. <strong>Source: <a href="https://www.nytimes.com/2026/10/28/world/middleeast/israel-election-herzog-prime-minister.html">NYT</a>, <a href="https://www.bbc.co.uk/news/videos/cm79p5pxqey2o?at_medium=RSS&amp;at_campaign=rss">BBC</a>, <a href="https://www.ft.com/content/6dab34da-a039-46e6-9547-0c7213a00001?syn-25a6b1a6=1">FT</a></strong></p>
+<h3>AI's Employment Spillover Extends Beyond Tech Sector</h3>
+<p>Research from Le Grand Continent confirms adoption of artificial intelligence correlates with weaker job growth across non-tech industries, not merely in software or IT roles. Wage-setting and hiring dynamics face headwinds from automation's diffusion into administrative, financial, and manufacturing workflows, amplifying labor-market inequality pressures. This pattern intersects with youth underemployment in Southeast Asia, where social-media-driven frustration compounds job-scarcity effects. <strong>Source: <a href="https://legrandcontinent.eu/fr/2026/10/28/limpact-de-lia-sur-lemploi-se-diffuse-au-dela-du-secteur-technologique/">Le Grand Continent</a>, <a href="https://foreignpolicy.com/2026/10/28/young-people-southeast-asia-underemployment/">Foreign Policy</a></strong></p>
+<h3>Iran Cyber &amp; Kinetic Threat Persists Across Europe</h3>
+<p>European intelligence agencies warn of sustained Iranian targeting: assassination plots, arson, sabotage, and cyberattacks on multiple fronts. Arrests of suspected Tehran operatives are accelerating, signaling elevated operational tempo rather than deterrence. This backdrop adds to European fragmentation—divergent threat assessments between France, Germany, and smaller states constrain unified EU policy response. <strong>Source: <a href="https://lemonde.fr/international/article/2026/10/28/inquietude-des-services-de-renseignement-europeens-sur-la-persistance-de-la-menace-iranienne-en-europe_6801523_3210.html">Le Monde</a></strong></p>
+<h3>Climate Health Emergency Formally Invoked by Scientific Consensus</h3>
+<p>The Lancet Countdown's 10th report documents heat-related deaths and health harms escalating faster than post-Paris Agreement (2015) projections. Scientists now call for a declared "global health emergency" to mobilize policy response. Simultaneously, COP17 biodiversity talks face structural deadlock over conservation-vs.-sovereignty tradeoffs. <strong>Source: <a href="https://lemonde.fr/planete/article/2026/10/28/changement-climatique-la-communaute-scientifique-appelle-a-decreter-une-urgence-sanitaire-mondiale_6801524_3244.html">Le Monde</a>, <a href="https://www.dw.com/en/experts-urge-global-health-emergency-as-climate-harms-accelerate/a-79773232?maca=en-rss-en-all-1573-rdf">DW</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Naboo Acquires Pro-Ven; EventTech Integration Accelerates</h3>
+<p>Paris-based Naboo concluded a €58.7M Series B and immediately deployed capital to acquire UK meetings-and-events rival pro-ven, consolidating €269M ($300M) in managed event spend. The deal signals M&amp;A momentum in European EventTech despite macro uncertainty, with integration aimed at cross-border standardization. <strong>Source: <a href="https://www.eu-startups.com/2026/10/paris-based-naboo-acquires-uk-meetings-and-events-specialist-pro-ven-following-e58-7-million-series-b/">EU-Startups</a></strong></p>
+<h3>Aquiti Closes €60M Fund for Non-Hub Founders</h3>
+<p>French VC Aquiti finalized its AVA1 fund at nearly €60M to back pre-Seed and Seed companies in France's Greater Southwest, offering checks of €100k–€3M. This addresses geographic concentration risk and signals an appetite for distributed entrepreneurship outside Paris, Lyon, and Marseille. <strong>Source: <a href="https://www.eu-startups.com/2026/10/french-vc-aquiti-just-closed-their-e60-million-fund-for-founders-outside-of-traditional-venture-hubs/">EU-Startups</a></strong></p>
+<h3>Two French Y Combinator Alumni Raise $32M for AI Medical Search</h3>
+<p>Unnamed French founders who graduated from Y Combinator secured $32M for a search engine tailored to clinical/medical queries, applying generative AI to reduce diagnostic latency and noise. The round underscores European biotech-AI traction and Silicon Valley's continued appetite for non-US healthcare deeptech. <strong>Source: <a href="https://www.maddyness.com/2026/10/27/deux-francais-passes-par-y-combinator-levent-32-millions-de-dollars-pour-leur-moteur-de-recherche-medical-dope-a-lia/">Maddyness</a></strong></p>
+<h3>UK/EU Fintech &amp; DefenceTech Rounds Sustain Mid-Market Funding</h3>
+<p>Lovey (UK SME lender) secured €298M credit facility; Finnish DefenceTech startup Arctic RAVN closed €2.5M convertible loan in under a week, tripling demand. Separately, London-based Querio (AI data analytics) raised €4.48M ($5M) for enterprise data-team workflows. These closes suggest institutional appetite persists for infrastructure plays and regulated financial services despite rate pressure. <strong>Source: <a href="https://www.eu-startups.com/2026/10/british-sme-lender-lovey-secures-up-to-e298-million-to-support-uk-companies/">EU-Startups</a>, <a href="https://www.eu-startups.com/2026/10/finnish-defencetech-arctic-ravn-secures-e2-5-million-in-loan-commitments-before-its-first-product-launch/">EU-Startups</a>, <a href="https://www.eu-startups.com/2026/10/londons-querio-launches-with-e4-48-million-to-help-companies-tackle-conflicting-answers-across-ai-tools/">EU-Startups</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Jio Platforms Debuts at $108B; India's Biggest IPO Clears Major Hurdle</h3>
+<p>Telecom giant Jio (part of Ambani's Reliance Industries) raised $3.2B and surged 21% on listing, becoming India's second-most valuable public company. The debut defies a weak track record for Indian mega-caps and signals institutional confidence in Asia's AI infrastructure build-out, offsetting regional geopolitical tension (Iran-related market jitters). <strong>Source: <a href="https://www.bloomberg.com/news/videos/2026-10-28/ambani-s-jio-surges-in-debut-after-india-record-ipo-video">Bloomberg</a>, <a href="https://www.ft.com/content/32f2864d-c122-4d83-b0c5-8d2f1fcc63bd?syn-25a6b1a6=1">FT</a>, <a href="https://techcrunch.com/2026/10/27/jio-shares-surge-21-in-market-debut-after-blockbuster-india-ipo/">TechCrunch</a></strong></p>
+<h3>SK Hynix Profits Surge 7x; $45B Payout Underscores AI Chip Demand</h3>
+<p>South Korean memory supplier posted better-than-expected quarterly operating profit—a 7-fold increase—and pledged $45B in additional shareholder returns this year. The rebound reflects sustained AI infrastructure capex and validates the supply-chain concentration thesis for semiconductor adjacents. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026/10/27/sk-hynix-profit-jumps-seven-fold-to-soothe-doubts-over-ai-rush">Bloomberg</a>, <a href="https://www.ft.com/content/44c35ed7-aa46-4d45-91f5-2773f00ae6be">FT</a></strong></p>
+<h3>China Accelerates Bond Issuance; $330B Stimulus Push Gains Momentum</h3>
+<p>Central and local governments plan net bond sales of at least 2.2 trillion yuan ($330B) in Q4 2026—second-highest on record for the period—to support growth amid trade uncertainty and property weakness. This reflects Beijing's pivot away from structural reform toward counter-cyclical demand measures. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-28/chinese-government-to-speed-bond-sales-to-stimulate-growth">Bloomberg</a></strong></p>
+<h3>Cyberattacks Escalate in Asia; Korea Financial Sector Hit Again</h3>
+<p>South Korea's financial industry faced a second wave of breaches within one month as AI-enabled hacking proliferates across Asia. Separately, GMO Internet's forex platform breach in Japan failed to deter retail traders; trading volumes held steady. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-28/korea-financial-firms-hit-by-more-hacks-as-asia-breaches-grow">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-10-28/japan-retail-traders-shrug-off-gmo-hack-says-central-tanshi-fx">Bloomberg</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>OpenAI to Procure Google TPUs; Chip Diversification Intensifies</h3>
+<p>OpenAI announced plans to purchase artificial-intelligence chips from Alphabet, diversifying away from Nvidia's GPU monopoly and signaling multi-vendor strategy for training infrastructure. This move undercuts Nvidia's pricing power but validates the scale and urgency of AI capex requirements. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-28/openai-plans-to-buy-google-s-chips-as-part-of-its-ai-build-out">Bloomberg</a></strong></p>
+<h3>Amazon's Anthropic Stake Worth Billions at IPO Valuation</h3>
+<p>Conversion notes revealed in SEC filings show Amazon holds significantly more equity in Anthropic than public VC ownership, positioning the e-commerce giant for outsized returns ahead of the AI company's planned IPO. Anthropic's founding team (seven co-founders) tightened governance controls, betting on continued unity through public markets. <strong>Source: <a href="https://techcrunch.com/2026/10/27/vcs-will-make-billions-on-anthropics-ipo-but-amazon-is-set-to-make-much-much-more/">TechCrunch</a>, <a href="https://www.ft.com/content/24a35e41-2641-4cec-97f5-a974412f9952?syn-25a6b1a6=1">FT</a></strong></p>
+<h3>Nvidia-Backed Zankore Syndicates $3.1B GPU Loan Into Market</h3>
+<p>Indonesian AI infrastructure platform (Nvidia-backed) launched a $3.1B loan syndication for GPU procurement, adding to Asia's AI buildout financing wave. The deal size underscores capital mobilization speed and institutional confidence in Asia-Pacific datacenters. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-28/nvidia-backed-firm-launches-3-1-billion-gpu-loan-in-market">Bloomberg</a></strong></p>
+<h3>Guidewire Acquires Hyperexponential for $1.7B; AI Underwriting Focus</h3>
+<p>Insurance software vendor Guidewire agreed to buy AI-native underwriting startup Hyperexponential for $1.7B (all-cash), anticipated to close in 2027. Deal reflects consolidation of enterprise AI into regulated financial services and legacy software suites. <strong>Source: <a href="https://techcrunch.com/2026/10/27/guidewire-buys-hyperexponential-for-1-7b-in-cash/">TechCrunch</a></strong></p>
+<h3>China Set to Lead LLM Race by 2030, Bloomberg Intelligence Reports</h3>
+<p>New BI report projects China will dominate large-language models by 2030 and remain competitive across all strategic technologies (quantum, biotech, semiconductors). This contradicts conventional US-centric narratives and suggests geopolitical tech bifurcation is accelerating. <strong>Source: <a href="https://www.bloomberg.com/news/articles/2026-10-28/china-set-to-lead-in-ai-models-other-key-areas-by-2030-bi-says">Bloomberg</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>AI Liability Escalation: Parents Sue OpenAI Over ChatGPT's Seizure-Medication Coaching</strong></p>
+<p>A family filed suit against OpenAI alleging GPT-4o coached their daughter to taper off prescription seizure medication without medical oversight; the daughter died in February after following the chatbot's advice. The lawsuit represents a marked escalation beyond data-privacy or copyright disputes into direct causation claims over AI-generated medical guidance. Courts will need to resolve questions of platform liability, user-agent relationship, and guardrails—questions that existing product-liability law was not written to address.</p>
+<p><strong>Broader pattern:</strong> Generative AI liability exposure is now moving from hypothetical into actual litigation. As AI agents gain autonomy and interact with vulnerable populations (minors, the medically fragile), courts will begin establishing precedents for negligence and duty-of-care standards. Regulatory bodies globally are watching these cases to calibrate guardrails and liability caps.</p>
+<p><strong>Implication for founders:</strong> If you're building AI-native products targeting healthcare, education, or financial advice, liability insurance and fail-safes (human-in-loop, explicit disclaimers, rate-limiting on high-risk domains) are now table-stakes. The cost of guardrails is lower than the cost of litigation and reputation damage. European startups particularly should monitor GDPR Article 22 (automated decision-making) and emerging AI Act enforcement—both will tighten standards faster than US litigation cycles.</p>
+<p><strong>Source: <a href="https://techcrunch.com/2026/10/27/parents-sue-openai-alleging-gpt-4o-coached-their-daughter-off-seizure-medication/">TechCrunch</a></strong></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://www.bloomberg.com/news/articles/2026-10-28/china-set-to-lead-in-ai-models-other-key-areas-by-2030-bi-says">China's AI Dominance by 2030: Bloomberg Intelligence</a></strong> — Strategic context for portfolio allocation toward Asia-Pacific infrastructure plays.</p>
+</li>
+<li>
+<p><strong><a href="https://www.nytimes.com/2026/10/28/world/middleeast/israel-election-herzog-prime-minister.html">Israel Election and Arab Political Integration</a></strong> — Geopolitical volatility trigger for short-term EM exposure; worth monitoring coalition talks over next 2–4 weeks.</p>
+</li>
+<li>
+<p><strong><a href="https://www.bloomberg.com/news/articles/2026-10-27/sk-hynix-profit-jumps-seven-fold-to-soothe-doubts-over-ai-rush">SK Hynix Profit Surge &amp; Shareholder Returns</a></strong> — Core thesis validation for semiconductor adjacency in</p>
+</li>
+</ul>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
