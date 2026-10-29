@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Israel election leaves neither coalition with parliamentary majority; Arab parties now central negotiators.</li><li>Google search revenue growth halves despite record AI investment; shares tumble 10%.</li><li>FuriosaAI quadruples to $2.9B valuation; Samsung commits 60% capex hike after 2027 chip sellout.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Israel's Kingmaker Moment: Arab Lawmakers Enter Coalition Math</h3>
+<p>Neither Benjamin Netanyahu nor challenger Gadi Eisenkot secured a parliamentary majority in Israel's October 28 election, leaving Arab parties—historically sidelined from coalition talks—in unexpected negotiating power. The rare surge in Arab voter turnout has transformed the political calculus, offering both leaders a path to government but at the cost of engaging Arab lawmakers directly. This represents a structural shift in Israeli politics and complicates regional security decisions, particularly regarding Iran. <a href="https://www.nytimes.com/2026/10/28/world/middleeast/israel-election-results-spain-train.html">Source: NYT</a></p>
+<h3>Localized Ukraine Ceasefire Signals Diplomatic Momentum</h3>
+<p>Melania Trump announced a rare localized peace accord in Kherson, granting civilian relief in a contested city on the Dnipr's western bank. President Zelensky framed the halt to Russian drone and artillery strikes as an "immense success" and called for trilateral talks (Moscow–Kyiv–Washington) in November. The move—brokered by the US administration—reflects a shift toward compartmentalized ceasefires rather than comprehensive settlements. <a href="https://www.lemonde.fr/international/live/2026/10/29/en-direct-guerre-en-ukraine-le-cessez-le-feu-a-olechky-est-un-immense-succes-selon-volodymyr-zelensky-qui-appelle-a-une-rencontre-entre-moscou-kiev-et-washington-en-novembre_6799896_3210.html">Source: Le Monde</a></p>
+<h3>US Vice President Floats Nuclear Talks Restart with Iran</h3>
+<p>Kevin Vance's letter to Iranian officials proposed immediate resumption of comprehensive negotiations on nuclear matters, signaling a potential thaw in US–Iran relations. The overture occurs amid Israel's political uncertainty and reflects Washington's recalibration of Middle East strategy. <a href="https://www.nytimes.com/2026/10/28/us/politics/vance-peace-talks-letter-iran.html">Source: NYT</a></p>
+<h3>North Korea Tests ~10 Ballistic Missiles Amid South Korea Tensions</h3>
+<p>Pyongyang's latest weapons trial occurred against rising border friction and uncertainty over potential US nuclear diplomacy, underscoring regional instability despite Washington's diplomatic overtures elsewhere. <a href="https://www.dw.com/en/north-korea-fires-around-10-ballistic-missiles-into-sea/a-79791900">Source: DW</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>MuRay Secures €7.1M for Rocket Engine Imaging Tech</h3>
+<p>French deeptech startup MuRay raised €7.1 million to scale its thermal and optical diagnostics for rocket propulsion systems—critical for ESA, CNES, and commercial launch providers validating engine performance in real time. The round signals strong investor appetite for precision instrumentation serving the aerospace supply chain. <a href="https://sifted.eu/articles/exclusive-deeptech-startup-muray-raises-e7-1m-to-see-inside-rocket-engines/">Source: Sifted</a></p>
+<h3>Alan Wins €3B Social Security Telemedicine Contract</h3>
+<p>Paris-based health-tech unicorn Alan secured a landmark three-year contract with France's national social security authority (CNAM), positioning digital-first primary care as the state's preferred delivery model. The deal cements Alan's role in restructuring French healthcare logistics and validates its employer-plus-payer strategy. <a href="https://www.maddyness.com/2026/10/28/alan-remporte-un-contrat-de-3-milliards-deuros-avec-la-securite-sociale/">Source: Maddyness</a></p>
+<h3>Proxima Fusion Signs Japan MOU; Germany Bets on Global Fusion Leadership</h3>
+<p>German stellarator fusion startup Proxima Fusion formalized industrial partnerships in Japan during Chancellor Merz's Tokyo visit, securing supply-chain backing for Germany's bid to lead commercial fusion. The pact reflects deeptech's reliance on geopolitical alignment and industrial cooperation. <a href="https://www.eu-startups.com/2026/10/as-merz-visits-japan-energy-startup-proxima-fusion-moves-to-secure-germany-s-place-in-the-global-fusion-race/">Source: EU-Startups</a></p>
+<h3>AP Ventures Closes €269.6M Fund III for Industrial/Energy Tech</h3>
+<p>London-based AP Ventures closed its third fund at €269.62 million ($300M), targeting early-stage industrial and energy-tech founders across Europe and signaling sustained institutional capital for non-software deeptech. <a href="https://www.eu-startups.com/2026/10/londons-ap-ventures-closes-e269-million-third-fund-to-back-early-stage-industrial-and-energy-tech-startups/">Source: EU-Startups</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Google Misses Revenue Targets; Search Ad Growth Halves Year-on-Year</h3>
+<p>Alphabet's search advertising revenue expanded only 12% in Q3 2026—down from 19% a year earlier and 17% in Q2—despite committing $51 billion annually to AI infrastructure. The deceleration exposed the gap between spend and consumer monetization and triggered a 10% intraday stock decline. Google's AI mode, launched to compete with ChatGPT-style competitors, has cannibalized traditional search click-through rates. <a href="https://www.ft.com/content/eb386156-5bf9-4edd-80f2-803fdee1e33d">Source: FT</a></p>
+<h3>Weil Gotshal Announces Dissolution After Partner Exodus</h3>
+<p>The storied M&amp;A and bankruptcy law firm—once a Wall Street titan—announced its planned breakup following a decade of defections, a failed succession plan, and a collapsed merger attempt with rival firm. The firm's unraveling reflects broader structural stress in BigLaw amid talent consolidation and specialized boutique competition. <a href="https://www.nytimes.com/2026/10/28/business/weil-gotshal-law-firm.html">Source: NYT</a></p>
+<h3>Iron Ore Below $90/Ton Tests Supply Exit; 170M Tons Now Loss-Making</h3>
+<p>Iron ore's fall below $90 per ton has pushed as much as 170 million metric tons of global production into negative cash flow, but prices must remain suppressed far longer to trigger meaningful supply exit, UBS estimated. The dynamic reflects Chinese demand weakness and suggests mining capex will remain cautious. <a href="https://www.bloomberg.com/news/articles/2026-10-29/iron-ore-s-drop-below-90-tests-high-cost-supply-as-losses-mount">Source: Bloomberg</a></p>
+<h3>Jio Platforms Adds $36B Market Value Post-IPO; India's Largest Listing Ever</h3>
+<p>Reliance's Jio Platforms Ltd. surged post-listing, adding nearly $36 billion in market capitalization across two trading sessions following India's record IPO. High retail delivery ratios pointed to sticky investor demand for telecom and digital-services exposure in Asia's largest consumer market. <a href="https://www.bloomberg.com/news/articles/2026-10-29/jio-platforms-adds-36-billion-in-value-after-india-ipo-surge">Source: Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Samsung Commits 60%+ Capex Hike; AI Chips Sold Out Through 2027</h3>
+<p>Samsung Electronics announced spending increases exceeding 60% this year after pre-selling high-end AI accelerators for all of 2027, yet its stock fell 6.6% intraday due to absent shareholder return announcements. The divergence—supply tightness + absent buybacks—signals investor skepticism about profit conversion. <a href="https://www.bloomberg.com/news/articles/2026-10-29/samsung-hikes-spending-after-ai-chips-sold-out-for-2027">Source: Bloomberg</a></p>
+<h3>FuriosaAI Quadruples Valuation to $2.9B in $620M Series D</h3>
+<p>South Korean AI chip startup FuriosaAI closed a Series D at $2.9 billion valuation—four times its prior round—on the strength of custom silicon demand from enterprises pivoting away from Nvidia's constrained supply. The valuation surge underscores investor conviction in non-Nvidia chip ecosystems. <a href="https://www.bloomberg.com/news/articles/2026-10-28/furiosaai-quadruples-valuation-to-2-9-billion-in-nvidia-chase">Source: Bloomberg</a></p>
+<h3>Anthropic Warns: AI Cyberattacks Will "Get Much Worse Before Better"</h3>
+<p>An Anthropic executive stated that mass disruptions driven by AI-enabled hacking will escalate sharply, highlighting the lag between offensive AI capability and defensive infrastructure maturity. The warning correlates with recent DHS employee data leaks (40K+) and GMO cyberattack fallout. <a href="https://www.bloomberg.com/news/articles/2026-10-29/ai-and-cybersecurity-why-cyberattacks-are-getting-harder-to-stop">Source: Bloomberg</a></p>
+<h3>Upwind Raises $400M at $3.8B After Rejecting Datadog Acquisition</h3>
+<p>Cloud security startup Upwind closed a Series C at identical valuation ($3.8B) rather than accept Datadog's merger offer, betting that independent growth in a security-conscious market will exceed acquisition multiples. The move signals founder confidence amid market volatility. <a href="https://techcrunch.com/2026/10/28/upwind-raises-400m-after-walking-away-from-datadog-acquisition-offer/">Source: TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The AI Capex Trap: Spending Without Monetization Proof</strong></p>
+<p>Google's revelation that its AI-powered "search mode" has <em>reduced</em> traditional search revenue—despite $51 billion in annual infrastructure spending—exemplifies a widening gap between technological capability and economic return. Across the sector, Samsung (sold-out chips but no buyback; stock declines), Tencent (Pony Ma called AI a "leaky ship"), and infrastructure players (Equinix betting on scarcity premium rather than efficiency gains) all show the same pattern: massive capital deployment is not yet translating to margin expansion or shareholder returns.</p>
+<p>This divergence reveals a structural reality: AI infrastructure has become a capital-intensive, defensive investment—necessary to remain competitive but insufficient alone to drive enterprise or consumer revenue growth. Startups and mature tech firms are discovering that compute availability does not automatically unlock new markets; it merely shifts the competition upstream (to chip design, data-center location, supply-chain control).</p>
+<p>For an early-stage founder, the implication is clear: the next wave of venture returns will accrue not to generalist AI companies (which face commoditization pressure and margin compression) but to <em>vertical applications</em> solving time-critical, high-stakes problems where AI reduces cost or risk measurably. French deeptech—rocket engines (MuRay), fusion (Proxima), healthcare logistics (Alan)—is correctly positioned in this window; European investors backing industrial AI and precision instrumentation will outpace those chasing consumer-grade generative chat.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>On AI spend vs. revenue:</strong> FT analysis of Alphabet's Q3 miss shows $51B capex commitment now consuming &gt;25% of operating cash flow. Critical read for portfolio construction around chipmakers and data-center operators.<br />
+<a href="https://www.ft.com/content/eb386156-5bf9-4edd-80f2-803fdee1e33d">FT: Google shares tumble 10%</a></p>
+</li>
+<li>
+<p><strong>On geopolitical deal flows:</strong> Vance's Iran outreach and Kherson ceasefire offer a roadmap for how fragmented parliaments (Israel) and war fatigue (Ukraine) are reshaping negotiation vectors. Relevant for defense-tech and sanctions-exposed supply chains.<br />
+<a href="https://www.nytimes.com/2026/10/28/us/politics/vance-peace-talks-letter-iran.html">NYT: Vance proposes restarting Iran talks</a></p>
+</li>
+<li>
+<p><strong>On European deeptech positioning:</strong> Proxima Fusion's Japan MOU and MuRay's €7.1M closing show how French and German startups are outpacing US competitors in <em>industrial</em> applications by securing geopolitical and supply-chain backing early.<br />
+<a href="https://www.eu-startups.com/2026/10/as-merz-visits-japan-energy-startup-proxima-fusion-moves-to-secure-germany-s-place-in-the-global-fusion-race/">EU-Startups: Proxima Fusion Japan MOU</a></p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: NYT, Bloomberg, FT, Sifted, EU-Startups, Maddyness, DW, Le Monde — October 29 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
