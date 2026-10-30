@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul><li><strong>AI capex collision with reality</strong>: Big Tech's $750B annual AI spending is colliding with slowing core revenues (advertising, cloud retail). Amazon, Google earnings miss are triggering a broader valuation repricing across tech—Asian semiconductor stocks falling sharply, Taiwan index nearing correction territory. For SP500/NASDAQ-heavy portfolios, this signals a rotation risk away from mega-cap AI capex plays toward defensive or non-AI infrastructure plays.</li><li><strong>Geopolitical fragmentation accelerating policy divergence</strong>: Israel's hung parliament, Iran-US tensions, China's deepening purges, and EU-Canada talks on "associated membership" reveal a world where traditional blocs are splintering—forcing capital deployment into regional hedging strategies (rare earths in Malaysia, EU energy reserves, Cuba sanctions endurance). This reduces predictability of macro trade flows, favoring diversified geography exposure.</li></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Binance suffers $6.3B hack, suspends withdrawals and trading.</li><li>Netanyahu bloc wins 53 seats; no majority, coalition talks loom.</li><li>Murata invests $6.4B to double capacitor output for AI demand.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Israel Election Yields Hung Parliament; Coalition Building Uncertain</h3>
+<p>Netanyahu's Likud-led bloc secured 53 seats in the Knesset, falling short of the 61-seat majority required to form government. Opposition leader Gadi Eisenkot's camp won 48 seats, with neither grouping commanding control. President Isaac Herzog, historically cautious, may push toward a unity coalition—a scenario his father, President Chaim Herzog, orchestrated 42 years prior. Coalition negotiations are expected to be complex and protracted. <strong>Source:</strong> <a href="https://www.dw.com/en/israeli-election-netanyahu-main-rival-fall-short-of-majority-after-all-votes-counted/live-79713839?maca=en-rss-en-all-1573-rdf">DW</a>, <a href="https://www.nytimes.com/2026/10/29/world/middleeast/israel-election-results-netanyahu-eisenkot.html">NYT</a></p>
+<h3>Iran Signals Readiness for Confrontation Despite Diplomatic Channels</h3>
+<p>Tehran has instructed defense officials to prepare for potential strikes from the US and Israel, while maintaining backchannel diplomatic contact through regional intermediaries. The messaging reflects a dual-track posture: preparing for military escalation while keeping negotiation pathways open. This stance underscores heightened regional volatility ahead of potential policy shifts under a new US administration. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/article/2026/10/30/en-iran-la-menace-d-une-nouvelle-confrontation-avec-les-etats-unis-et-israel-prise-au-serieux-malgre-les-tractations-diplomatiques_6802767_3210.html">Le Monde</a></p>
+<h3>China Accelerates Anti-Corruption Purges; 33 Officials Expelled</h3>
+<p>Xi Jinping's enforcement of party loyalty intensified with the expulsion of 33 officials, including prominent diplomat Liu Jianchao, as Xi prepares for an unprecedented fourth term. Observers characterize the purges as efforts to consolidate authority rather than genuine anti-corruption measures. This concentration of power signals Xi's intention to tighten control over both civilian and military institutions. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cq5ynw94k7kzo?at_medium=RSS&amp;at_campaign=rss">BBC</a>, <a href="https://www.nytimes.com/2026/10/29/world/asia/china-communist-party-purges.html">NYT</a></p>
+<h3>EU and Canada Explore "Associated Membership" Model</h3>
+<p>Ursula von der Leyen and Canadian officials maintained discussions on making Ottawa an "associated member" of the EU during a summit in Montreal. Germany expressed clear reservations about the terminology, creating divisions within the bloc. The initiative reflects EU efforts to deepen North American ties amid geopolitical flux. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/article/2026/10/30/a-montreal-le-canada-et-l-union-europeenne-resserrent-leurs-liens-malgre-les-divergences-des-vingt-sept_6802758_3210.html">Le Monde</a></p>
+<h3>EU Releases 42.6 Million Barrels From Strategic Reserves Ahead of Winter</h3>
+<p>Eleven EU member states are drawing down strategic petroleum reserves to stabilize diesel prices entering the winter heating season. The coordinated move addresses energy price volatility while the bloc affirms that supply security remains intact. This action signals energy security concerns persist despite assumed supply normalization. <strong>Source:</strong> <a href="https://www.lemonde.fr/economie/article/2026/10/30/crise-energetique-onze-pays-de-l-ue-vont-liberer-42-6-millions-de-barils-de-petrole-afin-de-stabiliser-les-prix-du-gazole-avant-l-hiver_6802691_3234.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Bleu Robotics Raises €5M to Accelerate Humanoid Robot Deployment</h3>
+<p>Paris-based Bleu Robotics closed a €5M pre-Seed round co-led by Contrarian Ventures and OVNI Capital to develop AI models enabling humanoid robots to learn tasks with minimal demonstrations. The startup targets reducing full deployment cycles to under one hour. This addresses a critical bottleneck in industrial automation—human training overhead for robotic systems. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/french-startup-bleu-robotics-secures-e5-million-to-teach-humanoid-robots-new-tasks-with-fewer-demonstrations/">EU-Startups</a></p>
+<h3>Braid Raises €34.13M to Enable Branded Mobile Connectivity</h3>
+<p>Dutch startup Braid (formerly Next Communications), a profitable enterprise software vendor, secured €34.13M in Series A funding to let brands launch proprietary mobile services. The company is approaching the threshold where unit economics can sustain growth without external capital. This signals maturing B2B software markets in telecom infrastructure. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/profitable-dutch-startup-braid-raises-e34-12-to-help-brands-launch-their-own-mobile-connectivity/">EU-Startups</a></p>
+<h3>Pixel Systems Raises €2.7M to Detect AI-Generated Content</h3>
+<p>Swedish AI startup Pixel Systems closed a €2.7M seed round led by Unconventional to scale technology identifying AI-manipulated images, documents, and digital material. Rising synthetic media proliferation is driving urgency in detection tools for enterprises and platforms. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/tool-that-identifies-ai-generated-material-helps-pixel-systems-raise-e2-7-million/">EU-Startups</a></p>
+<h3>Entourage VC Closes €100M Second Fund</h3>
+<p>Pieterjan Bouten's London-based early-stage firm Entourage surpassed its €75M target in two weeks and closed Fund II at €100M, backed entirely by entrepreneurs and family offices. The fundraising velocity reflects sustained LP appetite for generalist early-stage exposure despite tech sector volatility. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/pieterjan-boutens-entourage-closes-e100-million-second-fund-after-surpassing-e75-million-target-in-two-weeks/">EU-Startups</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Binance Suffers $6.3B Security Breach; Halts Trading and Withdrawals</h3>
+<p>The world's largest crypto exchange suspended deposits, withdrawals, and trading following a suspected hack that may have resulted in $6.3B in losses. Bobby Lee of Ballet Global stated the stolen Bitcoin is "likely gone" and unrecoverable. This marks one of the industry's largest security incidents and signals heightened institutional custody risk in crypto infrastructure. <strong>Source:</strong> <a href="https://www.ft.com/content/c7f5e395-c3a9-430e-b757-5014527b4d49">FT</a>, <a href="https://www.bloomberg.com/news/articles/2026-10-30/binance-grapples-with-security-incident-that-may-cause-6-3-billion-in-losses">Bloomberg</a></p>
+<h3>Big Tech's $750B AI Bet Collides With Slowing Core Growth</h3>
+<p>Amazon, Google, and peers announced record AI capex ($750B annually) while core advertising and retail engines show deceleration. The divergence is driving equity repricing: Amazon's post-earnings slump, Asian chip stocks falling, Taiwan index nearing correction. Wall Street sentiment is shifting from AI-bull euphoria to skepticism about ROI timelines. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/big-tech-s-750-billion-ai-bet-collides-with-slowing-core-growth">Bloomberg</a>, <a href="https://www.nytimes.com/2026/10/29/technology/amazon-earnings-tech-spending.html">NYT</a></p>
+<h3>Iron Ore Reaches 4-Year Low on Supply Glut and China Port Stockpiles</h3>
+<p>Iron ore futures in Singapore headed for the lowest month-end close since October 2022, as abundant global supplies and elevated Chinese port inventories dampened demand. The decline signals softening construction activity and reduced manufacturing pressure in China's economy. Commodity weakness may foreshadow broader demand contraction. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/iron-ore-heads-for-lowest-month-end-close-since-october-2022">Bloomberg</a></p>
+<h3>Murata Invests ¥1 Trillion ($6.4B) to Double Capacitor Production</h3>
+<p>Japanese component manufacturer Murata announced a five-year capex program to more than double sales of multilayer ceramic capacitors (MLCCs), which face unprecedented demand from AI data center operators. The investment targets closing the supply-demand gap in critical passive components. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/murata-boosts-mlcc-output-investment-to-keep-pace-with-ai-demand">Bloomberg</a></p>
+<h3>UK Pursues Bold Tax-Based Deficit Reduction, IMF Praises Approach</h3>
+<p>Britain was highlighted by the International Monetary Fund for proposing the most aggressive deficit-reduction plan in the G7, achieved through higher taxes rather than spending cuts. Chancellor John Healey's strategy carries economic risks, with analysts warning of potential drag on growth. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/britain-tests-the-limits-with-plan-to-tax-its-way-out-of-debt">Bloomberg</a></p>
+<h3>Taiwan Stocks Near Correction as Global AI Selloff Deepens</h3>
+<p>Taiwan's benchmark index approaches a technical correction as the broader selloff in artificial intelligence equities accelerates. Semiconductor export-dependent economies face valuation headwinds from US earnings misses. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/taiwan-stocks-heads-for-correction-as-global-ai-selloff-deepens">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Envision Plans 3GW Inner Mongolia Data Center Completion by 2028</h3>
+<p>Chinese renewable energy firm Envision Group aims to finish its Galaxy Campus data center in Inner Mongolia by end-2028, with eventual capacity reaching 3 gigawatts. The facility will power AI workloads using renewables. Envision also plans to develop data centers in Latin America, Southern Europe, and Africa. This represents a geographically diversified strategy to circumvent US export restrictions on advanced chips to China. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/envision-to-complete-massive-inner-mongolia-data-center-by-2028">Bloomberg</a></p>
+<h3>Indian AI Firm Seeks $3B Financing for Nvidia Chip Purchase</h3>
+<p>AM Intelligence, an Indian AI infrastructure startup, is raising up to $3B to fund a previously announced Nvidia GPU purchase. The capital raise underscores how AI infrastructure buildout is driving a debt binge across emerging markets, with leveraged balance sheets now central to data center economics. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/indian-ai-firm-seeks-3-billion-financing-for-nvidia-chips-order">Bloomberg</a></p>
+<h3>Nvidia in Credit Talks for Nscale Data Center Project</h3>
+<p>Nvidia is negotiating credit guarantees for an Nscale facility that Anthropic plans to use, according to informed sources. This signals Nvidia's willingness to backstop financing for large AI infrastructure deals—a strategy to ensure sustained GPU demand and lock in customer commitment. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-29/nvidia-in-talks-to-offer-credit-support-for-nscale-project">Bloomberg</a></p>
+<h3>Spotify to Launch AI Music Remix Service in Early 2027</h3>
+<p>The streaming platform plans to offer an AI-powered remix feature charging users up to $5/month. This represents a new monetization vector for generative AI applied to music catalogs, though licensing complexity with rights holders remains unresolved. <strong>Source:</strong> <a href="https://www.ft.com/content/50286bd0-7158-4347-81d8-011cd164f75b">FT</a></p>
+<h3>Anthropic IPO Filing Signals Maturing AI Funding Environment</h3>
+<p>Anthropic's IPO filing indicates the AI infrastructure boom is transitioning from private capital to public markets. This follows record capex commitments from hyperscalers and signals investor appetite for liquidity events after multi-year private funding cycles. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/videos/2026-10-30/odd-lots-what-wall-street-really-thinks-about-the-ai-trade-now">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Malaysia Becomes Unlikely Hub for US-China AI Data Center Race</strong></p>
+<p>The US-owned startup planning a $600M rare-earth refinery in Malaysia, combined with Envision's multi-GW data center build and existing Nvidia/US chip company operations, reveals Malaysia as a critical chokepoint in the AI infrastructure Cold War. Both Washington and Beijing are deploying capital into the same geography—competing for land, power, and regulatory favor—precisely because Malaysia sits outside direct US export controls on advanced chips to China.</p>
+<p>This bifurcation within a single country creates two overlapping patterns: (1) <strong>supply chain localization</strong>—US firms are pre-positioning rare-earth processing and data center capacity closer to Asian demand, reducing China transit; (2) <strong>regulatory arbitrage</strong>—Malaysia's relative neutrality and abundant hydropower make it attractive to both blocs, but that same neutrality is now under stress as Washington tightens chip export policy. Malaysia will face mounting pressure from Washington to restrict Chinese access to US technology that flows through its territory.</p>
+<p>For a 21-year-old deeptech founder, this signals an opportunity window: regional governments (Vietnam, Thailand, Indonesia, Philippines) are competing to attract AI infrastructure capex, and most lack the policy frameworks to manage US-China demands coherently. Building compliance/localization SaaS for data center operators navigating divergent export rules, or infrastructure-as-a-service platforms that can shift workloads between geographies as policy changes, offers asymmetric returns before the market hardens around a stable geopolitical equilibrium.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong>[FT] Inside the make-or-break AI mega-project behind Nscale's $35bn IPO</strong>: Covers the Anthropic-backed West Virginia data center campus and its construction, financing, and regulatory risks. <strong><a href="https://www.ft.com/content/ee86c4b6-1fe4-467e-8f18-9c08df288aff">Read here.</a></strong></li>
+<li><strong>[NYT] How One Country Became the Unlikely Crossroads of the Global A.I. Boom</strong>: Documents Malaysia's emergence as contested territory between US and Chinese tech investment, with local resource constraints surfacing. <strong><a href="https://www.nytimes.com/2026/10/30/business/malaysia-data-center-china.html">Read here.</a></strong></li>
+<li><strong>[Bloomberg] Big Tech's $750 Billion AI Bet Collides With Slowing Core Growth</strong>: Market analysis of tech earnings misses and repricing of AI capex thesis. <strong><a href="https://www.bloomberg.com/news/articles/2026-10-30/big-tech-s-750-billion-ai-bet-collides-with-slowing-core-growth">Read here.</a></strong></li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Friday, October 30 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
