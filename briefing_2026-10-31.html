@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>AI infrastructure spending euphoria colliding with financial gravity.</strong> OpenAI slashed its funding target from $30bn to $20bn; Baseten targets $30bn valuation while multiple tech giants announce mounting debt and negative cash flow. Meta's credit outlook downgraded to negative; S&amp;P flagged sustainability risks. This reversal—from "spend at any cost" to "prove ROI"—signals investor repositioning away from speculative capex bets. <em>For NASDAQ-tilted portfolios: near-term pressure on mega-cap tech valuations; rotation toward profitable AI plays and infrastructure enablers likely to accelerate.</em></p>
+</li>
+<li>
+<p><strong>Geopolitical fragmentation reshaping trade and defense supply chains.</strong> US 50% tariffs closed a Canadian paper mill; Western Sahara UN mandate expired amid US-Russia veto deadlock; European diplomats boycott G20 Russia session; El Salvador deploys 2,000 troops to Haiti. Separately, India's tanker hit with limpet mines in Hormuz, US approves 500 Patriot sales to Ukraine. De-risking from integrated global supply chains is now structural, not cyclical.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- North Korean hackers stole $6.3 billion from Binance in 30 minutes; largest crypto heist ever.
+- OpenAI raises $20 billion, not $30 billion; scales back AI ambitions amid investor skepticism.
+- Western Sahara UN peacekeeping mandate expires after US, Russia vetoes block renewal.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Oil Tanker Attacked in Strait of Hormuz; First Limpet Mine Success Since US-Iran War Began</h3>
+<p>A vessel carrying 27 Indian crew members was struck by limpet mines near Oman and caught fire, marking the first documented successful deployment of such explosives in the waterway since US-Iran hostilities escalated. The attack signals escalating maritime asymmetric tactics and raises insurance and routing costs for regional trade. Hormuz remains critical to global oil flows; repeated incidents risk supply disruption and geopolitical contagion. <strong>Source:</strong> <a href="https://www.dw.com/en/india-news-oil-tanker-carrying-27-indians-attacked-with-limpet-mines-in-strait-of-hormuz/live-79814329">DW</a></p>
+<h3>UN Western Sahara Peacekeeping Mandate Expires; Security Council Deadlocked</h3>
+<p>The mandate of MINURSO (UN Mission for the Referendum in Western Sahara) expired on October 31 after the Security Council failed to renew it—Russia vetoed a US-backed resolution prioritizing Morocco's autonomy plan. The 50-year dispute between Morocco and Polisario Front independence forces now lacks international oversight, heightening collision risk and undermining African Union mediation efforts. <strong>Source:</strong> <a href="https://www.dw.com/en/un-peacekeeping-mission-in-western-sahara-to-expire-amid-us-russia-vetoes/a-79814338">DW</a></p>
+<h3>El Salvador Deploys 2,000+ Troops to Haiti in Extraordinary Foreign Intervention</h3>
+<p>The Salvadoran government dispatched more than 2,000 soldiers to Haiti this week, marking an unprecedented deployment on foreign soil and signaling deepening US regional security coordination. The move reflects hemispheric instability and suggests Washington is outsourcing stability operations to allied militaries facing domestic legitimacy constraints. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/10/30/world/americas/el-salvador-haiti-soldiers-bukele.html">NY Times</a></p>
+<h3>US Approves 500 Patriot Missiles to Ukraine; Only Effective Anti-Ballistic Defense</h3>
+<p>The US authorized sale of 500 Patriot interceptors to Kyiv—the only proven weapon system capable of downing Russian ballistic missiles. The delivery signals sustained US commitment to Ukraine's air defense and raises interception capacity as Russia intensifies precision strike campaigns. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/c3vgxznlx7jzo">BBC</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>France Raises €41 Million This Week; AI Captures &gt;90% of Capital Flow</h3>
+<p>French tech closed €41 million in funding (week of Oct. 26–30), with AI-focused founders absorbing more than 90% of deployment. Madrid's Talky Labs raised €1.5m (pre-Seed, accounting automation AI); London's Easol secured €26.78m Series A extension for experience commerce; Ares Intelligence raised €2.9m (employee-to-AI adoption). Concentration signals investor risk-off outside narrow AI verticals. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/10/30/french-tech-lia-concentre-plus-de-90-des-41-millions-deuros-leves-cette-semaine/">Maddyness</a></p>
+<h3>Europe's SpaceTech Receives €560 Million; Deutsche Bank &amp; EIB Partnership</h3>
+<p>Deutsche Bank and the European Investment Bank mobilized €560 million to support European space startups, strengthening sovereign independence from US and Chinese satellite ecosystems. The co-investment targets constellation operators, launch providers, and ground infrastructure—addressing critical gaps in autonomous European access to orbit. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/european-spacetech-recieves-a-e560-million-injection-to-promote-european-sovereignty/">EU-Startups</a></p>
+<h3>Auriga Partners Launches €80 Million Cybersecurity Fund for European Champions</h3>
+<p>The fund targets scaling mid-stage European cyber security companies, addressing growing demand for regional alternatives to US-dominated vendors. Policy tailwinds (NIS2 EU directive, NATO standards) and client concentration risk (US supply-chain exposure post-tariffs) are driving LP appetite. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/10/30/auriga-partners-lance-un-fonds-de-80-millions-deuros-pour-faire-decoller-des-champions-europeens-de-la-cybersecurite/">Maddyness</a></p>
+<h3>PaperFoam Secures €2 Million Loan for Sustainable Packaging Scale-Up</h3>
+<p>The Dutch starch-and-fiber packaging maker borrowed €2m from Invest International to expand its Czech facility and strengthen working capital across Malaysia and US plants. Growth reflects regulatory tailwinds (single-use plastics bans) and supply-chain re-localization. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/10/paperfoam-secures-e2-million-loan-to-scale-sustainable-packaging-made-from-starch-and-natural-fibres/">EU-Startups</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>OpenAI Cuts Funding Target by $10 Billion; Seeks $20 Billion at $1.25 Trillion Valuation</h3>
+<p>OpenAI halved its capital raise target from $30bn to $20bn, signaling investor hesitation over unit economics and deployment timelines for massive compute spend. The lower valuation (from rumored $1.5tn+) reflects market repricing of speculative AI infrastructure bets and growing cash-burn anxiety. <strong>Source:</strong> <a href="https://www.ft.com/content/7a3ad950-1b3b-4d9e-8c15-65a61ae6180f">FT</a></p>
+<h3>Binance Suffers $6.3 Billion Hack; Largest Crypto Heist in History</h3>
+<p>North Korean state hackers exploited advanced AI and money-laundering techniques to steal $6.3 billion in 30 minutes—surpassing all prior crypto thefts. Binance committed to customer reimbursement, but the breach exposes systemic vulnerabilities in hot-wallet security and regulatory oversight. <strong>Source:</strong> <a href="https://www.ft.com/content/e84eceda-040b-4e5f-b906-09768085933a">FT</a></p>
+<h3>Meta's Credit Outlook Downgraded to Negative by S&P; AI Spending Pressure</h3>
+<p>S&amp;P flagged potential downgrade risk within two years, citing elevated AI capex straining Meta's balance sheet. The rating action signals investor concern that mega-cap tech's data-center spending spree may exceed operating cash flow growth. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/meta-s-credit-rating-outlook-downgraded-to-negative-by-s-p">Bloomberg</a></p>
+<h3>Hong Kong Q3 Growth Robust; 2026 on Track for Strongest Year in Five Years</h3>
+<p>Hong Kong's economic expansion remained steady in Q3, positioning the year for its strongest growth rate since 2021. Resilience reflects trade hub activity and regional financial flows despite US-China tensions. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-31/hk-s-chan-says-2026-growth-may-be-strongest-in-five-years-rthk">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Baseten Targets $30 Billion Valuation in New Funding Round</h3>
+<p>AI infrastructure startup Baseten is set to raise funding that would double its valuation to $30 billion, positioning it as a core player in model deployment and inference optimization. The valuation underscores investor appetite for infra plays over model-building, reversing 2024 dynamics. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-10-30/baseten-set-for-30-billion-valuation-with-new-funding">Bloomberg</a></p>
+<h3>Salesforce Acquires Defense Tech Startup Rune for ~$375 Million</h3>
+<p>Salesforce bolstered its Missionforce defense platform with the acquisition of Rune, an AI logistics startup. The deal signals enterprise expansion into regulated, mission-critical segments and underscores software's role in defense supply-chain automation. <strong>Source:</strong> <a href="https://techcrunch.com/2026/10/30/salesforces-ma-spree-continues-with-a-reported-375m-deal-for-defense-tech-startup-rune/">TechCrunch</a></p>
+<h3>Anthropic Expected to Receive High Junk Rating Post-IPO; Blackstone Forecast</h3>
+<p>Credit agencies are expected to assign Anthropic a high junk rating following its initial public offering, reflecting elevated leverage and cash-burn trajectory. Higher borrowing costs would constrain the company's already-stretched capex budget for model training. <strong>Source:</strong> <a href="https://techcrunch.com/2026/10/30/anthropic-expected-to-receive-high-junk-rating-from-credit-agencies-following-ipo-report-says/">TechCrunch</a></p>
+<h3>Intel Stock Crashes; US Government Stake Loses $12 Billion in Value</h3>
+<p>Intel's share price collapsed as PC sales faltered—AI demand siphoning memory and components, raising consumer-PC costs. The decline eroded the US government's equity stake by $12 billion, undermining domestic chip-manufacturing leverage in geopolitical negotiations. <strong>Source:</strong> <a href="https://techcrunch.com/2026/10/30/intels-stock-crashes-knocking-12b-from-governments-stake/">TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The Tariff-Driven Death of Single-Specialization Manufacturing: Témiscaming's Paper Mill Closure</strong></p>
+<p>A century-old paper mill in Témiscaming, Quebec shut down indefinitely after the US imposed 50% tariffs on its products, idling hundreds of workers. The facility—profitable before the tariff—exemplifies how geopolitically-induced cost shocks are forcing deindustrialization at speed in cross-border supply chains that lack diversification escape hatches.</p>
+<p>This extends beyond trade friction: the broader pattern reveals that tariff regimes (whether US, China, or reciprocal EU) are now acting as <em>structural derisking mechanisms</em>. Companies face binary choices—relocate production to tariff-exempt zones, vertically integrate to reduce import exposure, or exit. Single-country manufacturing, once attractive for labor and proximity arbitrage, is now a liability. Firms with optionality (capital, tech, regulatory relationships) survive; those without vanish.</p>
+<p>For an early-stage deep tech founder, this signals: (1) supply-chain geography is no longer a cost-optimization variable—it is existential. (2) Invest in production modularity and relocation flexibility from inception, not as a post-scale retrofit. (3) Geopolitical risk insurance (tariff-resilient sourcing, nearshoring options, or IP licensing to friendly jurisdictions) is now a core product feature, not an afterthought. Those who build "tariff-proof" operations will command venture capital in 2027–2030.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://www.ft.com/content/7a3ad950-1b3b-4d9e-8c15-65a61ae6180f">OpenAI's Funding Pullback Signals Broader AI Valuation Reset</a></strong> — How the $10bn target cut reflects investor recalibration on unit economics and capex sustainability across mega-cap AI.</p>
+</li>
+<li>
+<p><strong><a href="https://www.ft.com/content/e84eceda-040b-4e5f-b906-09768085933a">Binance's $6.3B Hack: Inside the North Korean Cyber Attack</a></strong> — Forensic breakdown of the heist techniques, money-laundering velocity, and regulatory implications.</p>
+</li>
+<li>
+<p><strong><a href="https://www.bbc.co.uk/news/articles/cmly016ep243o">Why Tariffs Are Reshaping Global Supply Chains Faster Than Anyone Expected</a></strong> — Long-form case study of Témiscaming mill closure and parallel de-risking moves across North American manufacturing.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Saturday, October 31 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
