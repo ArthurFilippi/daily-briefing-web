@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>US midterm voting today signals deep fracture over foreign entanglement.</strong> Anger over the Iran war and inflation—despite Trump's pre-election promises—is reshaping Republican coalition math. Swing votes driven by cost-of-living pressure (petrol prices now exceed Biden-era levels) and military fatigue will test whether populist anti-interventionism can survive as doctrine. <em>For SP500/NASDAQ portfolios tilted toward tech: energy sector volatility may persist; defensive rotation into treasury-yielding assets likely if Democrats gain ground.</em></p>
+</li>
+<li>
+<p><strong>AI capex boom hitting a credibility wall.</strong> Recent stumbles in AI projects (safety breaches, overhyped ROI claims, Kioxia demand leveling off) are puncturing the narrative of guaranteed returns. Higher interest rates—the structural brake on unprofitable scaling—are forcing re-evaluation of data center debt binge (STT GDC seeking $2.4B loan signals intensifying financing risk). Enterprise buyers now demanding concrete ROI proof rather than accepting sunk-cost infrastructure plays.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Ukraine, Russia emergency alert apps simultaneously hacked; Zelenskyy conditions strikes on Patriot delivery.
+- Kimi Antonelli, 20, crowned Formula 1 champion; youngest ever, first Italian since 1953.
+- Binance reports $3.6B net crypto outflows post-hack; North Korean actors blamed.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Iran war anger dominates midterm vote; inflation compounds Trump's caucus problem</h3>
+<p>US voters heading to polls today express frustration with both the ongoing Iran conflict and elevated petrol prices. Average fuel costs have risen past Biden-era levels despite Trump's campaign pledges to contain inflation and avoid foreign military commitment. Republican strategists face pressure as party unity erodes between interventionist defense hawks and populist cost-of-living caucus. The dynamic mirrors pre-2016 backlash but with material household impact measurable at the pump.<br />
+<em>Sources: <a href="https://foreignpolicy.com/2026/11/02/midterms-foreign-policy-results/">Foreign Policy</a>, <a href="https://www.lemonde.fr/international/article/2026/11/02/midterms-2026-les-reniements-de-donald-trump-l-exposent-a-un-vote-sanction-de-la-part-des-electeurs-americains_6804843_3210.html">Le Monde</a>, <a href="https://www.ft.com/content/ee2748fb-9f85-4095-b599-526e5a4a6baa">Financial Times</a></em></p>
+<h3>Russia deploys Kaliningrad radar complex; NATO braces for surveillance escalation</h3>
+<p>Russia is nearing completion of a large-scale radar installation in Kaliningrad capable of monitoring much of European airspace. Western defense analysts warn the system will intensify military standoff by improving Moscow's early warning and targeting capability. The infrastructure move signals intent to sustain heightened readiness and complicate NATO air operations over Baltic and Eastern European territories. Completion timeline not disclosed; strategic consequence viewed as significant.<br />
+<em>Source: <a href="https://www.dw.com/en/russia-s-giant-new-radar-in-kaliningrad-raises-alarm-in-nato/a-79797815">DW</a></em></p>
+<h3>Cyberattacks target Ukraine and Russia emergency alert systems simultaneously</h3>
+<p>Both nations reported coordinated compromises of civil warning infrastructure on November 2. Ukraine's app sent false radiation alerts; Russia's system broadcast unauthorized warnings within its borders. Zelenskyy stated Ukraine will cease refinery strikes if the US supplies Patriot air-defense missiles. The parallel targeting suggests either state-level cyber operation or coordinated non-state actors exploiting shared platform vulnerabilities.<br />
+<em>Sources: <a href="https://www.dw.com/en/ukraine-russia-report-hacking-attacks-on-emergency-alert-apps/live-79825079">DW</a>, <a href="https://www.bbc.co.uk/news/articles/c51kdy1ew7zvo">BBC</a></em></p>
+<h3>Syria considers joining Saudi Arabian mutual defense pact; Yemen war escalation feared</h3>
+<p>Syria's potential accession to the trilateral agreement linking Saudi Arabia, Turkey, and Pakistan would extend security architecture deeper into Levantine theater. Gulf diplomats warn that renewed Iran-Israel escalation could trigger severe Iranian retaliation against Saudi and UAE energy infrastructure. Current conflict concentration in Yemen and Iraq makes broader entanglement a geopolitical wildcard with oil-market implications.<br />
+<em>Source: <a href="https://www.nytimes.com/2026/10/31/world/middleeast/syria-saudi-defense-pact.html">NYT</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Petrol prices surge past prior peak; affordability crisis reshapes consumer discretion</h3>
+<p>Average US fuel costs have climbed above Biden-era highs, compressing household budgets ahead of midterm voting. The price floor is now sustained by Middle Eastern conflict premium and geopolitical supply anxiety. Real purchasing power erosion disproportionately impacts lower-income cohorts, reversing inflation-narrative claims made at campaign launch. Energy price stickiness will weigh on Q4 consumer spending forecasts.<br />
+<em>Source: <a href="https://www.ft.com/content/ee2748fb-9f85-4095-b599-526e5a4a6baa">Financial Times</a></em></p>
+<h3>New York MTA identifies $2.5B in operational savings; operational efficiency becomes fiscal necessity</h3>
+<p>The authority's fiscal watchdog found cost reductions via faster bus deployment, employee health insurance burden-sharing, and overhead cuts. Savings target amounts to roughly 15% of current discretionary operating budget and signals shift toward data-driven route optimization. Public transit efficiency gains, if realized, could improve regional labor mobility and reduce congestion tax on supply chains.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-02/ny-s-mta-could-save-2-5-billion-with-faster-buses-expense-cuts">Bloomberg</a></em></p>
+<h3>Citigroup cuts lithium price forecasts; battery demand growth falters amid trade uncertainty</h3>
+<p>Citi downgraded forward-year lithium valuations citing slowing EV sales growth, rising tariff risk, and macroeconomic headwinds. The revision reflects broader pressure on energy-transition capex timing and suggests OEM production guidance will contract. Implications extend to mining equities and battery chemistry suppliers reliant on sustained scaling assumptions.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-02/citi-cuts-lithium-forecasts-on-worsening-battery-demand-outlook">Bloomberg</a></em></p>
+<h3>Reliance Industries surges on refining margin tailwind from Iran premium</h3>
+<p>Shares rallied most in nine months after Q3 earnings beat consensus, driven by strong oil-to-chemicals segment performance. Geopolitical supply disruption has widened refining spreads, benefiting integrated players with crude-processing capacity. Valuation re-rating assumes sustained conflict-driven margin environment, a risk if diplomatic resolution materializes.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-02/reliance-industries-surges-most-in-nine-months-on-earnings-beat">Bloomberg</a></em></p>
+<h3>Binance crypto exchange hemorrhages $3.6B in outflows post-hack</h3>
+<p>The exchange processed net asset departures following restoration of customer withdrawals after the largest cryptocurrency theft attributed to North Korean state hackers. Outflow magnitude signals user confidence erosion and reflects broader custody anxiety across centralized platforms. Recovery of exchange reserve health will depend on transparency around stolen asset recovery and security remediation evidence.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/videos/2026-11-02/binance-details-3-6-billion-in-net-outflows-video">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>AI market correction deepens; Howard Marks says recent stumbles burst infallibility narrative</h3>
+<p>Oaktree Capital's co-chair noted that deployment failures and overhyped ROI projections have eroded the sector's perception of guaranteed returns. The reckoning accelerates as enterprises demand concrete cost-benefit quantification rather than accepting infrastructure-heavy bets on speculation. Market volatility in mega-cap AI hardware vendors signals reassessment of capex cycles and payback timelines.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-02/oaktree-s-howard-marks-says-ai-stumbles-have-boosted-skepticism">Bloomberg</a></em></p>
+<h3>Kioxia memory maker warns of demand plateau; AI growth narrative cracking</h3>
+<p>Japanese chipmaker's cautious forward guidance fueled investor concern that explosive AI-driven semiconductor consumption may be normalizing. Stock fell most in three months, signaling market repricing of capacity utilization expectations. Implication: capex overcommitment across memory and logic segments risks margin compression if AI workload adoption flattens.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-02/kioxia-shares-tumble-after-outlook-suggests-demand-leveling-off">Bloomberg</a></em></p>
+<h3>Singapore data center operator STT GDC seeks $2.4B loan; AI infrastructure debt binge accelerates</h3>
+<p>The operator is negotiating syndicated financing to expand facilities amid persistent data center demand from AI model training and inference workloads. Loan size reflects continued belief in capex scalability, though debt multiples signal rising refinancing risk if utilization rates disappoint. Structural vulnerability: borrowed cost for capacity building now faces higher interest rate regime.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-02/singapore-s-sttgdc-eyes-2-4-billion-loan-adds-to-ai-debt-binge">Bloomberg</a></em></p>
+<h3>NASA seeks commercial rescue for Hubble; orbit boost needed by early 2030s</h3>
+<p>Space agency opened proposals for private-sector solutions to reboost the aging space telescope before atmospheric drag forces reentry. Commercial SpaceX/Blue Origin capability now positioned as critical infrastructure for legacy asset preservation. Success hinges on cost-effective autonomous docking and propulsion, advancing reusable spacecraft economics.<br />
+<em>Source: <a href="https://www.theverge.com/science/1024239/nasa-commercial-space-save-hubble">The Verge</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>When AI Capex Meets Higher Rates: The Debt Spiral Question</strong></p>
+<p>Singapore's STT GDC borrowing $2.4B for data center expansion while Kioxia warns of demand normalization and Citigroup slashes battery demand forecasts reveals a fault line in the AI boom narrative. The structural issue: infrastructure builders committed to hyper-scale capex in a rising-rate environment, betting that utilization will justify debt servicing costs. Recent "stumbles" (OpenAI delays, Anthropic safety concerns, missed generalization targets) are eroding the certainty that once justified blank-check capex. </p>
+<p>The pattern mirrors 2021-22 crypto mining craze—massive infrastructure commitment, then demand deceleration forces asset write-downs. Here, the leverage is institutional (pension funds, SWFs financing data centers) rather than retail, but the risk architecture is identical: sunk costs trap operators into marginal-margin operation to cover financing charges.</p>
+<p>For an aspiring deeptech founder, this signals a near-term window of opportunity: capital flowing toward "proven" infrastructure plays (data centers, cooling systems, chip design) precisely when cost-of-capex risk is becoming visible. Venture money will rotate from generalist AI plays toward infrastructure-layer picks offering concrete ROI, not speculative scaling. Position your pitch accordingly.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📄 Resources</div>
+  <ul>
+<li><strong>Energy markets &amp; geopolitical risk premium</strong>: <a href="https://www.ft.com/content/efaa2962-1acb-45cf-afb4-d0088f0a1046">Financial Times analysis</a> on Gulf escalation fears and crude volatility outlook.</li>
+<li><strong>AI infrastructure economics</strong>: <a href="https://www.bloomberg.com/news/articles/2026-11-02/singapore-s-sttgdc-eyes-2-4-billion-loan-adds-to-ai-debt-binge">Bloomberg data-center debt tracker</a>—follows financing capacity across Asia-Pacific operators.</li>
+<li><strong>US midterm exit polls &amp; foreign policy</strong>: <a href="https://foreignpolicy.com/2026/11/02/midterms-foreign-policy-results/">Foreign Policy deep-dive</a> on voter antimilitarism vs. establishment consensus.</li>
+</ul>
+<hr />
+<p><em>Sources: RSS aggregation across Bloomberg, Financial Times, DW, BBC, Le Monde, NYT, The Verge — November 02 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📄 Resources"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
