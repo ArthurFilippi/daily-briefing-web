@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Democrats win Senate majority; House control contested; Trump policies face legislative headwinds.</li><li>Oracle cancels $7B Tencent chip lease; US-China tech decoupling accelerates.</li><li>AMD posts record $13.4B Q3 revenue; forecasts $17B Q4 on AI demand surge.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>US midterms: Democrats gain Senate control, reshape Trump policy landscape</h3>
+<p>Democrats captured Senate majority and competitive House position in Tuesday elections, with wins in historic Republican strongholds (Texas, Kansas since 1932, South Carolina in 28 years). The result delivers a stinging rebuke to Trump's midterm campaign intervention in battleground races, where his heavy-handed candidate endorsements backfired in multiple contests. Market reaction was immediate: Tesla and SpaceX equities fell in after-hours trading as investors repriced deregulation bets and tariff policies now facing Democratic legislative friction.
+<strong>Source:</strong> <a href="https://www.dw.com/en/us-midterms-democrats-gain-control-of-senate-from-republicans/live-79829440">DW</a>, <a href="https://www.bbc.co.uk/news/articles/cjy56z440nl9o">BBC</a>, <a href="https://www.ft.com/content/77c2eaca-4fe1-4c69-b3bd-c517b045ff37">FT</a></p>
+<h3>US cuts $4 billion in Israel military aid as Middle East tensions simmer</h3>
+<p>Trump announced near-term reduction of approximately $4 billion in military assistance to Israel, citing domestic political optics during midterms, though reaffirming US weapons sales commitment. Simultaneously, Gulf Arab states accelerated back-channel mediation efforts with Iran to avert renewed large-scale conflict, fearing Trump may exploit post-election window for escalation. This policy inconsistency—aid cuts paired with escalation risk—reflects Trump's electoral strategy bifurcation.
+<strong>Source:</strong> <a href="https://www.dw.com/en/us-to-cut-nearly-4-billion-in-israel-military-aid-trump-says/a-79848860">DW</a>, <a href="https://www.nytimes.com/2026/11/03/world/middleeast/trump-iran-war-midterms-election.html">NYT</a></p>
+<h3>South Africa's ANC faces municipal election collapse as urban discontent peaks</h3>
+<p>South African municipal elections Wednesday pit the ruling African National Congress—dominant since 1994—against the opposition Democratic Alliance in a near tie-up scenario. Voters cite endemic unemployment, infrastructure decay, and corruption; major metros show ANC hemorrhaging support. This parallels Democratic wins in US as anti-incumbent sentiment crosses geographies.
+<strong>Source:</strong> <a href="https://www.lemonde.fr/afrique/article/2026/11/04/en-afrique-du-sud-la-deconfiture-annoncee-de-l-anc-en-perte-de-vitesse-dans-les-grandes-villes-du-pays_6806072_3212.html">Le Monde</a>, <a href="https://www.bbc.co.uk/news/articles/cr4g1x6d77xyo">BBC</a></p>
+<h3>UK Supreme Court to hear Palestine Action ban challenge</h3>
+<p>Britain's highest court begins hearing arguments Wednesday against the government's 2025 designation of Palestine Action as a terrorist organization—a decision that prompted international criticism over protest rights. The case carries implications for UK regulatory overreach in political dissent classifications.
+<strong>Source:</strong> <a href="https://www.nytimes.com/2026/11/04/world/europe/palestine-action-ban-uk-supreme-court.html">NYT</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>French tech fundraising sustains momentum: €614.7M in October led by Pigment</h3>
+<p>French startups closed €614.7 million in October 2026, anchored by corporate SaaS leader Pigment's growth round. This sustained activity underscores ecosystem resilience despite broader macro volatility and US policy uncertainty. October's tally positions France for a robust Q4.
+<strong>Source:</strong> <a href="https://www.maddyness.com/2026/11/03/portee-par-pigment-la-french-tech-leve-6147-millions-deuros-en-octobre/">Maddyness</a></p>
+<h3>European deeptech VC closes €30M+ in committed capital across three vehicles</h3>
+<p>Robin Capital announced its second €15M fund (€30M total across two vehicles), explicitly targeting AI, robotics, and space startups with 17 investments already deployed. Evertrue Capital closed €15M ($17M USD) debut fund backing pre-Seed frontier tech across UK/Europe. Austrian SpaceTech firm Tumbleweed raised €6.9M post-satellite launch. Collectively, these closures signal deeptech investors have internalized geopolitical bifurcation and are sizing capital for regulatory headwinds.
+<strong>Source:</strong> <a href="https://www.eu-startups.com/2026/11/solo-vc-robin-capital-closes-e15-million-second-fund-to-back-ai-robotics-and-space-startups/">EU Startups</a>, <a href="https://www.eu-startups.com/2026/11/4-evertrue-capital-raises-e15-million-debut-fund-backed-by-british-business-bank-and-phoenix-court/">EU Startups</a>, <a href="https://www.eu-startups.com/2026/11/following-austrias-first-commercial-satellite-launch-tumbleweed-raises-e6-9-million-to-accelerate-space-missions/">EU Startups</a></p>
+<h3>Freight and climate tech secure Series A/B validation</h3>
+<p>Conlio (German AI-powered freight financial automation) closed €6.4M Series A led by Piton Capital; Virdi (carbon-waste-to-chemicals deeptech) raised €2.6M with Odyssey Ventures leading. Both rounds validate European investor appetite for climate-adjacent industrial automation despite AI funding skepticism post-midterms.
+<strong>Source:</strong> <a href="https://www.eu-startups.com/2026/11/freighttech-startup-conlio-secures-e6-4-million-to-expand-ai-powered-financial-automation-across-europe/">EU Startups</a>, <a href="https://www.eu-startups.com/2026/11/turning-pollution-into-everyday-products-southamptons-virdi-raises-e2-6-million-to-transform-waste/">EU Startups</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Global equities and dollar slide on Democratic sweep; AI/China exposure bleeds hardest</h3>
+<p>Asian stock indices fell to 6-month lows as Democratic midterm gains signaled tighter AI regulation and potential infrastructure spending delays. Japanese equities sank; South Korean chipmakers plunged on AI oversight fears. US dollar posted worst day in a month; Swiss franc and yen rallied as safe-haven flows accelerated. Tesla and SpaceX share prices fell in after-hours. Solar stocks surged on clean energy policy expectations.
+<strong>Source:</strong> <a href="https://www.ft.com/content/a0b18705-3bd8-4886-992c-b6062fdec6ea">FT</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-04/japanese-stocks-sink-as-us-midterm-results-hit-tech-shares">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-04/kospi-slumps-as-democrats-us-election-lead-spurs-chip-selloff">Bloomberg</a></p>
+<h3>Qatar set to command largest share of US LNG by 2033</h3>
+<p>The Gulf nation, once world's top producer, is on track to become the largest buyer of US liquefied natural gas exports by 2033, reshaping global energy architecture and signaling sustained energy geopolitical realignment independent of US political cycles.
+<strong>Source:</strong> <a href="https://www.ft.com/content/88e46724-0bd4-451a-b02b-f5709c9771b7">FT</a></p>
+<h3>Commodity weakness persists: palm oil hits 5-month low, corn slides 4-month lows</h3>
+<p>Palm oil fell to June 2026 lows on Malaysian stockpile concerns; corn extended losses amid ample US supply and Black Sea peace hopes. Both signals point to demand softness and supply-side headwinds typical of recessionary risk-off scenarios.
+<strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-04/palm-oil-sinks-to-lowest-since-june-as-stockpile-concerns-mount">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-04/corn-extends-loss-to-hit-four-month-low-on-supply-peace-hopes">Bloomberg</a></p>
+<h3>Bain Capital targets $30B exits this year; Mapletree Singapore IPO prepares</h3>
+<p>Bain Capital Chair signaled optimism on Asia and China exit momentum targeting $30B realizations in 2026. Temasek-owned real estate firm Mapletree selected banks for Singapore IPO targeting at least S$780M, indicating sovereign wealth appetite for capital markets normalization post-volatility.
+<strong>Source:</strong> <a href="https://www.bloomberg.com/news/videos/2026-11-04/bain-capital-chair-expects-30b-of-exits-this-year-video">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-04/temasek-s-mapletree-is-said-to-pick-banks-for-singapore-ipo">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Oracle scraps $7 billion Tencent chip-leasing deal; US-China tech bifurcation hardens</h3>
+<p>Oracle canceled a $7B deal to lease advanced chips to Tencent, signaling accelerating US regulatory constraints on technology transfer to Chinese entities. The abandonment reflects both Democratic regulatory tightening and Trump administration export controls, converging on permanent decoupling architecture.
+<strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-04/oracle-scraps-7-billion-deal-to-lease-chips-to-tencent-ft-says">Bloomberg</a></p>
+<h3>AMD posts record $13.4B Q3, forecasts $17B Q4 on AI data center demand surge</h3>
+<p>AMD reported largest and most profitable quarterly result in company history with $13.4B revenue in Q3 2026. Q4 guidance of $17B (+/- 3%) reflects sustained AI chip demand outpacing supply. This underscores that the AI capex cycle remains intact despite midterm political headwinds and broader equity volatility.
+<strong>Source:</strong> <a href="https://www.theverge.com/tech/1026148/amd-earnings-q3-2026-data-center-pc">The Verge</a>, <a href="https://www.bloomberg.com/news/videos/2026-11-03/amd-forecast-exceeds-estimates-as-ai-chip-demand-soars-video">Bloomberg</a></p>
+<h3>Nvidia China clients receive 1% of $70B RTX orders as production chokes</h3>
+<p>Chinese AI developers expect to receive approximately 1% of their advanced Nvidia RTX chip orders over coming months, with $70B in outstanding demand far exceeding production capacity. This supply-demand imbalance will persist through 2027, favoring AMD and encouraging China to accelerate domestic chip R&amp;D.
+<strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-04/nvidia-china-clients-to-get-1-of-70-billion-rtx-chips-ordered">Bloomberg</a></p>
+<h3>Anthropic develops FlashProof system to cryptographically verify AI model identity</h3>
+<p>Anthropic is engineering FlashProof, a cryptographic proof system allowing users to verify that AI responses genuinely originated from claimed models. The initiative addresses market fragmentation concerns as unverified AI proliferates and political scrutiny intensifies around model provenance.
+<strong>Source:</strong> <a href="https://techcrunch.com/2026/11/03/anthropic-is-working-on-a-system-to-prove-ai-models-identity/">TechCrunch</a></p>
+<h3>Data centers deploy obsolete jet engines to meet power demand amid grid delays</h3>
+<p>Data center operators, facing years-long queues for grid connections and new turbine deliveries, are repurposing decommissioned jet engines for on-site power generation. The workaround is less efficient and environmentally damaging than grid/modern generation, reflecting acute infrastructure bottlenecks constraining AI scaling.
+<strong>Source:</strong> <a href="https://techcrunch.com/2026/11/03/data-centers-are-turning-to-old-jet-engines-as-the-wait-for-power-grows/">TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The $7B Oracle-Tencent Cancellation: Regulation Beats Deal Economics</strong></p>
+<p>Oracle's termination of its $7 billion chip-leasing agreement with Tencent is the starkest signal yet that US regulatory constraints—not market demand or financial incentives—now govern tech supply-chain strategy. The deal was economically rational for both parties: Oracle gains Tencent's revenue; Tencent secures advanced AI chips despite US export controls. Yet political risk overwhelmed commercial logic.</p>
+<p>This pattern extends beyond Oracle. NVIDIA's $70B RTX backlog skews 1% toward China; Semight is rushing to Hong Kong listings to circumvent future US restrictions; Vietnamese VNG is reviving US IPO plans after abandoning them. What unites these moves is <strong>regulatory bifurcation now functions as permanently priced risk</strong>, not temporary friction.</p>
+<p>For founders, the implication is stark: if your deeptech model involves US-China data exchange, chip imports, or IP localization, design for forced decoupling from day one. The cost of retrofit—as Oracle discovered—exceeds the cost of architecture. European builders have an asymmetric advantage: they can serve both markets legally if they structure EU-first and remain neutral on US-China alignment. But window for navigating between superpowers closes within 12–18 months. Move supply chain optionality upstream now, or accept permanent exclusion from one pole.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><a href="https://www.ft.com/content/a0b18705-3bd8-4886-992c-b6062fdec6ea">Democratic sweep triggers $70B AI CapEx repricing: FT analysis of infrastructure policy collision</a></li>
+<li><a href="https://www.theverge.com/tech/1026148/amd-earnings-q3-2026-data-center-pc">AMD earnings call transcript: full guidance and data center demand commentary</a></li>
+<li><a href="https://www.bloomberg.com/news/articles/2026-11-04/oracle-scraps-7-billion-deal-to-lease-chips-to-tencent-ft-says">Oracle-Tencent deal cancellation and broader US-China tech decoupling timeline</a></li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, FT, DW, BBC, NYT, EU-Startups, TechCrunch, The Verge — November 04 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
