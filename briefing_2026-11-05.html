@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul><li><strong>Democratic sweep reshapes US policy vector on defense &amp; competition.</strong> Tuesday's midterms flipped Congress, removing Republican control and signaling voter rejection of Trump's Iran war strategy. This reduces Republican capacity to block spending on Ukraine aid, chip subsidies, and data-center regulation—shifting capital allocation toward industrial policy and away from military adventurism. For SP500/NASDAQ-heavy portfolios: defense contractors face near-term headwinds; semiconductor, infrastructure, and fintech exposure gains policy tailwind.</li><li><strong>Authoritarian regimes tightening security laws while voter backlash accelerates elsewhere.</strong> Hong Kong's Joshua Wong sentencing (10 years for foreign collusion) sits alongside surging electoral participation in democracies cracking down on incumbents (New Zealand, European protests, African turnout records). This bifurcation—hardening repression in closed systems vs. mobilization in open ones—suggests sustained geopolitical fragmentation and higher regulatory risk for tech/comms platforms spanning both zones.</li></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Democrats seize House, Senate; Trump midterm rout signals policy realignment.</li><li>Joshua Wong jailed 10 years; Hong Kong national-security law enforcement deepens.</li><li>France braces general strike on cost-of-living crisis; 220+ demonstrations planned.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Democrats Sweep Midterms; Ukraine Sees Window to Reset US-Russia Policy</h3>
+<p>Democrats retook both chambers of Congress in a historic reversal, eliminating Republican blocking power on Ukraine aid and defense spending. Democratic majorities now control committee investigations and budget authority, positioning them to scrutinize Trump administration dealings with Moscow and enforce anti-Russia transparency measures. Vice President J.D. Vance's public criticism of Trump's Iran war strategy as the midterm cause signals internal fracturing at the top of the Republican ticket heading into 2028.
+<em>Source: <a href="https://www.lemonde.fr/international/article/2026/11/05/midterms-2026-apres-la-deroute-republicaine-l-ukraine-nourrit-le-maigre-espoir-de-freiner-la-derive-americaine-en-faveur-de-la-russie_6806811_3210.html">Le Monde</a>, <a href="https://www.dw.com/en/democrats-take-house-and-senate-from-republicans-in-us-midterm-rout/a-79859416">DW</a></em></p>
+<h3>Joshua Wong Sentenced to 10 Years Under Hong Kong National Security Law</h3>
+<p>Hong Kong activist Joshua Wong, a leading face of 2019–2020 pro-democracy protests, was convicted of conspiracy to collude with foreign forces and sentenced to a decade in prison. Among hundreds detained under the controversial 2020 national-security law, Wong's case exemplifies Beijing's hardening posture on dissent even as global democratic participation surges elsewhere. The sentencing occurs as voters elsewhere punish incumbents over economic mismanagement.
+<em>Source: <a href="https://www.nytimes.com/2026/11/04/world/asia/joshua-wong-hong-kong-sentenced.html">New York Times</a>, <a href="https://www.bbc.co.uk/news/articles/cwp9g3rlp8jlo">BBC</a></em></p>
+<h3>France Mobilizes Nationwide Strikes Over Cost-of-Living Crisis</h3>
+<p>Over 220 demonstrations are scheduled across France on Thursday, uniting lycéens, university students, public-sector unions, and former yellow-vest activists in a convergence against rising inflation and stalled wage growth. Parliamentary deadlock on the 2027 budget has left austerity pressure unresolved, creating conditions for sustained labor action. This represents an escalation beyond weeks of localized protests, signaling potential to reshape French domestic politics and pressure the government on public-service funding.
+<em>Source: <a href="https://www.lemonde.fr/politique/article/2026/11/05/greve-du-5-novembre-entre-lyceens-etudiants-syndicats-de-salaries-et-gilets-jaunes-le-pari-d-une-convergence-des-mobilisations_6806706_823448.html">Le Monde</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-05/france-braces-for-marches-and-strikes-amid-stalled-budget">Bloomberg</a></em></p>
+<h3>Voter Turnout Surges Against Autocrats Globally</h3>
+<p>Overwhelming electoral participation in multiple democracies has produced tangible punishment for incumbent parties in New Zealand (both major parties losing to minor-party challengers) and elsewhere. Voters are using ballots to signal rejection of economic mismanagement and institutional decay. This contrasts sharply with Beijing's security-law tightening, revealing a widening fork between regimes betting on repression and those forced to accommodate electoral accountability.
+<em>Source: <a href="https://www.nytimes.com/2026/11/05/world/europe/voters-are-turning-out-in-droves-to-cut-autocrats-down-to-size.html">New York Times</a>, <a href="https://www.nytimes.com/2026/11/05/world/australia/new-zealand-election-polls.html">New Zealand Election piece</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>SHEIN Commits €500M Polish Logistics Hub; European Supply-Chain Consolidation Deepens</h3>
+<p>Chinese fast-fashion giant SHEIN announced a half-billion-euro investment in Poland to strengthen its European logistics network, marking a major bet on nearshoring and regional warehouse capacity. The move signals confidence in EU market access post-tariff uncertainty and reflects broader consolidation trends as e-commerce platforms build owned infrastructure. This compounds pressure on smaller regional logistics players not backed by capital-rich foreign corporations.
+<em>Source: <a href="https://www.frenchweb.fr/breaking-news/shein-annonce-500-millions-d-euros-d-investissement-en-pologne-pour-renforcer-sa-logistique-europeenne/6ccf32b9-5755-42b5-911e-cf1b6b670fac">FrenchWeb</a></em></p>
+<h3>Titan OS Raises €40M for Smart-TV Alternative; European OS Competition Intensifies</h3>
+<p>Barcelona-based Titan OS closed a €40 million round to expand its smart-TV operating system, challenging Roku dominance. Highland Europe and Mangrove Capital Partners co-led, signaling institutional appetite for European alternatives in consumer-software moats. Success here depends on content-platform partnerships and ad-tech integration—areas where European players remain fragmented.
+<em>Source: <a href="https://www.eu-startups.com/2026/11/tired-of-roku-and-the-like-spains-titan-os-just-raised-e40-million-to-provide-you-with-an-alternative/">EU-Startups</a></em></p>
+<h3>STATION F 2026 Future 40: Cohort Raised Record €2 Billion; Paris Ecosystem Sustains Scale</h3>
+<p>The world's largest startup campus unveiled its 2026 Top 40 list as STATION F companies collectively raised €2 billion in 2026 alone—an all-time record. The 8th edition reflects sustained institutional capital flow into Paris-based deeptech and AI ventures. This milestone underscores Paris's maturation as a secondary capital hub, though dependency on foreign mega-funds (Sequoia shuttering its London office signals VC consolidation) remains a structural constraint.
+<em>Source: <a href="https://www.eu-startups.com/2026/11/station-f-unveils-2026-future-40-as-its-startups-raise-a-record-e2-billion/">EU-Startups</a></em></p>
+<h3>Return Secures €835M for German Battery-Storage Expansion</h3>
+<p>Amsterdam-based energy-storage startup Return closed €835 million in portfolio financing (Deutsche Bank &amp; Rabobank underwritten) for German grid-scale battery deployment. The deal reflects accelerating European pivot toward distributed energy infrastructure to offset Russian gas supply risks. For entrepreneurs: energy storage, grid-flexibility software, and industrial demand-response remain capital-rich verticals in EU climate-tech.
+<em>Source: <a href="https://www.eu-startups.com/2026/11/return-secures-e835-million-financing-to-expand-battery-storage-capacity-in-germany/">EU-Startups</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Oil Crashes Below $100 on Post-Midterm Peace Hopes</h3>
+<p>Crude tumbled sharply as markets priced in Democratic congressional gains reducing likelihood of escalated Iran conflict under Trump. Vance's explicit blame of the Iran war for Republican midterm collapse signaled fracturing within the administration on foreign military commitments. Oil's move below $100/barrel eases inflation headwinds globally, benefiting oil-importing economies (India, parts of EU) but pressuring energy-export dependent regions.
+<em>Source: <a href="https://www.ft.com/content/b526f876-810a-4e74-8b8d-4ffca04b29c7">FT</a></em></p>
+<h3>Treasuries Rally on Democratic Sweep; Deficit Spending Hopes Constrained</h3>
+<p>US government bonds gained for a second consecutive day as markets bet Democratic control will contain Trump's tax cuts and spending expansions. This reverses the post-election bond selloff narrative and signals investor belief that divided government will produce fiscal restraint. For equity portfolios, lower long-rates favor duration-sensitive growth stocks over cyclicals.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-05/treasuries-gain-as-us-vote-fuels-hopes-for-curbing-bond-supply">Bloomberg</a></em></p>
+<h3>UBS Slashes Consultant Spending by $800M+ as Credit Suisse Integration Completes</h3>
+<p>Swiss banking giant UBS cut external advisory spending by more than $800 million and eliminated 5,500 jobs as its two-year Credit Suisse absorption nears finish line. The reductions reflect completed systems integration and operational consolidation. This signals structural headwinds for Big Four consulting practices selling M&amp;A and integration advisory services.
+<em>Source: <a href="https://www.ft.com/content/b024d943-4b2f-4481-bbcb-ed551db2a8dd">FT</a></em></p>
+<h3>China Bank Funding Costs Hit Record Low on PBOC Shift</h3>
+<p>Chinese bank short-term debt yields dropped to record lows after the central bank transitioned to overnight repo as its primary policy anchor—signaling de facto monetary easing. This suggests Beijing is supporting credit conditions ahead of 2027, with implications for yuan stability and emerging-market capital flows.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-05/china-bank-funding-costs-hit-record-low-on-pboc-rate-shift">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Isomorphic Labs Seeks $5 Billion for AI Drug Discovery; Alphabet Doubles Down</h3>
+<p>Alphabet's Isomorphic Labs is in talks to raise roughly $5 billion to accelerate AI-driven drug candidate discovery. The scale signals that generative AI for pharma remains a mega-fund priority despite earlier hype cycles. Success here depends on clinical validation—a multi-year, high-variance outcome investors are betting on.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-04/isomorphic-labs-in-talks-for-about-5-billion-in-funding">Bloomberg</a></em></p>
+<h3>Tenspresso Valued at $500M at Three Months Old; AI-Chip Startup Boom Accelerates</h3>
+<p>Newly formed artificial-intelligence chip startup Tenspresso (founded by ex-Google engineers) is in funding talks at a $500 million valuation despite existing for only three months. This reflects extreme capital concentration in the AI-silicon vertical and willingness to fund pre-revenue teams betting on novel architectures. Timing risk is acute: market saturation in inference chips remains probable.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-04/months-old-chip-startup-tenspresso-in-talks-for-500-million-valuation">Bloomberg</a></em></p>
+<h3>South Korea's Current-Account Surplus Hits Record on Chip Boom</h3>
+<p>South Korea's current-account surplus jumped to a record in September, buoyed by semiconductor export surges tied to global AI infrastructure investment. The country remains the primary non-US beneficiary of the training/inference capex cycle. For investors: Korean tech exposure (chips, batteries, display materials) remains structurally bid.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-05/south-korea-s-current-account-surplus-hits-record-on-chip-boom">Bloomberg</a></em></p>
+<h3>Qualcomm Shifts Revenue Mix Away From Handsets; Data-Center Play Intensifies</h3>
+<p>Qualcomm's Q4 earnings revealed smartphone sales cratered ~20% year-on-year, accelerating the chipmaker's pivot toward AI data-center partnerships with Amazon and others. Gross margins will compress in this transition, but growth optionality shifts from mature handsets to enterprise AI infrastructure. Microsoft's rejection of Nscale's multi-billion Texas data-center expansion deal signals both demand saturation and buyer selectivity in capex allocation.
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-05/qualcomm-is-betting-big-on-data-centers-as-smartphone-sales-sink">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Democratic Congress Opens Data-Center Regulatory Window; Opposition Crossed Party Lines</strong></p>
+<p>Tuesday's midterms swept Democrats into control of both chambers, arriving at a critical inflection point for US AI infrastructure policy. Unlike most tech-sector issues, data-center opposition in the 2026 midterms crossed party lines—rural Republicans concerned about grid strain and water use aligned with progressive environmental advocates. This unusual coalition means incoming Democratic committees will inherit bipartisan pressure to regulate data-center sprawl, land-use approval, and power-grid reservation.</p>
+<p>For founders in the AI-training and inference space, this signals a policy pivot: permitting timelines will likely extend; power-purchase agreements may face environmental scrutiny; and state-level regulation (especially in water-stressed regions) will intensify. Microsoft's public rejection of Nscale's expanded Texas facility on the same day hints that even mega-cap buyers are factoring in regulatory headwinds. The deeper pattern: US infrastructure policy is moving from permissive build-out toward managed constraint. European entrepreneurs watching this should note that EU data-residency rules and renewable-energy mandates already lock this calculus in; US players now face convergence.</p>
+<p>For you as a deeptech founder: if your business touches compute (whether chips, cooling, power optimization, or network switching), assume 18–36-month permitting delays become standard, not exceptional. De-risking via smaller, distributed, modular deployments beats betting on greenfield mega-facility financing.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong><a href="https://www.lemonde.fr/international/article/2026/11/05/midterms-2026-apres-la-deroute-republicaine-l-ukraine-nourrit-le-maigre-espoir-de-freiner-la-derive-americaine-en-faveur-de-la-russie_6806811_3210.html">Why Democratic Congress Matters for Ukraine &amp; Geopolitics</a></strong> — Le Monde on how Democratic control reshapes US-Russia policy transparency.</li>
+<li><strong><a href="https://foreignpolicy.com/2026/11/04/us-midterm-elections-democrats-trump-israel-iran/">Post-Midterm Policy Toolkit for Democrats</a></strong> — Foreign Policy on concrete congressional levers on foreign policy.</li>
+<li><strong><a href="https://legrandcontinent.eu/fr/2026/11/05/apres-les-midterms-une-fenetre-pour-la-relation-transatlantique/">Transatlantic Opportunity After Midterms</a></strong> — Le Grand Continent on EU-US coordination potential.</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Thursday, November 05 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
