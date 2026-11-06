@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Nasdaq worst rout since March 2020; Nikkei falls below 60,000 amid AI profitability doubts.</li><li>Democrats win US midterms decisively; tech regulation now politically viable.</li><li>China publishes 7× fewer economic statistics, signaling policy instability.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>China Cuts Official Statistics Publication by 86% Over Decade</h3>
+<p>China has reduced published economic data series sevenfold since 2015, reflecting intensifying regime opacity despite official growth narratives. This metric captures weakening institutional confidence and Beijing's attempt to control market-moving information amid property sector stress and slowing innovation-led growth. The transparency collapse parallels China's moves to tighten national security law (exemplified by Macau pro-democracy lawyer Au Kam San's 12-year sentence this week) and creates acute uncertainty for multinational capital allocation. <strong>Source:</strong> <a href="https://legrandcontinent.eu/fr/2026/11/06/pourquoi-la-chine-publie-t-elle-7-fois-moins-de-series-statistiques-quil-y-a-dix-ans/">Le Grand Continent</a></p>
+<h3>Taiwan Remakes Deterrence Doctrine Around Drone Warfare</h3>
+<p>Taipei has systematically reengineered its military strategy using lessons from Ukraine's asymmetric drone campaigns, shifting from platform-heavy deterrence toward distributed, low-cost autonomous systems. This represents a structural pivot in Indo-Pacific defense posture and signals how conflicts reshape doctrine at scale. <strong>Source:</strong> <a href="https://legrandcontinent.eu/fr/2026/11/06/de-lukraine-au-detroit-de-taïwan-comment-les-drones-inflechissent-la-strategie-de-dissuasion-de-taiwan/">Le Grand Continent</a></p>
+<h3>France Faces Terror Blowback: Trappes Shooting Tied to Anti-Immigrant Rhetoric</h3>
+<p>A mass shooting in the Paris suburb of Trappes—home to a large immigrant population—has residents pointing to years of far-right political speech as a accelerant. The incident underscores how electoral polarization and stigmatizing rhetoric create radicalization pathways, a dynamic evident across Europe as right-wing movements gain salience. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/11/06/world/europe/france-shooting-trappes.html">The New York Times</a></p>
+<h3>Paraguay's Banking Crisis Triggers Presidential Resignation</h3>
+<p>Santiago Peña stepped down after presiding over the country's worst financial crisis in decades, reflecting macro instability in South America amid global rate pressures and commodity volatility. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/11/05/world/americas/paraguay-santiago-pena-resigns.html">The New York Times</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>European Commission Commits €1.8 Billion to DeepTech in 2027</h3>
+<p>The EIC Work Programme allocation expands defense and women-led startup support, signaling institutional commitment to sovereignty in critical tech (semiconductors, quantum, energy storage) amid US-China decoupling. This capital—channeled through Horizon Europe mechanisms—addresses the structural gap left by US VC firms retreating from Europe (Sequoia closed its London office this week). <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/11/the-eic-confirms-e1-8-billion-for-startups-and-deeptech-in-2027-with-expanded-defence-and-women-led-startup-support/">EU-Startups</a></p>
+<h3>Mistral AI Executes Fifth Acquisition in 2026</h3>
+<p>The Paris-based LLM champion continues consolidation to compete with OpenAI and Anthropic, absorbing talent and capabilities in a crowded AI arms race. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/11/05/mistral-ai-soffre-une-cinquieme-acquisition-depuis-le-debut-de-lannee/">Maddyness</a></p>
+<h3>GRANIT Raises €5M for Healthcare Admin Automation</h3>
+<p>The French SaaS startup mobilized capital to streamline clinical documentation—a massive revenue opportunity in fragmented European health systems where administrative overhead consumes 15–25% of operating budgets. <strong>Source:</strong> <a href="https://www.frenchweb.fr/breaking-news/granit-mobilise-5-millions-d-euros-pour-automatiser-l-administratif-des-professionnels-de-sante/aab2b79d-8f97-4915-b5c4-8d3344e2d15e">FrenchWeb</a></p>
+<h3>Sequoia Shuts London Office; European Partners Remain</h3>
+<p>Sequoia's retreat from the UK signals broader US VC disengagement from Europe post-midterms, even as the €8.9 billion fund raise globally shows continued capital availability. European LPs and founders must expect fewer US co-investors and earlier-stage dry powder flowing to Asia. <strong>Source:</strong> <a href="https://www.eu-startups.com/2026/11/sequoia-capital-raises-around-e8-9-billion-in-new-funds-and-closes-london-office-most-local-partners-opt-to-stay-in-europe/">EU-Startups</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Market Bloodbath: Nasdaq Worst Day Since March 2020; Asia Follows</h3>
+<p>Thursday's selloff erased post-midterm euphoria as AI stock rotation intensified: Nasdaq dropped ~7% (worst rout in 6+ years), Japan's Nikkei fell below 60,000 for the first time since May, and South Korea's Kospi triggered circuit breakers after losing $1.7 trillion in value. Copper fell to July lows as tariff-trade and AI infrastructure narratives both collapsed. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-06/ai-selloff-asian-stock-markets-nikkei-kospi-taiex-grim-milestones">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-06/korea-s-1-7-trillion-rout-burns-day-traders-challenges-lee">Bloomberg</a></p>
+<h3>Taiwan Dollar Weakens Below 33 Per USD; Tech Rout Deepens</h3>
+<p>Taiwan's currency breached a key psychological barrier for the first time since April 2025, as AI-heavy equity markets slump and foreign capital flees semiconductor exposure. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-06/taiwan-s-currency-weakens-past-33-per-us-dollar-on-ai-jitters">Bloomberg</a></p>
+<h3>S&amp;P 500 Enters Correction Territory; Gold Posts Biggest Weekly Gain Since August</h3>
+<p>Equity volatility spiked as haven demand pushed gold toward its strongest week since summer, while China's 10-year sovereign yield hit record intraday lows—signaling dual recession fears across developed and emerging markets. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-06/gold-set-for-biggest-weekly-gain-since-august-after-us-midterms">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-06/china-s-10-year-yield-hits-record-intraday-low-on-haven-demand">Bloomberg</a></p>
+<h3>Street Calls Backfire; Consensus Torn Between AI Fundamentals and Regulation Risk</h3>
+<p>Wall Street's bullish equity forecasts (predicting post-election rally resumption) collapsed Thursday as Democratic control of Congress signaled tighter data center permitting, AI labor scrutiny, and potential antitrust enforcement. Hyperscaler capex narratives now carry binary political risk. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-06/wall-street-traders-wrong-footed-after-bullish-equity-calls">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>OpenAI Drops NDAs for Data Center Projects; Concedes Political Headwind</h3>
+<p>Following midterm backlash to data center sprawl, OpenAI announced it will no longer use non-disclosure agreements with public officials on infrastructure projects—a symbolic capitulation to community organizing and Democratic policy. This signals that AI capex will face granular political friction going forward. <strong>Source:</strong> <a href="https://www.theverge.com/ai-artificial-intelligence/1028454/openai-data-center-nda">The Verge</a></p>
+<h3>Atlassian Shares Plummet 20% on Weak Revenue Guidance</h3>
+<p>The Australian SaaS leader disappointed on forward guidance amid broader tech valuation concerns, reflecting how sell-side consensus on software multiples has collapsed in a single week. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-06/atlassian-s-shares-slide-after-revenue-outlook-disappoints">Bloomberg</a></p>
+<h3>NYT in Advanced Talks to Acquire Letterboxd for ~$330 Million</h3>
+<p>The Times Company is pursuing exclusive negotiations to buy the film-lover social platform, signaling strategic M&amp;A in consumer media as legacy publishers seek direct-to-consumer moats and cultural IP. <strong>Source:</strong> <a href="https://www.theverge.com/news/1028375/the-new-york-times-letterboxd-acquisition-report">The Verge</a></p>
+<h3>Airbnb Launching AI Travel Agent in H1 2027</h3>
+<p>The travel platform plans a conversational agent to assist with trip planning and booking management, entering the crowded AI assistant wars but with superior supply-side data. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/05/airbnb-says-its-launching-an-ai-travel-agent-in-the-first-half-of-2027/">TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>"Return on Investment" Now Trumps "Return on Impact" in AI Capital Allocation</strong></p>
+<p>This week's market collapse exposes a structural flaw in the AI capex narrative: investors conflated transformational technology potential with guaranteed financial returns. David Allen (Plato Investment Management) observed that Thursday's selloff stemmed from recognizing that token prices face competitive downward pressure from open-source models, slowing revenue growth at leading AI labs just as financing costs rise and IPO calendars slip.</p>
+<p>The political catalyst is real—Democratic victory makes data center permitting slower and costlier—but the underlying issue is older: no hyperscaler has yet demonstrated that $100+ billion annual capex on inference infrastructure generates acceptable returns at scale. Asian markets bore this reckoning first: Nikkei, Kospi, and Taiwan indices all hit fresh lows as foreign capital exited leveraged tech positions. South Korea's $1.7 trillion equity rout is now politically toxic for the Lee administration, which had weaponized stock market gains as a governance legitimacy metric.</p>
+<p>For an entrepreneur, this moment clarifies a durable lesson: venture capital does not reward "future disruption" narratives—it rewards demonstrable unit economics and path-to-cash. The AI founders and infrastructure teams that survive the next 18 months will be those who obsess over cost-per-inference, customer concentration risk, and working-capital cycles, not those betting on a perpetually expanding capex frontier. This applies equally to deeptech: FluoRok (€26.64M Series A for hazard-free fluorochemical synthesis) and VÆRIDION (€124.5M for electric aviation) both attract capital because they solve high-margin, defensible production problems—not because the technology is "transformational."</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>"How China Uses Its National Team to Influence the Stock Market"</strong> — Bloomberg's explainer on Beijing's state-backstopped equity intervention machinery and why rising opacity signals fragility in propping up asset prices amid structural slowdown. <a href="https://www.bloomberg.com/news/articles/2026-11-06/how-china-uses-its-national-team-to-influence-the-stock-market">Bloomberg</a></p>
+</li>
+<li>
+<p><strong>"AI Slump Stems From Conflated Return Thesis"</strong> — David Allen's diagnostic on why markets abruptly repriced AI infrastructure economics from "build at any cost" to "returns must justify capex." Essential reading for thesis-driven founders navigating LP skepticism. <a href="https://www.bloomberg.com/news/articles/2026-11-06/ai-slump-stems-from-conflated-return-thesis-plato-s-allen-says">Bloomberg</a></p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, FT, NYT, Le Grand Continent, Sifted, EU-Startups, TechCrunch, The Verge — Friday, November 06 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
