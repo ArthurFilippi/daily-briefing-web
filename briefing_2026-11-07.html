@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Ukraine absorbs fresh ballistic strikes on civilian infrastructure; three wounded including child in Kyiv Friday night.</li><li>OpenAI raises $11B tranche, now valued at $1.25 trillion after previous round of $122B in March.</li><li>Paraguay's President Peña removed from office, placed under house arrest; banking crisis froze millions of customer accounts.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Ukraine Under Sustained Missile Assault</h3>
+<p>Russian ballistic missiles struck Kyiv overnight Friday, injuring at least three people, one a child. Ukrainian intelligence had warned of coordinated attacks on energy infrastructure, Dnipro bridges, and civilian targets. The tempo of strikes reflects Moscow's winter campaign strategy targeting Ukrainian supply chains rather than tactical gains. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/live/2026/11/07/en-direct-guerre-en-ukraine-au-moins-trois-blesses-a-kiev-dont-un-enfant-dans-des-frappes-de-missiles-balistiques_6803934_3210.html">Le Monde</a></p>
+<h3>Washington Escalates Iran Nuclear Intelligence Bid</h3>
+<p>The US military command for the Middle East is offering $20 million and potential relocation to informants with details on Iranian nuclear facilities, equipment, and personnel. This marks an intensification of efforts to obtain actionable intelligence on Tehran's weapons program beyond public monitoring. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/article/2026/11/07/les-etats-unis-offrent-20-millions-de-dollars-et-un-possible-demenagement-pour-des-informations-sur-le-programme-nucleaire-iranien_6808067_3210.html">Le Monde</a></p>
+<h3>Houthis Systematize Red Sea Passage Control via Email</h3>
+<p>Yemeni pro-Iranian fighters are now issuing passage permits by email to merchant vessels, operationalizing de facto choke-point authority in the Red Sea. Wall Street Journal obtained correspondence showing conditional clearance negotiations. This signals consolidation of irregular maritime governance independent of international law. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/article/2026/11/07/les-houthistes-delivrent-des-autorisations-par-email-aux-navires-pour-traverser-la-mer-rouge_6808034_3210.html">Le Monde</a></p>
+<h3>Paraguay Executes Banking-Scandal Impeachment, Arrests President</h3>
+<p>President Santiago Peña was removed by Senate vote and confined to house arrest after a bank collapse froze accounts for nearly 3 million depositors, including public pension and health funds. Vice President Pedro Alliana assumes office. The financial implosion exposed governance failure in Latin America's second-largest economy by GDP per capita. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/article/2026/11/07/paraguay-le-vice-president-pedro-alliana-investi-president-apres-la-destitution-de-santiago-pena-par-le-senat_6807901_3210.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Meta France Cuts One-Third of Headcount</h3>
+<p>Meta is executing layoffs affecting approximately 33% of its French workforce. The downsizing reflects broader pullback in European operating costs amid advertiser spending pressure. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/11/06/plan-de-departs-chez-meta-france-pres-dun-tiers-des-effectifs-vises/">Maddyness</a></p>
+<h3>French Startups Mobilize €22M Weekly Capital</h3>
+<p>French founders raised €22 million across deals this week, sustaining mid-tier activity despite macro volatility. This signals resilience in seed and Series A rounds despite broader AI sector revaluation. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/11/06/les-startups-francaises-ont-leve-22-millions-d-euros-cette-semaine/">Maddyness</a></p>
+<h3>Alta Ares Secures First NATO Contract</h3>
+<p>The French deeptech startup achieved its first institutional win with NATO, validating its defense-grade technology stack. NATO procurement success is a rare credential for sub-€100M European deeptech firms and signals buyer confidence in non-US suppliers. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/11/06/alta-ares-remporte-son-premier-contrat-avec-l-otan/">Maddyness</a></p>
+<h3>Sequoia Closes London Office; Implications for European VC</h3>
+<p>Sequoia Capital is exiting its London hub and shuttering its Scouts micro-investing program globally. The move reflects consensus that distributed scout networks no longer generate edge in a capital-abundant environment. For European founders, the loss of Sequoia's on-ground presence removes a top-tier brand validator but may shift deal flow toward more structured European generalists. <strong>Source:</strong> <a href="https://sifted.eu/articles/sequoia-is-leaving-london-should-europe-be-worried/">Sifted</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>US Job Market Exceeds Expectations; October Adds 165,000</h3>
+<p>Unemployment fell in October as hiring rebounded stronger than consensus. The resilience complicates Federal Reserve signals on rate cuts and suggests consumer balance sheets remain robust despite inflation. <strong>Source:</strong> <a href="https://www.ft.com/content/f84c722c-99a9-4628-84dc-c42a192cb35c">Financial Times</a> | <a href="https://www.nytimes.com/2026/11/06/business/economy/economy-jobs-unemployment.html">New York Times</a></p>
+<h3>US Warns China on Busan Trade Deal Compliance</h3>
+<p>Washington is pressing Beijing to fulfill 2025 commitments on rare earths supply and agricultural purchases. China rejected US criticism as "economic protectionism," signaling continued friction on strategic minerals and food security. <strong>Source:</strong> <a href="https://www.dw.com/en/us-asks-china-to-uphold-busan-trade-deal-commitments/a-79882939">DW</a></p>
+<h3>China Extends Gold-Buying Spree to Two Years</h3>
+<p>Beijing's central bank purchased additional gold reserves in October, extending an accumulation streak to 24 months, even as global prices fell 7% in October below $4,000/oz. Sustained Chinese buying despite weakness signals reserve diversification strategy independent of price cycles. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-07/china-extends-gold-buying-streak-to-two-years-as-prices-drop">Bloomberg</a></p>
+<h3>US Equities Stage Tepid Recovery Post-$3.2T Rout</h3>
+<p>Bourses bounced Friday after an AI-driven $3.2 trillion selloff, but gains remain muted relative to historical volatility flush patterns. Magnitude suggests persistent uncertainty on AI capex ROI rather than technical capitulation. <strong>Source:</strong> <a href="https://www.ft.com/content/088ed252-ea9c-4b61-b2d1-37295fd0f7c2">Financial Times</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>OpenAI Closes $11B at $1.25 Trillion Valuation</h3>
+<p>OpenAI finalized funding tranche bringing total raise to $1.25 trillion, up from $852 billion valuation in March 2026. The round reflects venture capital's continued bet on large-scale model training, even amid broader AI selloff. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-06/openai-completes-11-billion-portion-of-funding-at-1-25-trillion-value">Bloomberg</a> | <a href="https://techcrunch.com/2026/11/06/openai-reportedly-raises-an-additional-11-billion-at-a-1-25-trillion-valuation/">TechCrunch</a></p>
+<h3>Groq Targets $8B Valuation Amid Data Center Consolidation</h3>
+<p>Data center operator Groq is seeking to double valuation to $8 billion within three months, positioning infrastructure-layer AI plays as insulated from software-stack volatility. The bid reflects confidence that capex momentum will sustain regardless of model company repricing. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-06/neocloud-groq-aims-to-double-value-to-8-billion-amid-ai-selloff">Bloomberg</a></p>
+<h3>Google Acquires Crusoe's Wyoming Data Center Campus</h3>
+<p>Google purchased Crusoe Energy's troubled Wyoming facility development, highlighting challenges in greenfield hyperscale buildout and validating hyperscaler consolidation of infrastructure. The transaction signals capital efficiency beats project autonomy in the current cycle. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/07/crusoe-sells-troubled-wyoming-data-center-project-to-google/">TechCrunch</a></p>
+<h3>Sequoia Shuts Scouts Program; Model Era Concludes</h3>
+<p>Sequoia is terminating its micro-investor scouts initiative globally, ending a trend it pioneered. Consensus now holds that distributed sourcing networks deliver insufficient deal-quality advantage in saturated capital markets. The closure affects access for emerging-market founders reliant on informal networks. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/07/sequoia-shutting-down-its-scouts-program-marks-the-end-of-an-era/">TechCrunch</a></p>
+<h3>US Intelligence Links Nvidia CEO Huang to Chinese Recruitment</h3>
+<p>American spy agencies warned that Jensen Huang had a romantic relationship with a Megaspeed executive recruited by China's Ministry of State Security to gather intelligence on Nvidia's AI chip capabilities and influence company policy. Huang has not commented; the finding complicates US–China tech supply chain relations. <strong>Source:</strong> <a href="https://www.ft.com/content/a55a2a22-4479-4f93-a445-6147a5c6d790">Financial Times</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Stephen Miller Promotion Signals Hard-Right Pivot in US Labor &amp; Immigration Policy</strong></p>
+<p>Donald Trump promoted Stephen Miller to Chief of Staff on Saturday, replacing Susie Wiles days after Republicans' midterm rout. Miller is a white nationalist ideologue with documented ties to conspiratorial movements and has long advocated mass deportation, visa restrictions, and labor market skepticism toward immigrant workers. His elevation to top administrative rank—over experienced operatives—indicates Trump intends to use his second term to reshape immigration enforcement and labor supply dynamics regardless of congressional opposition or business lobbying.</p>
+<p><strong>Pattern significance:</strong> This reflects the broader Trump 2.0 doctrine of ideology-first personnel decisions. The replacement of Wiles (a competent pragmatist) with Miller (an uncompromising true believer) mirrors the broader power consolidation among MAGA hardliners after the GOP's failure to extend House majorities. For venture capital and tech labor markets, the move implies intensified scrutiny of H-1B visa processing, possible restrictions on remote work for non-US citizens, and enforcement actions against undocumented workers in Silicon Valley and biotech clusters. European deeptech founders and Indian engineering talent will face elevated friction in US hiring and fundraising.</p>
+<p><strong>Founder implication:</strong> If you are scaling a tech/deeptech team, expect 2027 H-1B visa caps to tighten and wait times to lengthen. Consider doubling down on European talent acquisition pipelines and establishing subsidiary R&amp;D in allied jurisdictions (Germany, Netherlands, Canada). For US-founded startups with non-citizen technical staff, legal audit of visa sponsorship exposure is now urgent.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>[On the AI selloff's scope]</strong> Financial Times: <a href="https://www.ft.com/content/452cf328-c819-482e-8f2c-61b65c96f8ce">"The mother of all American course corrections"</a> — Analysis of how voter behavior in 2026 midterms reveals tolerance for geopolitical misalignment but intolerance for inflation; frames tech revaluation within broader populist reckoning.</p>
+</li>
+<li>
+<p><strong>[On European VC's future]</strong> Sifted: <a href="https://sifted.eu/articles/sequoia-is-leaving-london-should-europe-be-worried/">"Sequoia is leaving London. Should Europe be worried?"</a> — Explores implications of Sequoia's London closure for European founder access to US institutional capital and role of downstream European GPs in fill-the-gap scenarios.</p>
+</li>
+<li>
+<p><strong>[On AI infrastructure resilience]</strong> Bloomberg: <a href="https://www.bloomberg.com/news/videos/2026-11-06/ai-selloff-exposes-data-center-boom-risks-video">"AI Selloff Exposes Data Center Boom Risks"</a> — CFO Jolienne Halisky (AIB Data Centers) discusses how financing costs rise and permitting timelines stretch as lenders reassess risk appetite in greenfield builds.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, Financial Times, Le Monde, TechCrunch, DW, BBC, New York Times, Maddyness, Sifted — 24h cycle through Saturday, November 07 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
