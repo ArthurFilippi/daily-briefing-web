@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul><li><strong>Defense spending and war economics are reshaping state budgets globally.</strong> Russia faces acute fiscal strain as ten regions cut combat casualty payments; Yemen's Houthis absorb sustained airstrikes; Poland confronts security threats mid-incident; Israel's coalition-building gridlock reflects deeper military-political fractures. This fragmentation of state capacity under conflict pressure creates asymmetric fiscal risk—particularly for commodity-export economies—tilting portfolio exposure toward defensive energy plays and reducing appetite for high-growth emerging markets.</li><li><strong>Political realignment in established democracies is accelerating institutional instability.</strong> South Africa's ANC lost local elections for the first time; France's youth unemployment hit 21%+ as protesters mobilize; Israel's fragmented Knesset forces opposition-led coalition talks; European cyberattacks and bomb threats inject persistent uncertainty into civic life. This institutional volatility favors liquid, diversified holdings over concentration bets on single geographies or political narratives.</li></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Russian regions cut war casualty payments; ten regions reduce or suspend benefits.</li><li>South Africa's ANC lost local elections; once-dominant anti-apartheid party now ordinary competitor.</li><li>Israel's opposition leader Eisenkot tasked forming government after inconclusive legislative vote.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Russia's War Financing Fractures Regional Budgets</h3>
+<p>At least ten Russian regions have cut, postponed, or eliminated casualty payments to families of killed combatants in 2026, signaling acute fiscal stress from sustained Ukraine conflict. State capacity to fund social obligations is eroding at the regional level even as central military expenditure remains high—a classic symptom of unsustainable war financing. This redistribution of financial burden downward suggests Moscow faces long-term solvency pressure if attrition rates persist.<br />
+<em>Source: <a href="https://legrandcontinent.eu/fr/2026/11/08/economie-russe-les-pertes-elevees-en-ukraine-pesent-sur-le-budget-de-letat-et-des-regions/">Le Grand Continent</a></em></p>
+<h3>South Africa's Political Hegemony Ends</h3>
+<p>The African National Congress, which led anti-apartheid resistance and governed for 32 years, lost local elections decisively, reducing it to "any other political party" in voters' eyes. The erosion reflects deep dissatisfaction with corruption, service delivery failures, and economic stagnation. This collapse of single-party dominance creates unpredictable coalition politics and raises execution risk on infrastructure and fiscal policy.<br />
+<em>Source: <a href="https://www.nytimes.com/2026/11/08/world/africa/south-africa-election-african-national-congress.html">New York Times</a></em></p>
+<h3>Poland Faces Gun Violence as Europe Confronts Persistent Insecurity</h3>
+<p>A gunman opened fire in Kraków's main market square on November 7, killing at least six people including a British tourist and later three others at the attacker's home. Officials identified the shooter as motivated by far-right and radical ideologies. This incident compounds a wave of bomb threats and cyberattacks across Europe that have injected ambient uncertainty into everyday civic activity.<br />
+<em>Source: <a href="https://www.bbc.co.uk/news/articles/cmd7q15drwgeo">BBC</a>; <a href="https://www.dw.com/en/poland-gunman-kills-6-in-krakow-main-square/a-79886489">DW</a></em></p>
+<h3>Israel's Coalition Gridlock: Eisenkot Gets 28 Days</h3>
+<p>President Isaac Herzog formally tasked opposition leader Gadi Eisenkot—a former military chief with no prior political experience—with forming a government after November's inconclusive election left neither Netanyahu's nor the opposition bloc with a majority in the Knesset. Eisenkot has 28 days to assemble a ruling coalition. The assignment reflects institutional deadlock and raises near-term policy execution risk on security, economics, and judicial reform.<br />
+<em>Source: <a href="https://www.lemonde.fr/international/article/2026/11/08/en-israel-les-defis-de-gadi-eisenkot-general-novice-en-politique-charge-de-former-un-gouvernement_6808385_3210.html">Le Monde</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>French Youth Unemployment Exceeds 21%; Social Pressure Mounts</h3>
+<p>France's unemployment rate for under-25s surpassed 21% in Q2 2026, triggering visible mental health strain visible across social platforms (YouTube, TikTok). Young people describe job interviews as "last hope" scenarios, signaling acute labor-market dysfunction and desperation. This crisis is eroding social cohesion and creating recruitment friction for knowledge-intensive startups dependent on graduate talent pools.<br />
+<em>Source: <a href="https://www.lemonde.fr/m-perso/article/2026/11/08/j-ai-un-entretien-ce-vendredi-c-est-mon-dernier-espoir-quand-la-realite-de-la-crise-envahit-les-reseaux-sociaux_6808389_4497916.html">Le Monde</a></em></p>
+<h3>Mélenchon's La France Insoumise Mobilizes for 2027 Presidential Race</h3>
+<p>Jean-Luc Mélenchon presented his campaign platform, "L'Avenir en commun," to thousands of supporters at Le Bourget rally on November 8, balancing base mobilization with rhetorical moderation aimed at broadening electoral appeal. The gesture reflects tactical repositioning in advance of 2027 presidential vote amid ongoing autumn protests and national discontent over affordability.<br />
+<em>Source: <a href="https://www.lemonde.fr/politique/article/2026/11/08/presidentielle-2027-en-meeting-au-bourget-jean-luc-melenchon-s-attelle-a-mobiliser-sa-base-tout-en-elargissant-son-electorat_6808387_823448.html">Le Monde</a></em></p>
+<h3>Europe's Cyber and Physical Security Crisis Deepens</h3>
+<p>A wave of cyberattacks targeting industrial systems (including supermarket refrigeration controllers) and coordinated bomb threats to aircraft continue across European cities, forcing governments to encourage stockpiling and resilience measures. These incidents signal either sophisticated state-sponsored campaigns or widespread radicalization of threat actors—both elevate systemic infrastructure risk.<br />
+<em>Source: <a href="https://www.nytimes.com/2026/11/07/world/europe/bomb-threats-cyberattacks-europe-uncertainty.html">New York Times</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Apple Relocates $2.7 Billion in Tax Shelter from Ireland to Singapore</h3>
+<p>Apple disclosed that Singapore has overtaken Ireland as its primary tax domicile, capturing $2.7 billion in annual tax avoidance through profit-booking mechanics. The shift reflects changing corporate tax arbitrage as OECD minimum tax rules tighten globally. This signals ongoing capacity for multinational tax optimization but hints at regulatory pressure on traditional Irish structures.<br />
+<em>Source: <a href="https://www.ft.com/content/49453406-99f2-4f5b-8f5d-01dc8cac5ede">Financial Times</a></em></p>
+<h3>China to Lead Global Energy Investment at $940 Billion in 2026</h3>
+<p>China is projected to spend $940 billion on energy infrastructure in 2026—the highest by any nation—according to the Global Energy Transition Report released by the China Enterprise Reform and Development Society. This concentration of capital in renewable and grid modernization reflects Beijing's dual goals of supply security and climate positioning. Implications: commodity-heavy emerging markets will face intensified competition for energy investment; SP500/NASDAQ exposure to energy infrastructure (and downstream tech) may benefit from China's buildout creating export/IP licensing opportunities.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-08/china-set-to-lead-world-in-energy-investment-in-2026-cctv-says">Bloomberg</a></em></p>
+<h3>Berkshire Hathaway Posts Record $9.6 Billion Buyback</h3>
+<p>Warren Buffett's firm executed record share repurchases of $9.6 billion in Q3 2026 alongside weaker insurance earnings, signaling confidence in intrinsic value despite mixed operational performance. The buyback scale reflects excess cash and reduced M&amp;A appetite in current macro environment.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/videos/2026-11-07/berkshire-makes-record-9-6-billion-buyback-video">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Nvidia CEO Targeted by Chinese Intelligence Operation</h3>
+<p>A memo circulated in 2026 alleged that China's Ministry of State Security recruited a female technology executive to conduct espionage on Nvidia CEO Jensen Huang in a romantic context. Huang was summoned to explain the relationship. The incident exposes executive-level counterintelligence vulnerabilities in AI/chip sectors and underscores Beijing's focus on talent acquisition and personal leverage in tech leadership.<br />
+<em>Source: <a href="https://www.lemonde.fr/international/article/2026/11/08/jensen-huang-le-patron-de-nvidia-soupconne-aux-etats-unis-d-avoir-ete-espionne-par-une-entrepreneuse-chinoise-dans-le-cadre-d-une-relation-sentimentale_6808394_3210.html">Le Monde</a>; <a href="https://techcrunch.com/2026/11/07/chinese-exec-was-recruited-to-spy-on-nvidia-ceo-according-to-us-intelligence-memo/">TechCrunch</a></em></p>
+<h3>Claude Code Leaks Secrets Across 1,122 Public GitHub Files</h3>
+<p>AI-assisted coding agents using Anthropic's Claude triggered unintended credential exposure via a "Don't Ask Again" feature, causing passwords and API keys to surface in publicly visible repositories. This incident reveals systemic hazard in autonomous code generation: agent autonomy can bypass human security gates. Security-conscious enterprises now face new compliance burdens around AI tool governance.<br />
+<em>Source: <a href="https://apiiro.com/blog/coding-agents-leaking-secrets-github-dont-ask-again">Apiiro / HN</a></em></p>
+<h3>Data Center Backlash Spreads Across Europe; CoreWeave Seeks Political Cover</h3>
+<p>Protests against data center expansion continued across Europe on Saturday; concurrently, CoreWeave Inc. sent a letter to Texas Governor-elect Gina Hinojosa requesting cooperation on current and future projects. The dual trend reflects rising environmental opposition to AI compute infrastructure paired with strategic vendor outreach to sympathetic state administrations. Geopolitical fragmentation of data center policy is accelerating.<br />
+<em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-07/ai-backlash-spreads-across-europe-with-data-center-protests">Bloomberg</a>; <a href="https://www.bloomberg.com/news/articles/2026-11-07/coreweave-asks-texas-governor-elect-for-data-center-cooperation">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Institutional Authority in Freefall: What South Africa's ANC Loss Means for Tech Founders</strong></p>
+<p>South Africa's ruling African National Congress—the party that dismantled apartheid and governed for 32 years—lost decisive local elections this week, reducing its status from historic liberator to ordinary competitor. This follows similar institutional collapses in other democracies (France's traditional center, US polarization, Brazil's volatility). The pattern is not mere political churn; it signals a deeper rupture: institutions built on post-WWII or post-Cold War settlement are losing legitimacy faster than replacement legitimacy is forming.</p>
+<p>For a tech founder or deep-tech entrepreneur, this has concrete implications. Yesterday, regulatory capture and government relationships were predictable—you could map career trajectories of officials, anticipate policy shifts 18 months out, lobby effectively through stable channels. Today, incumbents are fragile. A minister you briefed in October may be out by March. Coalition governments (Israel, much of Europe) are less stable than single-party rule. South Africa's ANC loss means infrastructure policy, R&amp;D incentives, and tax treatment will become contested within a weaker coalition. Uncertainty premiums for capex in unstable jurisdictions will widen.</p>
+<p>The entrepreneurial opportunity: founders who can operate in fractured, low-trust environments—building resilience into regulatory strategy, diversifying jurisdictional bets, automating policy monitoring—will compete more effectively. Conversely, deeptech founders betting on government continuity or long-term subsidy regimes face growing execution risk.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://legrandcontinent.eu/fr/2026/11/08/economie-russe-les-pertes-elevees-en-ukraine-pesent-sur-the-budget-de-letat-et-des-regions/">Russia's War Economy: Regional Breakdown</a></strong> — Detailed fiscal anatomy of how sustained military conflict erodes regional state capacity in non-war-economy regimes.</p>
+</li>
+<li>
+<p><strong><a href="https://www.bloomberg.com/news/articles/2026-11-07/ai-backlash-spreads-across-europe-with-data-center-protests">Data Center Policy Fragmentation: Europe vs. US</a></strong> — Strategic primer on why AI infrastructure is becoming a political fulcrum and how founder playbooks must adapt to jurisdictional variance.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS feeds (24h) — Sunday, November 08, 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
