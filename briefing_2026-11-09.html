@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Nvidia board investigates CEO Huang over affair with suspected Beijing-linked operative.</li><li>Paris hosts Chernobyl arche donor conference as Ukraine conflict reshapes European diplomacy.</li><li>China extends trade truce on 24% tariffs to January, signals engagement appetite.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Nvidia CEO Huang's affair escalates into national-security probe</h3>
+<p>Nvidia Chief Executive Jensen Huang admitted to an extramarital relationship with a woman identified by US intelligence as potentially connected to Chinese intelligence recruitment. Secretary of State Marco Rubio had drafted a classified memo last spring flagging the entanglement. Nvidia's board launched a formal investigation; Yale management professor Jeffrey Sonnenfeld estimates Huang's tenure at roughly 50–50 odds. At $4.5 trillion market cap, this implicates AI infrastructure at the heart of US-China competition. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/videos/2026-11-09/how-nvidia-ceo-s-affair-engulfed-ai-giant-in-spy-probe-video">Bloomberg</a>, <a href="https://www.lemonde.fr/economie/article/2026/11/09/le-patron-de-nvidia-jensen-huang-reconnait-avoir-eu-une-liaison-extraconjugale-avec-une-personne-consideree-comme-une-espionne-de-pekin_6808531_3234.html">Le Monde</a></p>
+<h3>Paris convenes Chernobyl remediation donor conference; Ukraine settlement pressure mounts</h3>
+<p>France hosts a donor conference Monday to secure remaining funding for repairs to the Chernobyl nuclear sarcophage, damaged by Russian drone strike last year. Timing coincides with G7 ministers' talks on Ukraine as Washington prepares bilateral negotiations with Moscow and Kyiv. European leaders fear premature settlement will force Ukraine into unfavorable terms; France's independent fundraising on nuclear infrastructure signals European stakes in post-war reconstruction and energy security. <strong>Source:</strong> <a href="https://www.lemonde.fr/international/live/2026/11/09/en-direct-guerre-en-ukraine-reunion-a-paris-lundi-pour-financer-la-reparation-de-l-arche-de-tchernobyl_6808609_3210.html">Le Monde</a>, <a href="https://www.dw.com/en/g7-ministers-meet-as-europe-seeks-greater-say-in-ukraine-peace-talks/a-79894960?maca=en-rss-en-all-1573-rdf">DW</a></p>
+<h3>French PM Lecornu enters critical negotiation week; labor unrest tied to presidential race</h3>
+<p>Prime Minister Sébastien Lecornu begins negotiations Monday with social partners, then high school students, and public-sector unions later in the week. If responses fall short of demands, sustained strikes could damage sitting government credibility ahead of the 2027 presidential election. Communist party chief Fabien Roussel (polling 2–3%) remains defiant despite defections to Mélenchon's France Unbowed faction, fragmenting left opposition. <strong>Source:</strong> <a href="https://www.lemonde.fr/politique/article/2026/11/09/mobilisation-sociale-pour-sebastien-lecornu-la-semaine-de-toutes-les-negociations_6808601_823448.html">Le Monde</a>, <a href="https://www.lemonde.fr/election-presidentielle-2027/article/2026/11/08/presidentielle-2027-fabien-roussel-ira-jusqu-au-bout-malgre-le-ralliement-de-deputes-communistes-a-melenchon_6808471_6205049.html">Le Monde</a></p>
+<h3>Trump signals de-escalation with Iran; North-East Yemen strikes kill 50+</h3>
+<p>President Trump stated new strikes on Iran are "highly unlikely" if talks progress, reversing weeks of escalation rhetoric. Separately, Saudi-led airstrikes in Yemen killed over 50 in one 24-hour period—among the deadliest spans of the renewed August conflict. Houthi counterattacks hit an Aramco tower in central Riyadh's financial district, indicating operational capability despite attrition. <strong>Source:</strong> <a href="https://www.dw.com/en/iran-trump-says-strikes-unlikely-if-peace-talks-keep-moving/a-79894190?maca=en-rss-en-all-1573-rdf">DW</a>, <a href="https://www.nytimes.com/2026/11/07/world/middleeast/more-than-50-killed-in-yemen.html">NYT</a>, <a href="https://www.bbc.co.uk/news/articles/c6ly3mjx958eo?at_medium=RSS&amp;at_campaign=rss">BBC</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>China suspends additional 24% US tariff hike through January; trade truce holds</h3>
+<p>China formally extended its pause on an additional 24% tariff on US imports to January 2027, maintaining the existing 10% rate. The decision, formalized by the two nations' leaders, signals appetite for deal-making before US policy potentially hardens. Separately, China is marketing green bonds in Canada for the first time, expanding offshore financing footprint as bilateral ties warm. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-09/china-extends-pause-on-24-us-tariffs-to-january-keeps-10-rate">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-09/china-starts-marketing-green-bonds-for-debut-sales-in-canada">Bloomberg</a></p>
+<h3>Chinese producer inflation hits 5.7%—highest since mid-2022; domestic demand remains weak</h3>
+<p>Producer prices accelerated to 5.7% year-over-year, the fastest since June 2022, driven by surging energy costs. Consumer inflation, however, decelerated, reflecting persistent weakness in end-demand despite rising factory input costs. The gap signals stagflationary pressure: manufacturers cannot pass costs downstream as consumption slows, squeezing margins amid geopolitical and trade uncertainty. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-09/chinese-producer-inflation-soars-to-5-7-for-post-covid-era-high">Bloomberg</a>, <a href="https://www.ft.com/content/085c4610-143a-47ad-b546-0587695294b5?syn-25a6b1a6=1">FT</a></p>
+<h3>Mitsui Chemicals acquires JSR for $12 billion with state-bank backing; chip-materials consolidation accelerates</h3>
+<p>Japan's Mitsui Chemicals, with support from the Development Bank of Japan, is acquiring chip-materials specialist JSR Corp. for ¥1.84 trillion ($12 billion). The deal strengthens Japan's grip on a linchpin in semiconductor supply chains at a moment of heightened US-China tech decoupling and regional security competition. Tokyo's use of state capital underscores economic-security strategy reshaping Asia's industrial architecture. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-09/japan-s-mitsui-chemicals-dbj-to-buy-jsr-for-12-billion">Bloomberg</a></p>
+<h3>Soybean futures rise as Trump administration pressures China on farm purchases</h3>
+<p>Soybean prices advanced most in two weeks as the US pressed Beijing to fulfill commitments to buy American agricultural goods. The rally reflects ongoing trade-truce mechanics: Beijing signals willingness to purchase commodities as a confidence-building measure, offsetting tariff uncertainty. India, meanwhile, attracted close to $5 billion in foreign stock inflows last week as AI-sector volatility redirected capital flows. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-09/soybeans-rise-as-us-presses-china-to-boost-farm-goods-purchases">Bloomberg</a>, <a href="https://www.bloomberg.com/newsletters/2026-11-09/foreign-funds-pile-into-india-as-ai-trade-falters">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Nvidia board investigation into Huang cascades through AI leadership discourse</h3>
+<p>Following Huang's admission, Yale's Sonnenfeld places CEO departure odds at 50–50; Trump publicly backed him as a "fine person" and said he should remain. The contradiction—between formal board scrutiny and presidential endorsement—signals fractured US governance clarity on foreign-influence safeguards in critical AI infrastructure. Huang's prior October interviews, wherein he criticized US chip export restrictions and called China "not our enemy," now carry operational risk as the investigation proceeds. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/08/is-jensen-huangs-job-on-the-line-yales-jeffrey-sonnenfeld-estimates-its-about-a-50-50/">TechCrunch</a>, <a href="https://www.bloomberg.com/news/videos/2026-11-09/how-nvidia-ceo-s-affair-engulfed-ai-giant-in-spy-probe-video">Bloomberg</a></p>
+<h3>Analysts debate whether AI trade remains durable amid volatility</h3>
+<p>Futurum Group CEO Daniel Newman argues the AI buildout is intact despite recent selloffs; former US intelligence analyst Elly Rostoum described Beijing's approach as "the oldest trick in the book"—targeting executive networks. UBS's Peirce noted ongoing infrastructure investment appetite in APAC, suggesting institutional capital remains committed to AI deployment despite near-term equity churn. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/videos/2026-11-09/futurum-s-newman-believes-ai-trade-isn-t-over-video">Bloomberg</a>, <a href="https://www.bloomberg.com/news/videos/2026-11-09/ex-intelligence-analyst-on-jensen-huang-investigation-video">Bloomberg</a></p>
+<h3>Taiwan authorities intervene to arrest market rout; Digital Realty, Goodman raid NEXTDC stake</h3>
+<p>Taiwanese stock authorities unveiled confidence measures after the longest selling streak since 2022. In Australia, Digital Realty and Goodman Group jointly acquired 9.9% of data-center operator NEXTDC in an aftermarket raid, signaling collaborative interest in AI infrastructure amid supply-chain consolidation. Japan-Vietnam economic security talks in Tokyo Monday will prioritize technology and trade partnerships against regional geopolitical tension. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-09/taiwan-stocks-gain-as-authorities-move-to-stem-market-rout">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-08/digital-realty-goodman-buy-9-9-of-nextdc-in-stock-market-raid">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-09/japan-vietnam-eye-economic-security-ties-as-to-lam-visits-tokyo">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>US Intelligence Now Openly Names State-Sponsored Sabotage; Nvidia Is the Flagship Incident</strong></p>
+<p>The Rubio memo, Huang's affair, and the board investigation represent a threshold event: Washington is no longer concealing Beijing's targeting of individual executives as a compartmentalized concern. Instead, it has elevated the story to public-market scale, forcing board-level governance and investor re-pricing. This signals a structural shift from espionage-as-tradecraft to espionage-as-policy instrument—coordinated, high-profile, and designed to raise the cost of hiring or retaining key executives with China exposure.</p>
+<p>What this reveals more broadly is that AI supply-chain security is now understood as <em>leadership-contingent</em>, not just technical. The Huang probe isn't really about one relationship; it's a forcing function that will compel boards to adopt counterintelligence vetting as a standard governance layer. Berkshire Hathaway is raising yen bonds; Mitsui is consolidating JSR with state backing; Japan-Vietnam talks are formalizing tech partnerships. Each reflects a pivot toward trusted, state-aligned technology ecosystems rather than globally optimized supply chains.</p>
+<p>For a young entrepreneur in deeptech, the implication is stark: your future cap table and board composition will be hostage to geopolitical alignment. If you're building in semiconductors, compute infrastructure, or quantum, expect investor diligence on your executive team's foreign relationships and clearance status to become as routine as tax compliance. Raising from US limited partners (pension funds, endowments) will require certifiable distance from Chinese connections. Conversely, raising from Singapore or Tokyo will demand EU-US partnership alignment language. Geopolitics is no longer a tail risk; it's an underwriting criterion.</p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">📄 Resources</div>
+  <ul>
+<li><strong>Nvidia board memo (full text).</strong> <a href="https://www.theverge.com/ai-artificial-intelligence/1029595/full-text-jensen-huang-affair-memo-nvidia">The Verge</a> — Direct record of Huang's disclosure and investigation scope.</li>
+<li><strong>How deepfakes reshape military narratives.</strong> <a href="https://www.ft.com/content/7f36031b-ea90-4a3a-a570-a6c6ff96e45a?syn-25a6b1a6=1">FT</a> — Parallel trend: Russian forces using manipulated video to claim wins; intelligence credibility under systemic pressure.</li>
+</ul>
+<hr />
+<p><em>Sources: Reuters, Bloomberg, FT, Le Monde, NYT, DW, BBC, TechCrunch — 24h to Nov 09 2026, 08:00 UTC</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📄 Resources"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
