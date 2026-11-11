@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>Iran strategy fracture signals deeper US defense doctrine instability.</strong> Trump administration officials openly clash over escalation vs. diplomacy in Iran conflict; Hegseth survives impeachment despite centrist Republicans questioning war scope. This mirrors broader uncertainty in US strategic commitments—investors should monitor defense-sector volatility and geopolitical risk premiums, particularly for NASDAQ defense suppliers and emerging-market currency pairs.</p>
+</li>
+<li>
+<p><strong>AI infrastructure competition pivots from funding to compute scarcity.</strong> Anthropic's $1.5T IPO bid, Cohere's $25B valuation, and CoreWeave's forecast boost all pivot on securing GPU access, not capital—shortage signals are tightening margins across the AI stack and favoring infrastructure players (data center, power) over application-layer startups. Hedge fund risk reductions (largest in a decade) suggest institutional repositioning away from unprofitable AI burn toward energy/compute plays.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Trump team divided on Iran war; Hegseth impeachment blocked by GOP Congress.
+- Anthropic eyes $1.5 trillion IPO valuation after strong Q3 financials emerge.
+- Cohere faces daily struggle to secure GPU compute despite $25B valuation.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>No Good Choices on Iran</h3>
+<p>Trump administration aides are openly debating three conflicting strategies: escalation, narrower strikes, and diplomacy. The split reflects deeper fractures over war scope and exit conditions in the Iran theatre. This internal division is already visible in Congress: Hegseth survived impeachment from GOP maverick Thomas Massie despite charges ranging from Iranian war conduct to extrajudicial executions in the Caribbean, signaling neither party has strategic consensus. <a href="https://www.nytimes.com/2026/11/10/world/iran-trump-war-hegseth-impeach.html">Source: NYT</a></p>
+<h3>Ukraine Talks Stall in Abu Dhabi</h3>
+<p>Zelensky called Tuesday's Moscow-Kyiv talks "constructive," but Russia remained silent on ceasefire terms after eight months of deadlock. The Trump administration welcomed the mere fact of dialogue while offering no new negotiating leverage. Stalemate persists despite US engagement. <a href="https://www.lemonde.fr/international/article/2026/11/11/guerre-en-ukraine-a-abu-dhabi-les-pourparlers-russo-ukrainiens-condamnes-a-l-impasse_6808927_3210.html">Source: Le Monde</a></p>
+<h3>Three Iran-Backed Suspects Plotted UK RAF Airbase Attack</h3>
+<p>US Department of Justice alleges three operatives orchestrated a string of plots targeting RAF Fairford, a US-allied facility in England used by American armed forces. Intelligence links the cell to Iranian backing and earlier incidents. Escalation risks remain acute in the Atlantic corridor. <a href="https://www.bbc.co.uk/news/articles/c3rryrryk59zo?at_medium=RSS&amp;at_campaign=rss">Source: BBC</a></p>
+<h3>Israeli Opposition Seeks October 7 Inquiry as New Knesset Convenes</h3>
+<p>Gadi Eisenkot and the newly sworn opposition majority called for a formal probe into state failures during the October 7 attack. Eisenkot has yet to forge a coalition to unseat Netanyahu, but the institutional shift signals accountability pressure and fracture within Israel's security consensus. <a href="https://www.dw.com/en/israel-eisenkot-proposes-october-7-probe-as-new-knesset-sworn-in/a-79913636">Source: DW</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>SWAN Leadership Transition: Camille Tyan Takes CEO Role</h3>
+<p>French fintech SWAN announced founder Nicolas Benady's exit, installing Camille Tyan as new chief. The move signals maturation and board-driven governance shift in a high-visibility payment infrastructure play. No financial metrics disclosed. <a href="https://www.frenchweb.fr/breaking-news/swan-nicolas-benady-se-retire-camille-tyan-aux-commandes-de-la-fintech/">Source: FrenchWeb</a></p>
+<h3>Mirakl Restructures Leadership: Nussenbaum to Board Chair</h3>
+<p>Marketplace SaaS unicorn Mirakl appointed former Sitecore CEO as co-CEO alongside Philippe Corrot; Adrien Nussenbaum shifted to board chair. The dual-CEO structure suggests either pending exit or operational complexity in scaling beyond current revenue base. Enterprise SaaS scaling pressures visible. <a href="https://www.frenchweb.fr/breaking-news/mirakl-nomme-l-ancien-patron-de-sitecore-co-ceo-adrien-nussenbaum-prend-la-presidence-du-conseil/">Source: FrenchWeb</a></p>
+<h3>Anthropic IPO Trajectory: Valuation Eyes $1.5 Trillion</h3>
+<p>Claude maker is preparing public markets debut via $26B private placement alongside public offering. Q3 financials show $900.9B in long-term commitments, rapid revenue growth, and contained operating losses. Bankers expect listing price to rise sharply from initial estimates due to investor demand. This is the largest AI-native company IPO signal yet and redefines EU-US talent drain dynamics. <a href="https://www.frenchweb.fr/anthropic-prepare-une-ipo-de-64-milliards-de-dollars-ce-que-revelent-ses-comptes/">Source: FrenchWeb</a> / <a href="https://www.ft.com/content/68bcba57-0575-44ee-80f4-2e5ea23a431e">FT</a></p>
+<h3>Mistral Opposes New Copyright Restrictions; Creators Protest</h3>
+<p>French AI lab Mistral pushed back against proposed copyright regulation, sparking backlash from creative industries. Regulatory risk for European AI labs now extends to IP frameworks, not just safety. <a href="https://sifted.eu/articles/mistral-copyright-law-proposal/">Source: Sifted</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Anthropic's IPO Valuation Surge to $1.5 Trillion</h3>
+<p>Bankers are raising the target valuation significantly beyond initial $64B estimates after oversubscription. The company's amended disclosure reveals $900.9B in long-term partnership commitments, rapid revenue acceleration, and controlled burn. This reprices the entire AI-native SaaS market and signals institutional patience for unprofitable hypergrowth. <a href="https://www.ft.com/content/68bcba57-0575-44ee-80f4-2e5ea23a431e">Source: FT</a></p>
+<h3>Hedge Funds Cut Risk at Steepest Rate in Decade</h3>
+<p>Morgan Stanley prime brokers report global equity hedge funds trimmed exposure dramatically through early November, the sharpest pullback since 2016. This unwind signals institutional repositioning out of crowded AI growth trades toward value and infrastructure. Portfolio implications: rotation into energy, data center REITs, and defensive tech. <a href="https://www.bloomberg.com/news/articles/2026-11-11/hedge-fund-risk-retreat-largest-in-a-decade-says-morgan-stanley">Source: Bloomberg</a></p>
+<h3>Lithium Prices Face Record Volatility; Ganfeng Warns of Extreme Swings</h3>
+<p>China's largest lithium producer reports price predictability has collapsed after a rollercoaster year. Oversupply and demand uncertainty in EV/battery markets are creating margin compression for refined lithium suppliers. This pressures energy transition economics and battery costs. <a href="https://www.bloomberg.com/news/articles/2026-11-11/chinese-lithium-giant-says-price-swings-have-turned-more-extreme">Source: Bloomberg</a></p>
+<h3>South Korea Fines Bond Dealers Record $1.2 Billion for Collusion</h3>
+<p>Seoul's antitrust regulator imposed 1.63 trillion won in penalties on 13+ domestic banks for rigging sovereign bond auctions over years, artificially raising government borrowing costs. The fine exposes structural market integrity failures and signals tightening regulatory enforcement in Asian capital markets. <a href="https://www.bloomberg.com/news/articles/2026-11-11/korea-fines-bond-dealers-record-1-2-billion-over-collusion">Source: Bloomberg</a></p>
+<h3>SoftBank Books $7 Billion Loss; Data Center Writedown Drags</h3>
+<p>SoftBank Group reported quarterly net loss including $3.7B writedown on US data center assets. Investor sentiment split between AI optimism and portfolio underperformance in AI infrastructure bet. <a href="https://www.bloomberg.com/news/articles/2026-11-11/softbank-group-shares-drop-10-after-booking-7-billion-loss">Source: Bloomberg</a></p>
+<h3>Brazil Readies Fiscal Plan to Stabilize Markets</h3>
+<p>President Lula's team is preparing fiscal proposals for Congress aimed at demonstrating credible path to deficit targets and calming investor anxiety. Global sell-off tied to Iran war concerns has widened yield spreads on French and Belgian sovereigns, signaling Eurozone debt differentiation. <a href="https://www.bloomberg.com/news/articles/2026-11-11/lula-team-readies-brazil-fiscal-plan-in-bid-to-calm-market-jitters">Source: Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Cohere Fights Daily Compute Shortage Despite $25B Valuation</h3>
+<p>Canadian AI startup CEO Aidan Gomez dismissed concerns about AI capacity overbuilding, instead highlighting a persistent struggle to procure GPU power for operations. Despite Nvidia backing and recent $25B valuation, Cohere faces infrastructure constraints that limit growth velocity. This paradox—high valuation yet compute scarcity—reveals the true bottleneck has shifted from capital to physical resources. <a href="https://www.bloomberg.com/news/articles/2026-11-11/nvidia-backed-cohere-in-a-fight-to-secure-ai-computing-power">Source: Bloomberg</a></p>
+<h3>CoreWeave Boosts Annual Forecast; GPU Infrastructure Demand Holds</h3>
+<p>AI compute infrastructure provider CoreWeave topped analyst estimates and raised full-year guidance, signaling sustained demand for GPU rental services. CEO Michael Intrator reaffirmed faith in Nvidia partnership despite recent controversies. The company's confidence reflects strong enterprise appetite for outsourced compute, not overbuilding. <a href="https://www.bloomberg.com/news/videos/2026-11-11/coreweave-boosts-forecast-easing-slowdown-concerns-video">Source: Bloomberg</a></p>
+<h3>OpenAI Q3 Revenue Hits $10 Billion; 50% Quarterly Growth</h3>
+<p>OpenAI's quarterly revenue reached $10B for the first time in the September quarter, driven by strong demand for its latest AI software. This marks the fastest scaling revenue trajectory of any frontier AI lab and signals consumer + enterprise stickiness. <a href="https://www.bloomberg.com/news/articles/2026-11-10/openai-third-quarter-revenue-soars-nearly-50-to-10-billion">Source: Bloomberg</a></p>
+<h3>US Imposes Synthetic DNA Ordering Rules to Deter Bioterrorism</h3>
+<p>Federal regulations now require screening and reporting on synthetic DNA orders to prevent synthesis of weaponizable pathogens. The rule tightens guardrails on DIY biotech and shifts compliance burden to vendors, affecting biotech startups and research institutions. <a href="https://www.science.org/content/article/deter-bioterrorism-u-s-imposes-new-rules-ordering-synthetic-dna">Source: Science</a></p>
+<h3>Malaysia Launches Separate Electricity Market for Data Centers</h3>
+<p>Malaysia will open a wholesale power market exclusively for large consumers including data centers, creating a new mechanism for energy-intensive operators to hedge power costs. This diversifies energy sourcing options for AI infrastructure and signals regional competition for compute hubs. <a href="https://www.bloomberg.com/news/articles/2026-11-11/malaysia-to-start-electricity-market-for-data-center-operators">Source: Bloomberg</a></p>
+<h3>X Launches Native Video Clipping Feature</h3>
+<p>X introduced its own clipping tool to enable creators to cut long-form videos into viral shorts, competing with third-party tools and doubling down on influencer engagement. Reflects platform strategy to deepen creator economics and compete with TikTok. <a href="https://techcrunch.com/2026/11/10/x-launches-its-own-clipping-feature-to-spur-influencer-engagement/">Source: TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Why Compute Scarcity Matters More Than AI Company Valuations</strong></p>
+<p>The paradox exploded today: Cohere's $25B valuation sits atop a confession that GPUs are the real constraint, not capital or talent. Meanwhile, CoreWeave—a "boring" infrastructure company—is raising forecast on hardware rental while frontier labs scramble to build. OpenAI's $10B quarterly revenue is impressive; Anthropic's $1.5T IPO valuation is newsworthy. But neither solves the underlying physical constraint: there are not enough high-end chips to go around.</p>
+<p>This reveals a structural shift in AI economics. For the first time, the scarcity is not innovation (LLMs work), not talent (pools exist), not money (trillions available)—it is electricity and semiconductor manufacturing. The implications are profound. A 21-year-old entrepreneur considering where to build will find that investing in frontier AI model research is oversaturated; the real defensible moats are in power infrastructure, chip design, and data center operations. Mistral's copyright fight, Cohere's GPU shortage, and SoftBank's data center writedown are all expressions of the same problem: the economics of training and serving LLMs at scale require re-architecting energy supply and silicon allocation, not just software.</p>
+<p>For your portfolio, this trend supports deeptech energy plays (fusion, next-gen power), semiconductor manufacturing (not fabless design), and infrastructure-as-a-service in AI—sectors where scarcity creates margin durability. Avoid unprofitable AI SaaS that relies on spot market compute access.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong>Anthropic's Path to $1.5T: What the Filing Reveals</strong> — FT analysis of amended IPO disclosure and $900.9B commitment pipeline. <a href="https://www.ft.com/content/68bcba57-0575-44ee-80f4-2e5ea23a431e">Read.</a></li>
+<li><strong>The GPU Crunch That Nobody Predicted</strong> — Why infrastructure, not models, became the binding constraint in 2026 AI. <a href="https://www.bloomberg.com/news/articles/2026-11-11/nvidia-backed-cohere-in-a-fight-to-secure-ai-computing-power">Bloomberg deep dive.</a></li>
+<li><strong>Iran War Strategy &amp; Defense Sector Volatility</strong> — How internal Trump administration fractures are repricing defense stocks and geopolitical exposure. <a href="https://www.nytimes.com/2026/11/10/world/iran-trump-war-hegseth-impeach.html">NYT explainer.</a></li>
+</ul>
+<hr />
+<p><em>Sources: Bloomberg, Financial Times, NYT, Le Monde, FrenchWeb, DW, BBC, Sifted, TechCrunch, Science — November 11, 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
