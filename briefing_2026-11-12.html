@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>Nvidia's implosion signals the fragility of personality-driven tech dominance.</strong> Jensen Huang's board-level crisis—triggered by affairs with both an alleged Chinese spy and a direct subordinate—exposes systemic governance failure at the world's most valuable chipmaker. The stock fell 9% after-hours; Bernstein downgraded; rivals (AMD, Broadcom, Alphabet) rallied on succession uncertainty. This reflects a broader reckoning: founder-led AI companies lack institutional resilience. For NASDAQ/growth portfolios, leadership transitions at concentration nodes carry tail-risk implications—diversification into chip infrastructure (not just Nvidia) becomes tactically relevant.</p>
+</li>
+<li>
+<p><strong>Geopolitical fractures are accelerating techno-nationalist policy, compressing entrepreneurial optionality.</strong> US-China espionage intertwined with commercial AI; Democratic congressional investigations of Trump; UK arrests of US soldiers accused of Russian spying; Israeli strikes in Gaza persist despite 2025 ceasefire. This fragmentation (military, intelligence, regulatory) creates incentives for decoupled tech ecosystems—European deeptech funding nearly 4x'd as investors back Nvidia alternatives; Taiwan drafts sovereign wealth legislation. Startups face rising regulatory friction and supply-chain bifurcation.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong></p>
+<ul>
+<li>Nvidia board considers ousting Jensen Huang after affairs revealed.</li>
+<li>Alleged Chinese spy at center of scandal fled to Beijing.</li>
+<li>Scott Colom becomes first Black Mississippi senator since Reconstruction.</li>
+</ul>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>US-China Intelligence War Intensifies Around AI Supply Chain</h3>
+<p>Nvidia scandal exposes deep-rooted espionage competition: US intelligence flagged Huang as a target of Chinese spy activity; separately, a 41-year-old US Army soldier was arrested in the UK on suspicion of Russian espionage. The pattern reveals Washington's vulnerability in protecting AI leadership from foreign intelligence while managing internal national-security leaks. <a href="https://www.nytimes.com/2026/11/11/world/asia/china-us-nvidia.html">Source: <em>New York Times</em></a>; <a href="https://www.nytimes.com/2026/11/10/world/europe/uk-us-army-arrest-espionage-russia.html">Source: <em>New York Times</em></a></p>
+<h3>Ukraine Peace Window Opens Before Year-End, Zelensky Says</h3>
+<p>Ukrainian president stated Wednesday that negotiation participants—including US, EU, and Russia—now genuinely want a breakthrough before 2027, marking a shift in diplomatic temperature after years of stalemate. Specifics on territorial concessions or ceasefire terms remain unresolved. <a href="https://www.lemonde.fr/international/live/2026/11/12/en-direct-guerre-en-ukraine-volodymyr-zelensky-juge-une-avancee-possible-avant-la-fin-de-l-annee-dans-les-pourparlers-de-paix_6808609_3210.html">Source: <em>Le Monde</em></a></p>
+<h3>DRC President Tshisekedi Clears Path to Third Term Via Constitutional Maneuver</h3>
+<p>Félix Tshisekedi signed legislation (Nov 9) enabling constitutional referendum that would reset presidential term limits, effectively allowing him to stay in power beyond 2028. Described as "technical" but substantively removes a democratic guardrail; opposition remains muted. <a href="https://www.lemonde.fr/international/article/2026/11/12/en-rdc-felix-tshisekedi-promulgue-une-loi-controversee-qui-lui-ouvre-la-voie-a-un-troisieme-mandat_6809048_3210.html">Source: <em>Le Monde</em></a></p>
+<h3>Democrats Prepare Broad Investigations Into Trump Administration</h3>
+<p>Following midterm victories, Democratic lawmakers are drafting inquiries spanning Huang's personal enrichment, ICE agent misconduct, and Epstein case follow-ups. Risk: Trump administration may refuse cooperation, escalating constitutional friction. <a href="https://www.lemonde.fr/international/article/2026/11/12/les-elus-democrates-veulent-lancer-des-enquetes-tous-azimuts-contre-l-administration-trump_6809046_3210.html">Source: <em>Le Monde</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>SINGULAR Backs Accounting Startup SUMARY With €25M Seed</h3>
+<p>Singular invested $25 million in SUMARY, a sub-two-year-old French fintech focused on accountancy automation using vertical AI. Move signals renewed appetite for back-office SaaS despite saturated SME software market; distribution via accounting firms remains the bottleneck. <a href="https://www.frenchweb.fr/pourquoi-singular-investit-25-millions-de-dollars-dans-une-startup-comptable-de-moins-de-deux-ans/900000037?utm_source=rss&amp;utm_medium=syndication&amp;utm_campaign=flux_general&amp;utm_content=article">Source: <em>FrenchWeb</em></a></p>
+<h3>European Chip Funding Surges as Investors Bet Against Nvidia Dominance</h3>
+<p>Venture and growth capital into European semiconductor and AI inference plays has nearly quadrupled year-over-year, driven by US export controls, Nvidia volatility, and EU strategic autonomy mandates. Founders cite longer sales cycles but clearer exit paths via CHIPS Act and state-backed funds. <a href="https://sifted.eu/articles/european-chips-funding-almost-quadruples-as-investors-back-nvidias-inference-challengers/">Source: <em>Sifted</em></a></p>
+<h3>Orakl Oncology Raises $34M for AI-Driven Virtual Patient Testing</h3>
+<p>UK-based biotech secured $34 million to accelerate clinical trials using digital twins and machine-learning pharmacology, reducing animal testing and shortening preclinical timelines. Part of broader European deeptech wave in biotech. <a href="https://sifted.eu/articles/exclusive-orakl-oncology-fundraise/">Source: <em>Sifted</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Nvidia Stock Plunges 9% as CEO Crisis Deepens; Rivals Gain</h3>
+<p>Following board deliberations on Jensen Huang's tenure, Nvidia fell sharply in after-hours trading (Nov 11). AMD, Broadcom, and Alphabet rallied on bets they'll capture displaced workloads. Bernstein downgraded the stock, citing governance risk. <a href="https://www.bloomberg.com/news/articles/2026-11-12/nvidia-drama-triggers-difficult-search-for-huang-s-successor">Source: <em>Bloomberg</em></a>; <a href="https://www.bloomberg.com/news/articles/2026-11-12/nvidia-turmoil-lifts-amd-broadcom-on-bets-for-business-gains">Source: <em>Bloomberg</em></a></p>
+<h3>EU and UK Delay 10% EV Tariff Implementation</h3>
+<p>Brussels and London postponed the electric-vehicle tariff to avoid undermining European carmakers against Chinese competition. Signals policy reversal under lobbying pressure; geopolitical trade tensions temporarily receding. <a href="https://www.ft.com/content/b6c31ee9-0837-4fb0-83d9-a0e70100d0a3?syn-25a6b1a6=1">Source: <em>Financial Times</em></a></p>
+<h3>France Backs Spain's Pablo Hernández de Cos for ECB Presidency</h3>
+<p>Paris signaled support for Spain's central banker in ECB leadership race, part of EU consensus-building on monetary policy architecture. Germany also aligned, suggesting package deal on central-bank governance. <a href="https://www.ft.com/content/b0d03a62-a75d-41f9-bac3-1518cefe400a?syn-25a6b1a6=1">Source: <em>Financial Times</em></a></p>
+<h3>Indonesia's Rupiah Hits All-Time Low; Regional Selloff Widens</h3>
+<p>IDR/USD weakened to record levels amid MSCI index concerns and oil-supply shocks, pressuring stocks and bonds. Central bank faces spillover contagion risk across Southeast Asia. <a href="https://www.bloomberg.com/news/articles/2026-11-12/idr-usd-indonesian-rupiah-drops-to-record-amid-msci-concerns-oil-risks">Source: <em>Bloomberg</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Nvidia Board Engages Search Firm to Identify CEO Successors</h3>
+<p>Board formally retained outside recruitment firm to map potential Huang replacements. Successor must possess deep chip-architecture expertise and operational credibility; no internal heir apparent exists. Timeline for decision unclear but board signaled urgency. <a href="https://www.bloomberg.com/news/articles/2026-11-12/nvidia-working-with-outside-firm-to-identify-ceo-candidates">Source: <em>Bloomberg</em></a></p>
+<h3>Alleged Chinese Spy at Heart of Scandal Fled to Beijing</h3>
+<p>The businesswoman linked to Huang's affair has returned to China, complicating US counterintelligence investigation. Raises questions about vetting of Nvidia executives' personal networks and foreign contact protocols. <a href="https://www.bloomberg.com/news/articles/2026-11-12/alleged-chinese-spy-at-center-of-nvidia-firestorm-is-in-beijing">Source: <em>Bloomberg</em></a></p>
+<h3>Tencent Founder Ma Deploys Half Workforce to AI-Native Business Units</h3>
+<p>Pony Ma committed 50,000 staff across Tencent's 100,000-person org to AI-focused ventures, signaling structural pivot away from traditional gaming and social. Reflects Chinese tech's urgency around generative AI competitiveness. <a href="https://www.bloomberg.com/news/articles/2026-11-12/tencent-founder-rallies-half-of-staff-behind-ai-native-push">Source: <em>Bloomberg</em></a></p>
+<h3>Australian Data Center Projects Suspended Amid Community Backlash</h3>
+<p>Third major data center near Adelaide halted after public opposition rose; reflects tension between AI infrastructure demand and environmental/grid capacity concerns. Signals regulatory risk for foundation-model compute expansion. <a href="https://www.bloomberg.com/news/articles/2026-11-12/another-data-center-halts-in-australia-as-public-backlash-rises">Source: <em>Bloomberg</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The Huang Scandal Reveals a Structural Vacuum in AI Governance</strong></p>
+<p>Nvidia's leadership crisis—triggered not by market competition but by personal conduct and security vetting failures—exposes a critical gap: the world's most powerful AI infrastructure company lacks institutional guardrails separate from its founder-CEO. Huang's dual affairs (one with an alleged Chinese spy) were not detected by Nvidia's board or legal/HR functions; the scandal erupted via media and US intelligence leaks. This is not isolated drama. It reflects a broader pattern: founder-led tech dominance in critical infrastructure (chips, data centers, models) has outpaced governance maturity. Nvidia has no succession plan; competitors lack the engineering talent to capture share quickly; and geopolitical risk (US-China espionage, export controls) now sits inside a company whose leadership judgment is publicly compromised.</p>
+<p>For entrepreneurs building deeptech infrastructure: this moment clarifies two hard truths. First, founder charisma and technical genius do not substitute for independent board governance and transparent security protocols—especially when handling foreign partnerships or talent. Second, regulatory and intelligence scrutiny of AI companies is accelerating; founders must assume that personal conduct, financial conflicts, and foreign contacts will eventually surface. European startups in semiconductors, biotech, and quantum now face a strategic opening: positioning yourself as governance-first and geopolitically aligned (EU, not China-dependent) becomes a competitive advantage, not a constraint. Build institutional resilience now; it will matter when you scale.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong><a href="https://www.bloomberg.com/news/articles/2026-11-12/nvidia-drama-triggers-difficult-search-for-huang-s-successor">Nvidia's Leadership Vacuum and Succession Risk</a></strong> — Bloomberg deep-dive on candidate profiles and market implications of a CEO change.</li>
+<li><strong><a href="https://www.nytimes.com/2026/11/11/world/asia/china-us-nvidia.html">US-China Espionage in AI: The Broader Pattern</a></strong> — <em>New York Times</em> investigative piece on intelligence competition around semiconductor/AI talent.</li>
+<li><strong><a href="https://sifted.eu/articles/european-chips-funding-almost-quadruples-as-investors-back-nvidias-inference-challengers/">European Chip Funding Surge: A Structural Shift</a></strong> — Sifted analysis of VC redeployment away from US dominance, with fund names and ticket sizes.</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Thursday, November 12 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
