@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Huang resigns amid affair allegations; Kress assumes interim CEO role at Nvidia.</li><li>Kushner-Witkoff secure Zelensky agreement to include European leaders in Ukraine talks.</li><li>North Korea stole $400M in crypto via deepfake video calls; US seizes servers and $1.2B in Binance assets.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Ukraine Peace Talks Expand to Europe After US Envoys Meet Putin</h3>
+<p>US special envoys Steve Witkoff and Jared Kushner met Vladimir Putin in Moscow, then Volodymyr Zelensky in Dublin Thursday, securing Ukrainian agreement to include European leaders in the next negotiation round. Russia has not yet confirmed participation. Zelensky framed European involvement as logical given Ukraine's EU aspirations. The move signals Washington views bilateral US-Russia talks as insufficient and tacitly concedes that any durable settlement requires European buy-in on security guarantees. <a href="https://www.nytimes.com/2026/11/12/world/europe/russia-ukraine-witkoff-kushner.html">Source: NYT</a></p>
+<h3>Le Pen's RN Intensifies Attacks on Civic Institutions Ahead of 2027</h3>
+<p>The Rassemblement National leadership is conducting systematic public campaigns against intermediary bodies—civil society organizations, unions, magistrates, media—capable of opposing them. This institutional delegitimization mirrors pre-authoritarian patterns documented elsewhere. Centrist candidates (including Olympic judoka Teddy Riner) are positioning themselves as democratic firewalls, though Christine Lagarde's candidacy remains uncertain. The 2027 presidential race is structuring along institutional resilience lines. <a href="https://www.lemonde.fr/politique/article/2026/11/13/presidentielle-2027-l-offensive-illiberale-de-marine-le-pen_6809272_823448.html">Source: Le Monde</a></p>
+<h3>FBI Dismantles $400M North Korean Crypto Scam Using Deepfake Video Meetings</h3>
+<p>US authorities disrupted infrastructure behind the "FaceStealer" scheme, which deployed synthetic video calls to impersonate business contacts and steal credentials from &gt;900 victims over 18 months. The FBI seized servers and is moving to recover $1.2 billion in stolen cryptocurrency held at Binance. The attack underscores convergence of AI-generated fraud and financial crime at scale—a threshold that redefines cyber threat modeling for institutions holding digital assets. <a href="https://www.dw.com/en/us-disrupts-north-korea-s-400-million-crypto-scam-fbi-says/a-79935957?maca=en-rss-en-all-1573-rdf">Source: DW</a></p>
+<h3>Microsoft Outlook and Teams Disabled Globally for Hours</h3>
+<p>Microsoft's cloud infrastructure suffered a major outage Thursday affecting Outlook, Teams and related services across 74 countries and territories within one hour. The incident raised questions about redundancy and disaster recovery in mission-critical communication platforms. Full restoration timeline was not disclosed. The outage coincided with peak market hours and disrupted financial services, corporate operations and government agencies reliant on Microsoft infrastructure. <a href="https://www.dw.com/en/microsoft-works-to-restore-outlook-and-teams-after-global-outage/a-79935611?maca=en-rss-en-all-1573-rdf">Source: DW</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>European Robotics and Defense Deeptech Attract Massive Capital Inflows</h3>
+<p>Agile Robots (German humanoid robotics) closed a €425–450M funding round led by SoftBank and Nvidia, valuing the company at ~€4B and targeting physical AI manufacturing at scale. Separately, Ukrainian drone-focused UFORCE raised $700M (€595M) backed by Valor Equity Partners and the UK National Wealth Fund, signaling geopolitical willingness to fund defense-grade autonomous systems. SE3, a spatial AI/drone autonomy startup, closed a €25.5M Series A with Accel. The capital surge reflects recognition that Europe and the US must build indigenous hardware stacks independent of China. <a href="https://www.frenchweb.fr/breaking-news/agile-robots-leve-425-millions-d-euros-aupres-de-softbank-et-nvidia-pour-accelerer-dans-la-physical-ai/a6075547-dc13-4525-84de-ac51832f9f3b">Sources: FrenchWeb</a>, <a href="https://sifted.eu/articles/drone-startup-uforce-fundraise-uk-national-wealth-fund-scoop/">Sifted</a>]</p>
+<h3>British AI Chip Startup FRACTILE Valued at $7B Despite Pre-Commercial Status</h3>
+<p>The UK-based AI chip designer raised €649M in new funding, pushing its valuation from ~$1.1B to ~$7B in six months—a 6.4x leap—despite having no commercial product in market yet. Backers include Thrive Capital, Founders Fund, Lightspeed Ventures and Redpoint. The bet rests on its stacked-memory architecture for inference acceleration. This valuation multiple reflects the post-Huang vacuum: investors are flooding capital into any credible alternative to Nvidia's monopoly on AI compute hardware. <a href="https://www.frenchweb.fr/fractile-leve-649-millions-d-euros-pourquoi-les-investisseurs-valorisent-a-6-3-milliards-une-puce-d-ia-encore-non-commercialisee/900000040">Source: FrenchWeb</a></p>
+<h3>French Cybersecurity Regulation NIS 2 Delayed Two Years; Assembly Vote Imminent</h3>
+<p>France was obligated to transpose the EU's Network and Information Security Directive 2 (NIS 2) by October 2024. The bill only reached the National Assembly in November 2026—a 24-month delay blamed on parliamentary dissolution, political instability and deadlock over encryption standards. The holdup has left 50,000+ French firms in regulatory limbo and created compliance uncertainty for startups in critical infrastructure. Once passed, NIS 2 will establish mandatory incident reporting and supply-chain security audits, reshaping the operating environment for deeptech and cloud vendors. <a href="https://www.frenchweb.fr/nis-2-pourquoi-la-france-a-t-elle-mis-deux-ans-a-examiner-une-loi-pourtant-jugee-urgente/900000038">Source: FrenchWeb</a></p>
+<h3>European Tech M&amp;A: Samsung Eyes Modine for Data Center Cooling</h3>
+<p>Samsung Electronics is in acquisition talks with Modine Manufacturing, a US-based thermal management systems maker for data centers. The deal signals accelerating consolidation around infrastructure needed for AI compute density at scale. European deeptech founders should note: large acquirers are rapidly buying up enabling layers (cooling, power, packaging) that startups have historically treated as commodity suppliers. <a href="https://www.bloomberg.com/news/articles/2026-11-12/samsung-is-in-talks-to-acquire-data-center-cooling-firm-modine">Source: Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Huang's Resignation Tests AI Trade as Anthropic Readies IPO</h3>
+<p>Jensen Huang resigned as Nvidia CEO Thursday after disclosures of affairs, including one with an alleged Chinese intelligence operative. CFO Colette Kress assumed interim leadership; Harvey Jones was named board chair. Retail investors have mounted record buying pressure on Nvidia stock in hopes of a rebound, while Congress has summoned both Huang and Commerce Secretary Howard Lutnick to testify on AI chip export controls and alleged shielding of Nvidia from scrutiny. The leadership vacuum raises questions about operational continuity during critical GPU supply cycles and creates opening for rival chipmakers to capture design wins. <a href="https://www.bloomberg.com/news/articles/2026-11-13/nvidia-sees-record-open-retail-buy-after-ceo-ousted-vanda-says">Source: Bloomberg</a>, <a href="https://www.nytimes.com/2026/11/12/business/nvidia-jensen-huang-ceo-affairs.html">NYT</a>]</p>
+<h3>Russia's Ukraine Toll: 500K Military Casualties in Two Years</h3>
+<p>UK Financial Times analysis of Russian statistical data indicates Moscow has absorbed nearly half a million military deaths and wounded in the Ukraine conflict since 2022, concentrated in grinding advances on small frontages. The attrition rate underscores the war's macro-economic cost: sustained manpower depletion constrains Russia's ability to sustain offensive operations and compounds demographic stress. No peace timeline is visible; US-brokered talks now explicitly include European security frameworks. <a href="https://www.ft.com/content/7377e093-d58e-4303-853a-5aa82b6a747e">Source: FT</a>]</p>
+<h3>Emerging Markets Rally on Tech Rebound; First Weekly Gain Since September</h3>
+<p>EM equities are tracking for their first positive week since late September as investors rotate back into technology on bets that upheaval at Nvidia will not derail AI sector growth. Regional bourses (India, Southeast Asia) showed particular strength as institutional buyers re-entered after weeks of caution. India's $5.4T equity market is seeing renewed brokerage and exchange activity, brightening trading-volume and fee outlooks. <a href="https://www.bloomberg.com/news/articles/2026-11-13/em-stocks-eye-first-weekly-gain-since-september-as-tech-rebounds">Source: Bloomberg</a></p>
+<h3>US Rates Repriced Higher as Treasury Rout Extends</h3>
+<p>Japanese government bonds and other developed-market fixed income fell Friday as traders repriced Federal Reserve rate-hike probabilities upward. Australia's 10-year yield fell below the US equivalent for the first time in &gt;1 year, signaling divergent central bank expectations. India's inflation accelerated to its highest in two years (October CPI beat estimates), raising questions about whether the Reserve Bank of India will tighten ahead of consensus. Bond volatility suggests rate-sensitive sectors (tech, growth equities) face headwinds if Fed tightening resumes. <a href="https://www.bloomberg.com/news/articles/2026-11-13/japan-bonds-fall-as-treasury-rout-extends-on-fed-hike-bets">Sources: Bloomberg</a>]</p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>ByteDance $6B Buyback Signals Confidence; Valuation Edges $400B</h3>
+<p>ByteDance announced a $6B share repurchase program at a $400B implied valuation—a 20% increase from its buyback a year prior—despite ongoing US regulatory pressure on TikTok and geopolitical uncertainty. The move suggests founder Zhang Yiming and the board are betting on long-term operational continuity and see current equity pricing as attractive on a 5+ year view. Institutional investors are being offered exit windows at rising prices, reducing pressure for external IPO. <a href="https://www.bloomberg.com/news/articles/2026-11-13/bytedance-tiktok-plans-6-billion-buyback-400-billion-valuation">Source: Bloomberg</a></p>
+<h3>SigmaStar Seeks $300M Hong Kong IPO; Chinese AI Chip Crowding</h3>
+<p>The Chinese AI chipmaker is targeting a Hong Kong listing as soon as late 2026, raising up to $300M. The move reflects Beijing's push to build domestic semiconductor alternatives and a crowded field of chip startups competing for capital and design wins. Valuations remain elevated despite manufacturing challenges and export restrictions on advanced nodes. <a href="https://www.bloomberg.com/news/articles/2026-11-13/china-chipmaker-sigmastar-said-to-plan-300-million-hk-listing">Source: Bloomberg</a></p>
+<h3>Singapore Tightens Nvidia Chip Diversion Investigation; Fifth Arrest</h3>
+<p>Singapore charged a fifth person linked to an AI server fraud case involving potential illegal re-export of Nvidia chips to Malaysia. Malaysia's government is now independently investigating whether servers brought into the country by Megaspeed International (Singapore-based) were subsequently shipped abroad in violation of US export controls. The widening probe suggests systemic loopholes in semiconductor supply-chain tracking and risk that enforcement tightens on non-state actors attempting to circumvent licensing regimes. <a href="https://www.bloomberg.com/news/articles/2026-11-13/singapore-charges-5th-person-linked-to-nvidia-chip-case-st-says">Source: Bloomberg</a></p>
+<h3>Nscale Warns of Cash Shortage Ahead of $35B IPO; Anthropic Dependency</h3>
+<p>Nscale, an Nvidia-backed "neocloud" infrastructure provider, has flagged to investors that it requires additional financing to fulfill existing contracts with Anthropic (the AI safety company preparing its own IPO). The disclosure raises questions about capital efficiency in the AI infrastructure layer and potential contagion if Anthropic's fundraising or IPO timing slips. Nscale's challenges underline that the post-Huang landscape may see weaker-capitalized vendors struggle to maintain service levels during demand spikes. <a href="https://www.ft.com/content/8d5a8642-d0a1-458d-aaa4-c1e7d344fe47">Source: FT</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>When Titans Fall: Why the Huang Departure Matters Beyond Nvidia</strong></p>
+<p><strong>The fact.</strong> Jensen Huang, who built Nvidia from a startup into the world's most valuable company over 33 years, resigned Thursday as CEO following disclosed affairs—one allegedly with a Chinese intelligence operative—and a simultaneous Congressional summons. His exit was unconditional; the board moved quickly to install CFO Colette Kress as interim CEO and Harvey Jones as chair. Retail investors responded with record buying volume, not euphoria about succession, but pure hope that the leadership crisis won't metastasize.</p>
+<p><strong>Broader pattern.</strong> The Huang departure crystallizes a structural tension in modern tech leadership: founder-led companies trading on visionary momentum often lack institutional safeguards that catch governance crises before they explode publicly. Nvidia had no heir apparent; its board relied on founder charisma as a substitute for deep operational redundancy. The timing—coinciding with Microsoft's Outlook outage and North Korean deepfake-driven crypto theft—reveals that when one critical figure or system fails, confidence cascades downward across the entire stack. Capital doesn't flee the AI sector; it hunts for alternative technical bets and more distributed governance models.</p>
+<p><strong>Implication for entrepreneurs.</strong> If you are building a deeptech or infrastructure company with venture backing, take note: boards and LPs are now actively scanning for concentration risk in leadership and operations. The Huang moment will accelerate demand for COOs with P&amp;L accountability, documented succession plans and board diversity that isn't decorative. Founders who conflate personal brand with company resilience will face harder questions during governance conversations. Build redundancy into your narrative now, or face it imposed on you under duress later.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>"Inside Jensen Huang's Final Hours as CEO of Nvidia"</strong> — Bloomberg's behind-the-scenes account of his capitulation Wednesday night; useful for understanding board dynamics under crisis. <a href="https://www.bloomberg.com/news/articles/2026-11-13/inside-jensen-huang-s-final-hours-as-the-ceo-of-nvidia">Link</a></p>
+</li>
+<li>
+<p><strong>US-Europe Security Coordination in Ukraine Talks</strong> — FT explainer on why Kushner's insistence on European inclusion signals strategic recalibration toward burden-sharing and away from bilateral US-Russia diplomacy. <a href="https://www.ft.com/content/8d28a5be-af56-421f-a33d-779a0fcc7ad4">Link</a></p>
+</li>
+<li>
+<p><strong>NIS 2 Transposition Delays: A Case Study in EU-France Implementation Friction</strong> — FrenchWeb investigation into why critical cybersecurity regulation took 24 months beyond the deadline, touching on encryption politics and regulatory capture risks. <a href="https://www.frenchweb.fr/nis-2-pourquoi-la-france-a-t-elle-mis-deux-ans-a-examiner-une-loi-pourtant-jugee-urgente/900000038">Link</a></p>
+</li>
+</ul>
+<hr />
+<p>*Sources: RSS 24h — Friday, November 13 2026.</p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
