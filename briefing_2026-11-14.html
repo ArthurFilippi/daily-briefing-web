@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>US infrastructure &amp; policy credibility under stress.</strong> A nationwide FAA ground stop (telecommunications outage, hours-long halt) exposed aging systems; Trump administration requested $50B Congressional funding to modernize air traffic control. A tanker-cruise ship collision in New Orleans (32 hospitalized) signals cascading maritime/industrial risks. These aren't isolated incidents—they reflect decades of deferred US infrastructure investment now colliding with operational fragility. For a NASDAQ/S&amp;P500-tilted portfolio heavy in logistics ETFs (BRES, ESE), systemic underinvestment in critical infrastructure raises tail risks around transport/supply-chain disruption; short-term: regulatory funding requests may boost defense/industrial plays; medium-term: structural capex shortfalls could dampen cyclical growth.</p>
+</li>
+<li>
+<p><strong>Corporate governance &amp; tech sector leadership crises are reshaping capital allocation.</strong> Jensen Huang's Nvidia departure (triggered by governance failures), Colette Kress stepping into interim CEO role, and reports of Nvidia's alleged GPU scarcity engineering via startup funding all point to a broader loss of confidence in tech mega-cap leadership. Simultaneously, European founders (Arthur Mensch, Hugging Face) are mobilizing for deeper AI autonomy, and French startups raised €118M this week—signaling capital rebalancing away from opaque US mega-cap tech toward transparent deeptech and EU-based alternatives. This reshuffles risk appetite across your portfolio: growth rotation toward differentiated deeptech (not hardware commodity plays) and away from personality-driven mega-cap tech.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- FAA grounds all US flights hours; system failures expose $50B infrastructure gap.
+- Huang departs Nvidia; governance vacuum fuels AI startup funding anxiety.
+- Trump-Xi-Putin nuclear disarmament talks scheduled Shenzhen, next week.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>US Air Traffic System Failure Exposes Decade-Long Neglect</h3>
+<p>A nationwide FAA ground stop halted all US departures on Friday due to a telecommunications outage affecting regional air traffic control centers. The Trump administration blamed "overloaded" and "outdated" systems, requesting $50B Congressional funding for upgrades. An unnamed US official stated the incident lasted hours, disrupting passenger operations across the country. This failure crystallizes a structural US policy problem: critical infrastructure has been starved of capital investment for over a decade, leaving air travel—the backbone of US economic mobility—vulnerable to single points of failure. <a href="https://lemonde.fr/economie/article/2026/11/14/aux-etats-unis-apres-la-suspension-des-vols-l-administration-trump-politise-cette-panne-geante-et-reclame-50-milliards-de-dollars_6809689_3234.html">Source: <em>Le Monde</em> / <em>DW</em> / <em>The Verge</em></a></p>
+<h3>Trump to Hold Trilateral Nuclear Talks with Xi, Putin in Shenzhen</h3>
+<p>The White House announced a three-way meeting next week (November 20 in Shenzhen) between Trump, Xi Jinping, and Putin to discuss nuclear arsenal reduction. A senior US official stated no agreement is expected; Iran will be discussed, but Ukraine will not be on the agenda. The summit represents the first post-Ukraine multilateral framework attempt on strategic weapons—a notable diplomatic opening despite ongoing conflict. <a href="https://www.dw.com/en/trump-to-meet-xi-putin-for-three-way-huddle-on-nuclear-arms-talks/a-79946408?maca=en-rss-en-all-1573-rdf">Source: <em>DW</em> / <em>Le Monde</em></a></p>
+<h3>European Generational Fault Line: Pensions vs. Public Services</h3>
+<p>France and other European nations face widespread student-led protests this weekend, fueled by pension reform fatigue. As retirees live longer, government spending on pensions crowds out funding for education, healthcare, and infrastructure. The dynamic mirrors Russia: Putin's approval curve has historically spiked during geopolitical escalation. European governments face an inverse pressure—pension obligations force austerity that breeds youth discontent, potentially destabilizing political consensus on NATO, Ukraine support, and EU cohesion. <a href="https://www.nytimes.com/2026/11/14/world/europe/student-protests-pensions-generations.html">Source: <em>The New York Times</em> / <em>Le Grand Continent</em></a></p>
+<h3>Swedish Government Moves to Bar Russian Athletes</h3>
+<p>After Finland and Norway, Sweden announced plans to prevent Russian athletes from competing on its territory. The measure will target Nordic skiing world championships in February 2027. This reflects a hardening Nordic consensus: athletic competition is now subordinate to geopolitical alignment. Combined with the Dakar Youth Olympics permitting Russian athletes under their flag (first time since Ukraine invasion), we see a fragmented global sports governance framework—EU/Nordic nations decoupling from Olympic neutrality, while emerging economies (China dominant in Dakar medals) operating under different diplomatic norms. <a href="https://lemonde.fr/sport/article/2026/11/14/apres-la-finlande-et-la-norvege-la-suede-veut-a-son-tour-empecher-les-athletes-russes-de-concourir-sur-son-sol_6809422_3242.html">Source: <em>Le Monde</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>French Startups Raised €118M This Week; Arthur Mensch Calls for EU Action on AI</h3>
+<p>French founders closed €118M in weekly fundraising, while Mensch (Mistral AI co-founder) publicly urged European leaders to act "immediately" to compete in AI. He frames the stakes as existential: without coordinated EU policy and capital deployment, Europe will remain downstream of US/China in foundational AI. Separately, two ex-iBanFirst founders closed a funding round for an AI assistant targeting SME executives, signaling strong product-market fit in the SME finance vertical. <a href="https://www.maddyness.com/2026/11/13/ia-arthur-mensch-appelle-les-dirigeants-europeens-a-agir-des-maintenant-pour-rester-dans-la-course/">Source: <em>Maddyness</em></a></p>
+<h3>JOLIMOI Fashion Startup Shuts After €10M+ Raise</h3>
+<p>The French fashion-tech startup JOLIMOI, which raised over €10M, has ceased operations. No formal statement was released on reasons (market saturation, unit economics, or product-market fit failure likely candidates). This mirrors broader deeptech correction: companies that raised on narrative alone—without proven unit economics—are failing mid-growth. <a href="https://www.frenchweb.fr/breaking-news/jolimoi-ferme-apres-avoir-leve-plus-de-10-millions-d-euros/c9c2fc76-a562-4890-a05a-92d27ef72ca0?utm_source=rss&amp;utm_medium=syndication&amp;utm_campaign=flux_general&amp;utm_content=breaking_news">Source: <em>FrenchWeb</em></a></p>
+<h3>EU Proposes Chatbot Addiction Constraints; NIS 2 Cybersecurity Rules Expanded</h3>
+<p>Brussels is drafting rules to let consumers disable chatbot features that encourage compulsive use (e.g., simulated relationships to prolong engagement). Simultaneously, France is implementing NIS 2 (Network &amp; Information Systems Directive 2), extending cybersecurity obligations to thousands of organizations and redefining technology supply-chain risk governance. Both moves signal EU intent to regulate AI/digital infrastructure as public goods, not unaccountable platforms—a regulatory stance hostile to move-fast-break-things narratives. <a href="https://www.frenchweb.fr/chatbots-bruxelles-veut-encadrer-la-fabrication-de-l-attachement/900000043?utm_source=rss&amp;utm_medium=syndication&amp;utm_campaign=flux_general&amp;utm_content=article">Source: <em>FrenchWeb</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Nvidia Leadership Crisis: Huang Departure, Board Governance Failure, Interim CFO Takeover</h3>
+<p>Jensen Huang has departed Nvidia, with CFO Colette Kress assuming interim CEO role. Financial Times commentary notes the board failed both Huang and the company—a euphemism for inadequate oversight of governance/ethics. An Nvidia director sold ~$1B in stock weeks before the scandal, raising insider-trading optics. This cascades: venture capitalists and founders now report anxiety over shrinking AI startup funding rounds (Nvidia poured tens of billions into portfolio companies under Huang; his departure signals potential capital contraction). The Huang vacuum is not just board-room theater—it's a systemic shock to the AI funding ecosystem. <a href="https://www.ft.com/content/e141a5ea-5aa4-491b-88a4-369cfc67693a">Source: <em>FT</em> / <em>Bloomberg</em> / <em>TechCrunch</em></a></p>
+<h3>Anthropic IPO Roadshow Underway; SBF Would Have Netted ~$40B</h3>
+<p>Wall Street banks are conducting a roadshow to pitch Anthropic's IPO—potentially the largest public offering on record. Separately, analysis shows that jailed crypto mogul Sam Bankman-Fried, an early Anthropic investor, would have gained nearly $40B in a public exit. The contrast is stark: legitimate AI infrastructure (Anthropic) commanding unprecedented valuation multiples, while fraudulent finance (SBF) faces zero return. This reinforces investor thesis that AI capex cycles are durable, but that capital allocation discipline (governance) matters more than narrative. <a href="https://www.nytimes.com/2026/11/13/business/anthropic-ipo-roadshow.html">Source: <em>The New York Times</em> / <em>FT</em></a></p>
+<h3>China's Clean Energy Expansion, Rail Ridership Hit Record</h3>
+<p>China's railways carried 4.13B passengers in the first 10 months of 2026 (+4.7% YoY), and the government pledged to meet all new power demand growth with clean energy by 2030. Venezuela also announced pipeline repair completion by March, offsetting Colombia's reserve depletion. These moves signal emerging-market infrastructure capex resilience despite macro uncertainty—a partial offset to US infrastructure fragility. For a NASDAQ-heavy portfolio, this underscores Chinese competitive advantage in cleantech (lithium, solar, grid) and infrastructure automation (rail ops, energy logistics). <a href="https://www.bloomberg.com/news/articles/2026-11-14/china-to-meet-all-new-power-demand-with-clean-energy-cctv-says">Source: <em>Bloomberg</em></a></p>
+<h3>Cruise Ship-Tanker Collision in New Orleans: 32 Hospitalized, Supply Chain Risk Signal</h3>
+<p>An oil tanker struck a docked American Cruise Lines vessel on the Mississippi River, leaving the cruise ship partially submerged. All passengers and crew were rescued; 32 people hospitalized (non-critical injuries). The incident highlights vulnerability of inland waterway logistics (critical for US grain, energy, and container transit) to aging vessel infrastructure and operational deconfliction. Combined with the FAA outage, maritime/air/rail logistics are showing systemic stress. <a href="https://www.bloomberg.com/news/videos/2026-11-14/cruise-ship-capsizes-after-tanker-crash-in-new-orleans-video">Source: <em>Bloomberg</em> / <em>BBC</em> / <em>Le Monde</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>SpaceX Starship Booster Recovery Fails; Abort During Test Flight</h3>
+<p>SpaceX aborted its planned catch of the Starship booster during Flight Test. The vehicle continued to orbit, but the booster exploded over the Gulf of Mexico rather than landing for reuse. This is a setback for Elon Musk's goal of achieving full rocket reusability. Despite the failure, the core mission (spacecraft to orbit) succeeded, limiting downside PR—but reusability timelines are slipping. For deeptech founders in propulsion/launch, this signals Starship's pathway to reliability extends longer than originally marketed. <a href="https://www.dw.com/en/spacex-launches-starship-rocket-fails-to-recover-booster/a-79946091?maca=en-rss-en-all-1573-rdf">Source: <em>DW</em> / <em>BBC</em> / <em>FT</em></a></p>
+<h3>Nvidia Allegedly Engineered GPU Scarcity via Startup Funding</h3>
+<p>TechPowerUp reported that Nvidia allegedly engineered GPU supply constraints by funding AI startups to purchase its chips, creating artificial demand concentration. While unconfirmed, the allegation echoes patterns in prior tech booms (e.g., Google's venture arm funding to capture search traffic). If true, this exposes a structural conflict of interest: GPU makers have incentive to fund downstream startups not for ROI, but to lock supply. This will likely trigger regulatory scrutiny post-Huang transition. <a href="https://www.techpowerup.com/354814/nvidia-allegedly-engineered-scarcity-by-funding-ai-startups-to-buy-its-gpus">Source: <em>TechPowerUp</em> / <em>HN</em></a></p>
+<h3>White House Urges Easing AI Liability to Encourage Disclosure</h3>
+<p>The Trump administration's AI task force recommended that federal agencies relax cyber liability policies to incentivize AI companies to self-report critical security incidents. This represents a regulatory pivot: carrot (liability immunity for disclosure) over stick (mandatory reporting with penalties). For AI founders, this creates a window to build incident-response playbooks without fear of retroactive liability—but only if disclosure is rapid and transparent. <a href="https://www.bloomberg.com/news/articles/2026-11-14/white-house-urges-easing-liability-to-encourage-ai-disclosure">Source: <em>Bloomberg</em></a></p>
+<h3>Ggml v1.0.0 Released; Open-Source ML Infrastructure Matures</h3>
+<p>The ggml library (GPU inference framework) reached v1.0.0, signaling stable API and production-ready status. Ggml enables efficient large-language model inference on consumer hardware, underpinning open-source alternatives to proprietary cloud inference (OpenAI, Anthropic). This is a watershed: open-source ML infrastructure is now at parity with closed systems on ease-of-use and performance. Implications: smaller deeptech teams can now deploy models without Nvidia GPU dependency, fragmenting the inference market and reducing Nvidia's moat. <a href="https://github.com/ggml-org/ggml/releases/tag/v1.0.0">Source: <em>GitHub / HN</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>"Neo-DeepTech": The Post-Hype Maturation Cycle Begins</strong></p>
+<p>French deeptech analyst Maddyness published an obituary for "DeepTech" as a category, declaring the emergence of "neo-DeepTech"—a phase where foundational R&amp;D transitions to commercial scalability and unit-economics discipline. This reflects observed founder behavior: €118M in French fundraising this week is now concentrated in companies with proven metrics (ex-iBanFirst alumni launching an SME AI assistant; founders joining Lyon's French Tech acceleration program focused on human-centered scaling), while capital-inefficient narrative plays (JOLIMOI's €10M+ raise ending in shutdown) are dying.</p>
+<p>The broader pattern: venture capital has cycled from 2023–2025 euphoria around "AI will change everything" to 2026–2027 pragmatism around "show me unit economics, customer retention, and competitive moat." This mirrors historical tech inflections (post-dot-com, post-2008). The signal for an aspiring deeptech founder is clear: storytelling is dead; execution and customer value (not just technical sophistication) determine funding access and valuation.</p>
+<p>For your investment portfolio, this portends a rotation within deeptech/AI: away from high-burn-rate model-training labs (capital black holes) and toward applied AI tools with transparent revenue mechanics (SME fintech, enterprise automation, biotech applications). Companies like Anthropic (disciplined on revenue, governance; IPO roadshow credibility) will attract capital that previously flowed to unfocused "AI labs."</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>"Why Putin's Approval Curve Matters Now"</strong> — <em>Le Grand Continent</em> analysis on Russian domestic politics and escalation cycles; contextualizes geopolitical risk for Trump-Xi-Putin talks. <a href="https://legrandcontinent.eu/fr/2026/11/14/pourquoi-il-faut-preter-attention-a-la-courbe-de-popularite-de-poutine/">Link</a></p>
+</li>
+<li>
+<p><strong>"Infrastructure as National Security"</strong> — <em>FT</em> investigation into US air traffic modernization funding gaps and how Medicaid work-requirement delays expose fiscal constraint on Biden-era social commitments. Relevant for macro investors assessing US policy coherence.</p>
+</li>
+<li>
+<p><strong>"The Next AI Revolution Will Be Biological"</strong> — <em>Le Grand Continent</em> essay on AI's role in cancer treatment vs. public fear narratives; directly challenges the hype-vs.-substance divide signaled above. <a href="https://legrandcontinent.eu/fr/2026/11/14/la-prochaine-revolution-de-lia-sera-biologique/">Link</a></p>
+</li>
+</ul>
+<hr />
+<p>*Sources: RSS 24h, Le Monde, Financial Times, Bloomberg, DW,</p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
