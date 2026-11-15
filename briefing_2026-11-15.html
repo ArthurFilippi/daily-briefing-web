@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>SpaceX catches Starship's upper stage after 14 orbits using mechanical arms.</li><li>France slides below European average GDP per capita amid weakest growth.</li><li>Nvidia CEO Jensen Huang exits following security breaches; 115,000+ signatures urge reinstatement.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>France's Structural Economic Underperformance Widens Relative Decline</h3>
+<p>France now ranks below the European mean on GDP per capita, a reversal reflecting weakest-in-cohort growth this year. <em>Source: <a href="https://www.lemonde.fr/economie/article/2026/11/15/le-lent-declin-economique-de-la-france-face-au-reste-de-l-europe_6810984_3234.html">Le Monde</a></em></p>
+<p>This metric signals deeper labour productivity and competitiveness gaps, not cyclical downturns. Italian politics' rightward shift and fragmentation (far-right normalization across the continent) suggests EU governments lack fiscal bandwidth or labour-market flexibility to reverse course. For eurozone-exposed portfolios, this reinforces long-term headwinds on French sovereign spreads and growth-linked equities.</p>
+<h3>US Floats Donbas Concession in Exchange for Ukraine NATO Membership</h3>
+<p>Trump administration envoys proposed Ukrainian NATO accession conditioned on territorial concessions in Donbas, which Kyiv dismissed. Zelensky stated Putin maintains unchanged demands. <em>Source: <a href="https://www.lemonde.fr/international/article/2026/11/15/ukraine-volodymyr-zelensky-evoque-l-hypothese-americaine-d-une-adhesion-de-son-country-a-l-otan-contre-la-cession-du-donbass_6810710_3210.html">Le Monde</a></em></p>
+<p>No formal US confirmation yet, but the trial balloon signals negotiation scope within the Trump orbit. Geopolitical risk premium on energy and defence names remains elevated pending clarity on settlement parameters.</p>
+<h3>Iran's Proxy Activity Unsettles Europe, Prosecutors Investigate Security Breaches</h3>
+<p>UK and European authorities believe Iran or Iranian proxies orchestrated multiple data breaches and threats across Britain and the continent. <em>Source: <a href="https://www.nytimes.com/2026/11/15/world/europe/in-europe-an-emboldened-iran-contributes-to-a-sense-of-anxiety.html">New York Times</a></em></p>
+<p>Pattern reflects broader asymmetric contestation via espionage and infrastructure probing. Operational tempo suggests Iran perceives reduced Western deterrent capacity post-Ukraine, with implications for critical infrastructure insurance and cybersecurity spend.</p>
+<h3>Teddy Riner Announces 2027 Presidential Bid, Rejects Macronism</h3>
+<p>Judo champion and household name Riner officially entered the French presidential race, with one-in-five voters open to supporting him. He distanced himself from incumbent framing. <em>Source: <a href="https://www.bbc.co.uk/news/articles/c6dj1e8wyykmo?at_medium=RSS&amp;at_campaign=rss">BBC</a></em></p>
+<p>Fractured candidacy field (now including a mainstream sports figure pivoting populist-adjacent) mirrors European anti-establishment sentiment and suggests 2027 vote splitting could reshape French policy in ways unfavourable to EU cohesion or tech-friendly reform agendas.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>First Cohort of Extended Medical Residencies Deploys to Underserved Zones</h3>
+<p>Approximately 2,700 junior GPs entered four-year residencies (extended from three) beginning November 2, predominantly in medically underserved regions—a structural health-system reform. <em>Source: <a href="https://www.lemonde.fr/societe/article/2026/11/15/deserts-medicaux-sur-le-terrain-avec-la-premiere-promotion-de-docteurs-juniors-en-medecine-generale_6810976_3224.html">Le Monde</a></em></p>
+<p>Policy aims to redress rural/peripheral access gaps and signals sustained government investment in primary care infrastructure. Opportunity set for health-tech startups (telehealth, diagnostics, ERP for clinic operations) in underserved territories remains underpenetrated; this cohort's deployment creates a multi-year addressable market.</p>
+<h3>Protests Over Police Self-Defence Legislation Continue (Fifth Weekend)</h3>
+<p>Approximately 106,000 marchers demonstrated across French cities Saturday against proposed law establishing presumption of legitimate self-defence for police and gendarmes—turnout declined from prior weekends. <em>Source: <a href="https://www.dw.com/en/tens-of-thousands-continue-to-protest-across-france/a-79950503">DW</a></em></p>
+<p>Waning mobilization suggests coalition fatigue, but core opposition from civil-rights and left constituencies remains organised. Legislative passage likely but faces sustained reputational costs; startups in justice/legal compliance space may see demand for police accountability tools and body-camera analytics.</p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Data Centre Construction Stocks Lose $4.2 Trillion as AI Infrastructure Boom Deflates</h3>
+<p>Shares in "picks and shovels" providers (semiconductor equipment, power infrastructure, real estate) suffered acute losses following unraveling of the AI trade. <em>Source: <a href="https://www.ft.com/content/d5adde7e-68cc-455b-ba78-b39cc3676b7a">Financial Times</a></em></p>
+<p>Market repricing reflects recognition that speculative overbuilding outpaced genuine demand for compute capacity and that incumbent hyperscalers (Google, Meta, Microsoft) now optimize for internal capex efficiency rather than external vendor revenue growth. For PAEEM, TNO, ETZ exposure, this marks cyclical peak in infrastructure capex elasticity.</p>
+<h3>FAA Ground Stop Exposes Decades of Deferred Maintenance in US Air Traffic Control</h3>
+<p>A single router facility in southern Arkansas triggered a nationwide flight suspension Friday after personnel upgraded copper wire to fibre optic lines. <em>Source: <a href="https://www.ft.com/content/9df17e1c-c77a-4f67-b5b4-1adb64bcd063">Financial Times</a></em></p>
+<p>Incident exemplifies systemic brittleness: decades of bipartisan infrastructure neglect mean that routine modernization can cascade into national disruption. Repair capex backlogs will strain carrier balance sheets and reinforce pressure for regulatory cost-pass-through, dampening near-term airline profitability.</p>
+<h3>Family Dollar to Settle Overcharging Litigation for $63 Million</h3>
+<p>Federal regulators and 17 states alleged the discount retailer overcharged customers "millions of dollars" at checkout since 2023, triggering negotiated settlement. <em>Source: <a href="https://www.nytimes.com/2026/11/14/business/family-dollar-overcharging-settlement.html">New York Times</a></em></p>
+<p>Signals sustained enforcement focus on retail transparency and fintech/POS system accountability. Implications for discount retail margins and compliance tech vendors remain pricing-in across consumer discretionary indices.</p>
+<h3>EU Banking Watchdog Shifts Course on Deposit Insurance Harmonization</h3>
+<p>European Banking Authority chair moving toward alternative frameworks for cross-border lending liberalization rather than single deposit guarantee scheme. <em>Source: <a href="https://www.ft.com/content/016ce22d-1e09-4f1d-a7e6-9acf183e757f">Financial Times</a></em></p>
+<p>Retreat from centralized harmonization reflects political resistance to fiscal burden-sharing and suggests slower deposit-base fungibility across EU member states, reinforcing fragmentation in eurozone banking consolidation and M&amp;A velocity.</p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>SpaceX Successfully Captures Starship Upper Stage After Orbital Flight Using Mechanical Arms</h3>
+<p>On Flight 15, SpaceX recovered the Starship upper stage after ~24 hours in orbit (14 revolutions) using "Mechazilla" catch tower arms—the first successful capture of this vehicle class post-reentry. <em>Source: <a href="https://www.bbc.co.uk/news/videos/cwlym2gy3y3eo">BBC</a>, <a href="https://www.theverge.com/science/1033930/spacex-chopstick-starship-catch">Verge</a></em></p>
+<p>Technical achievement de-risks the core reusability assumption underpinning SpaceX's economics model (cost-per-kg to orbit diminishes 10–50x with true hardware reuse vs. expendables). Implication: launch services pricing pressure accelerates across commercial space, affecting satellite constellation capex ROI and constellation-operator unit economics.</p>
+<h3>Nvidia CEO Jensen Huang Exits Amid Security Breach and Supplier-Relationship Controversy</h3>
+<p>Huang stepped down following investigation into relationships with executives at firms suspected of funneling chips to China in violation of export controls. Petition to reinstate gathered 115,000+ signatures from tech leaders including Elon Musk. <em>Source: <a href="https://techcrunch.com/2026/11/14/where-was-nvidias-security-team/">TechCrunch</a></em></p>
+<p>Security chief departed quietly in August; investigation reveals potential lapses in corporate compliance and governance. Market reaction reflects heightened geopolitical risk on semiconductor supply chains and potential Chinese retaliatory measures; impacts Taiwan semiconductor exposure and US-listed chip equipment vendors.</p>
+<h3>Court Denies Motion to Dismiss DRAM Price-Fixing Litigation Against Samsung, SK Hynix, Micron</h3>
+<p>Lawsuit alleging cartel pricing coordination in DRAM markets survived dismissal motion, allowing discovery to proceed. <em>Source: <a href="https://litnews.ai/articles/garciaguirre-samsung-sk-hynix-micron-dram-conspiracy-suit-survives-dismissal">Litigation News</a></em></p>
+<p>Litigation risk on commoditized memory pricing increases reputational and settlement exposure for suppliers. Implication: margin volatility on memory-intensive infrastructure (servers, data centre ASICs) may face upside from reduced competitive intensity if settlements trigger output constraints.</p>
+<h3>Indian Equities Rebound as AI Trade Unwinds, Foreign Flows Return</h3>
+<p>Indian stock market reversed bruising YTD losses as artificial intelligence capital rotation unwound and foreign institutional investors returned to emerging-market valuations. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-15/india-stock-market-rebounds-as-ai-trade-unwinds-foreign-funds-return">Bloomberg</a></em></p>
+<p>Rotational shift suggests disciplined reallocation from speculative AI capex plays toward diversified fundamentals-driven emerging markets. For growth-tilted NASDAQ/SP500 portfolios, this reflects broader risk-off in unprofitable AI vendors and resurgent demand for earnings-generative equities.</p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Reusability Engineering Becomes the Profitable Moat in Deep Tech</strong></p>
+<p>SpaceX's Starship upper-stage catch represents a critical inflection: the transition from "can we do it?" (proof-of-concept, 2023–2024) to "can we repeat it reliably and profitably?" (deployment phase, 2026 onwards). Successive full-stack orbital flights with mechanical recovery now reduce the conceptual distance between aerospace and manufacturing—both require iteration, quality control, and process repeatability. Meanwhile, the simultaneous collapse in data-centre construction stocks reveals investor recognition that <em>speculative capacity</em> (building facilities for imagined demand) is not the same as <em>demonstrated efficiency</em> (running existing systems at lower cost per output). </p>
+<p>This divergence will reshape deeptech venture investing: founders with early traction on reuse metrics (launch manifests with actual repeat customer commitments, chip yields improving quarter-on-quarter, battery cycle-life proving) will command higher valuations than those with shinier roadmaps. Aerospace and energy-storage startups claiming "reusable" design but lacking operational data will face skepticism. The signal: market is moving away from "technology + story" toward "technology + metrics." For a young entrepreneur, this means building not just a prototype, but a repeatable process for its manufacture and deployment—and measuring it obsessively from day one.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong>FAA ground stop root cause analysis</strong> — <a href="https://www.wsj.com/business/airlines/the-single-router-in-southern-arkansas-that-ground-air-travel-to-a-halt-eedc326c">Wall Street Journal</a>: How a single facility's infrastructure failure cascaded into national economic disruption; essential for understanding critical-system design trade-offs in complex networks.</p>
+</li>
+<li>
+<p><strong>Nvidia security governance gaps</strong> — <a href="https://techcrunch.com/2026/11/14/where-was-nvidias-security-team/">TechCrunch</a>: CEO departure and compliance lapses offer a case study in how geopolitical risk intersects with corporate control environments; relevant for understanding board-level oversight in strategic industries.</p>
+</li>
+<li>
+<p><strong>SpaceX Starship Flight 15 technical overview</strong> — <a href="https://www.spacex.com/launches/starship-flight-15">SpaceX Launch Updates</a>: Complete recovery data, orbital parameters, and catch tower performance metrics; critical reading for understanding reusability economics and capital intensity of next-generation launch platforms.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS feeds aggregated 24h through November 15 2026. Curation: Geopolitics (25), Business &amp; Finance (25), Tech/Deeptech (25), French/European entrepreneurship (6 items extracted and prioritized).</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
