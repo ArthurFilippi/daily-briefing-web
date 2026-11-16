@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul><li>Nvidia CEO Huang under pressure; 157K petition demands his return.</li><li>China's October growth lagged expectations across consumption, industrial output, investment.</li><li>Haiti holding first election since 2021; assassinated leader's widow runs.</li></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Nvidia's Stability Crisis Spills Into U.S. Strategic Vulnerability</h3>
+<p>Jensen Huang's departure from Nvidia has triggered an unprecedented institutional panic: 157,000+ signatories (including tech titans like Elon Musk) are demanding his return, while U.S. Treasury Secretary Scott Bessent publicly called for a "dramatic leadership shakeup" and full compliance disclosure on AI chip export controls. The New York Times framed the moment as "the U.S. economy hitched its wagon to Nvidia and Jensen Huang" — a single-point failure now exposing how concentrated American geopolitical leverage in AI infrastructure has become. Intelligence adds a layer: reports of a suspected Chinese spy embedded at Nvidia until 2025 underscore that this leadership vacuum coincides with acute counterintelligence risk. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/11/15/world/nvidia-jensen-huang-ai-chips.html">New York Times</a>, <a href="https://www.lemonde.fr/pixels/article/2026/11/16/plus-de-157-000-signataires-dont-elon-musk-demandent-le-retour-de-jensen-huang-a-la-tete-de-nvidia_6811065_4408996.html">Le Monde</a></p>
+<h3>Red Sea Control Tilts Toward Iran-Backed Houthis as Saudi Allies Retreat</h3>
+<p>Saudi-backed Yemeni forces announced a tactical withdrawal from the Bab al-Mandab Strait to consolidate defenses around the interim capital Aden, effectively ceding control of one of the world's most critical chokepoints to Iran-aligned Houthis. This shift allows Houthis to enforce de facto maritime leverage over global shipping between the Red Sea and Indian Ocean — a geopolitical realignment with direct implications for freight costs, insurance premiums, and U.S. Navy operational presence in the region. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cqvg2xgyvnjpo?at_medium=RSS&amp;at_campaign=rss">BBC</a></p>
+<h3>Haiti's First Election Since 2021 Assassination: Widow of Jovenel Moïse Registers</h3>
+<p>Five years after the assassination of President Jovenel Moïse, Haiti is holding its first presidential election, with his widow registering as a candidate. The electoral restart — after years of gang violence, UN occupation politics, and institutional collapse — signals an attempt to restore formal democratic legitimacy, though security conditions remain precarious and international oversight remains critical. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cmwy83432q1jo?at_medium=RSS&amp;at_campaign=rss">BBC</a></p>
+<h3>France Pushes Climate Finance Burden-Sharing at COP31; Maize Harvests Collapse</h3>
+<p>At COP31 in Turkey, France has made broadening the circle of developed nations required to fund climate adaptation for the Global South a priority — attempting to redistribute responsibility beyond traditional OECD donors. Concurrently, severe drought and heatwaves have crushed French maize yields: grain maize output fell 50%, forage maize by 30%, directly threatening the livestock feed supply chain that underpins French and European animal agriculture. This convergence underscores how climate volatility is restructuring both financial architecture (who pays) and domestic production (what crops survive). <strong>Source:</strong> <a href="https://www.lemonde.fr/planete/article/2026/11/16/cop31-quels-pays-doivent-regler-la-facture-de-la-lutte-contre-la-catastrophe-climatique_6811341_3244.html">Le Monde</a>, <a href="https://www.lemonde.fr/economie/article/2026/11/16/le-mais-indispensable-au-modele-agricole-francais-menace-par-le-dereglement-climatique_6811339_3234.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Paris-Vatry Airport Threatened by France's Small-Package Tax; Decision December 4</h3>
+<p>The Paris-Vatry logistics hub, a critical node in France's e-commerce infrastructure, faces potential closure due to fallout from France's new tax on small international parcels. Regional officials (Marne) will vote December 4 on whether to sustain the facility, which has become a collateral casualty of Paris's effort to level the competitive playing field against low-cost cross-border parcel services. This is a micro-level illustration of how uncoordinated fiscal policy can unintentionally strangle domestic logistics ecosystems. <strong>Source:</strong> <a href="https://www.frenchweb.fr/breaking-news/dommage-collateral-de-la-taxe-francaise-sur-les-petits-colis-paris-vatry-est-menace-de-fermeture-les-elus-de-la-marne-se-prononceront-le-4-decembre/">FrenchWeb</a></p>
+<h3>MAILEVA Hit by Major Breach: 22 Million Records Exposed</h3>
+<p>French digital mail and document services provider MAILEVA suffered a cyberattack exposing contact information for 22 million individuals — likely including government agencies, corporations, and households relying on the platform for official communications. The scale of exposure raises urgent questions about critical infrastructure resilience in France's digitalization drive. <strong>Source:</strong> <a href="https://www.frenchweb.fr/breaking-news/cyberattaque-chez-maileva-les-coordonnees-de-22-millions-de-personnes-derobees/">FrenchWeb</a></p>
+<h3>Macron Convenes European Tech Leaders on AI Capital Allocation</h3>
+<p>Three weeks after the Dublin European Council, France and the Netherlands are hosting a summit of European tech executives in Paris, with Macron pressing for EU-based AI companies to source capital domestically rather than defaulting to U.S. investors. This repositioning effort — under the banner "where does Europe's AI spending go?" — reflects growing strategic anxiety about capital flight and the risk that European AI talent trains in U.S.-funded labs. <strong>Source:</strong> <a href="https://www.frenchweb.fr/ia-ou-va-l-argent-que-l-europe-depense/">FrenchWeb</a></p>
+<h3>Italian Robotics Startup Mosaico Raises €7.5M for AI Data Infrastructure</h3>
+<p>Mosaico, an Italian deeptech robotics-software firm addressing AI training data bottlenecks, closed a €7.5M funding round — a rare EU-scale capital event for non-AI infrastructure plays in the broader AI ecosystem. This signals investor appetite for unsexy but critical components (data pipeline automation, synthetic data generation) that sit downstream of headline AI model wars. <strong>Source:</strong> <a href="https://sifted.eu/articles/robotics-software-ai-funding-round-mosaico/">Sifted</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>China's October Growth Falters Across All Metrics; Stimulus Stalling</h3>
+<p>China's economic data released Monday morning delivered a broad-based disappointment: industrial output, consumption, and investment all undershot forecasts in October, signaling that Beijing's stimulus measures have yet to translate into visible demand recovery. The People's Bank of China responded by draining medium-term liquidity for the first time in five months, a hawkish signal that contradicts market bets on aggressive monetary easing and suggests officials are prioritizing stability over growth acceleration. <strong>Source:</strong> <a href="https://www.ft.com/content/7a6f84cf-ebea-4225-a31a-571fb877286a">Financial Times</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-16/pboc-withdraws-medium-term-funds-in-warning-sign-to-easing-bets">Bloomberg</a></p>
+<h3>Copper, Iron Ore Hit Multi-Month Lows on Demand Pessimism</h3>
+<p>Copper fell to a 4-month low and Chinese iron ore futures slumped to a 4-year low as traders turned sharply bearish on industrial demand, particularly from steel mills heading into winter. The twin commodity rout reflects both structural softness in Chinese manufacturing and broader risk-off sentiment accelerating out of the AI sector correction. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-16/copper-sinks-to-four-month-low-on-tech-rout-china-growth-woes">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-16/chinese-iron-ore-futures-hit-four-year-low-on-weak-steel-outlook">Bloomberg</a></p>
+<h3>Brussels Proposes €45B Emergency Ukraine Loan via EU Budget Borrowing</h3>
+<p>The European Commission is set to propose a €45 billion loan to Ukraine, borrowed against the EU's own budget, to bridge Kyiv's critical funding gap in 2027 and sustain fiscal solvency as war costs compound. This represents a material escalation in EU direct financial commitment and a pragmatic bypassing of member-state-by-state negotiation bottlenecks. <strong>Source:</strong> <a href="https://www.ft.com/content/2c9de06b-aa86-4275-b9f3-1276f8c20994">Financial Times</a></p>
+<h3>EQT Plans €9B Japanese Private-Equity Wave; Morgan Stanley Calls 'Max Overweight' on Equities</h3>
+<p>Stockholm-based mega-fund EQT signaled plans to deploy up to 30% of its $30B dry powder (roughly €9B) into take-private opportunities in Japan, betting on undervalued public companies in a stagnant market. Simultaneously, Morgan Stanley strategists recommended "max overweight" in global equities, arguing the AI capital spending cycle remains intact and will extend earnings growth into 2027 — a contrarian call against the day's broader risk-off mood. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/videos/2026-11-16/eqt-sees-wave-of-take-private-opportunities-in-japan-video">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-16/morgan-stanley-max-overweight-global-stocks-on-intact-ai-cycle">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Alibaba Launches Flagship AI Model to Challenge OpenAI and Anthropic in China</h3>
+<p>Alibaba unveiled a new flagship large language model claiming performance parity with Anthropic and OpenAI offerings, doubling down on China's competitive posture in AI infrastructure as U.S. export controls tighten. The move signals both technological progress and strategic urgency to reduce dependency on foreign AI stacks amid geopolitical decoupling. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-16/alibaba-unveils-new-flagship-ai-model-in-riposte-to-us-rivals">Bloomberg</a></p>
+<h3>Kakao to Split Internet Empire Next Year; Betting on AI-Native Organizational Structure</h3>
+<p>After over a decade of vertical consolidation under one holding company, South Korea's Kakao is preparing a historic corporate breakup in early 2027 to become leaner, more specialized AI competitors. The split reflects a broader thesis that AI-native businesses require rapid experimentation, smaller teams, and vertical focus rather than the conglomerate model of the pre-AI era. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-16/kakao-prepares-for-historic-split-of-internet-empire-in-ai-chase">Bloomberg</a></p>
+<h3>SK Hynix Opens Semiconductor Testing Hub to Boost Korean Chip Ecosystem</h3>
+<p>South Korea's SK Hynix is partnering with the government to launch a dedicated chip testing facility next year, targeting smaller Korean equipment makers squeezed out by dominance of Samsung and SK Hynix in upstream production. This infrastructure play mirrors Japan's earlier Fab strategy — building shared capabilities to level the playing field for mid-tier suppliers. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-16/sk-hynix-plans-chip-testing-hub-to-boost-smaller-korean-players">Bloomberg</a></p>
+<h3>Indian Chip Startup Bharat Semi Lands $24M Seed Round for AI Sensor IP</h3>
+<p>Bharat Semi, an Indian semiconductor deeptech firm targeting AI-enabled sensor architectures, closed a $24M seed round with design wins already secured from General Atomics. This validates the thesis that non-U.S. chip fabless design (especially in sensor/edge-AI) is attracting serious venture capital as geopolitical decoupling accelerates supply-chain diversification. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/15/indian-chip-startup-bharat-semi-lands-24-m-seed-round-as-it-eyes-global-ai-sensor-market/">TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>Nvidia Leadership Vacuum as Highest-Signal Test of AI Hype Resilience</strong></p>
+<p>Jensen Huang's abrupt exit from Nvidia — triggered by allegations of extramarital affairs and now swamped by 157,000+ public petition signatures demanding his reinstatement (including from 7,500+ Nvidia employees) — is not tabloid noise. It is the clearest market stress-test yet of whether AI enthusiasm is fundamentally tied to charismatic founder mythology or to capital deployment, product velocity, and edge.</p>
+<p>The fact that Treasury Secretary Scott Bessent felt compelled to publicly demand a "dramatic leadership shakeup" and full export-control transparency suggests the U.S. government views Nvidia's stability as a national security asset, not a private-sector concern. When geopolitical stakeholders lose confidence in a company's leadership, it cascades: talent flight risk, customer nervousness (does Nvidia still execute?), and opportunistic competitor signaling (AMD, Intel, or even Chinese alternatives gain credibility in boardrooms hedging exposure). The spy allegations (a suspected Chinese agent embedded at Nvidia until 2025) add a layer: if Huang's absence creates organizational chaos, information security tightens anyway — paradoxically making espionage harder but institutional decision-making slower.</p>
+<p>For an entrepreneur, the lesson is structural: founder-dependent narratives are now a liabilities, not assets. Investors and customers are learning to ask: what happens to this company if the founder dies, faces scandal, or leaves? Huang built Nvidia into a $3T+ franchise, but the moment his personal conduct became tabloid material, the entire edifice revealed itself as fragile. A resilient deeptech company — whether in chips, biotech, or energy — must have institutional redundancy, transparent governance, and the ability to execute at scale without a single charismatic personality. That's hard to do when fundraising still rewards founder-centric narratives, but the market is now punishing (via leadership crises) those who don't.</p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://www.nytimes.com/2026/11/15/world/nvidia-jensen-huang-ai-chips.html">Why Nvidia's Huang Crisis Matters More Than His Personal Conduct</a></strong> — New York Times on systemic concentration risk in U.S. AI infrastructure.</p>
+</li>
+<li>
+<p><strong><a href="https://www.ft.com/content/7a6f84cf-ebea-4225-a31a-571fb877286a">China's Stimulus Stalling; What's Next for Growth?</a></strong> — Financial Times analysis of China's disappointing October data and PBOC's hawkish liquidity drainage.</p>
+</li>
+<li>
+<p>**[Dual-Class Shares and Founder Control in AI Unicorns: Anthropic, SpaceX, Google](https://www.bloomberg.com/news</p>
+</li>
+</ul>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
