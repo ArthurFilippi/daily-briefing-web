@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>AI sector losing execution credibility amid leadership turbulence and geopolitical friction.</strong> Jensen Huang's departure from Nvidia—the first time he's missed earnings in 27 years—collides with US chip export curbs targeting Southeast Asia and China, triggering selloffs across hyperscalers and model developers. The narrative has shifted from "build anything" to "can we monetize at scale without stepping on US/China tripwires?" For NASDAQ-heavy portfolios (WPEA, ETZ, PAEEM), this signals near-term consolidation risk; conviction in AI upside now hinges on earnings clarity and regulatory certainty rather than growth optionality.</p>
+</li>
+<li>
+<p><strong>European deeptech capital mobilization is decoupling from US venture turbulence.</strong> PLURAL's €1B fund close and Sofinnova's €725M raise for Crossover II arrive precisely as Anthropic's IPO draws skepticism from AustralianSuper's CIO (comparing valuations to dot-com excess), and China's Z.AI crashes 85% on chip-access fears. France/Europe is positioning sovereign AI/deeptech stacks outside the valuation volatility and geopolitical squeeze—a structural shift with 3-5 year horizon for portfolio diversification away from pure-play US cap-weighted exposure.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Jensen Huang resigns from Nvidia; interim CEO Colette Kress debuts at earnings.
+- US tightens chip export rules for Southeast Asia, Brazil data centers; China AI firms suffer.
+- PLURAL closes €1B deeptech fund; European VC capital hardens focus on sovereignty.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Jensen Huang's departure leaves Nvidia leaderless weeks before earnings</h3>
+<p>Nvidia founder Jensen Huang has stepped down as CEO after 27 years, with CFO Colette Kress assuming the role for the company's earnings call—the first time Huang will miss reporting results since 1999. The move arrives amid mounting pressure from US export controls on advanced chips and intensifies investor anxiety about whether the AI infrastructure buildout can sustain its growth narrative. Trump's administration and prominent tech figures have launched public campaigns to reinstate Huang, treating his exit as a warning signal for the broader AI sector. <strong>Source:</strong> <a href="https://www.ft.com/content/424e5ab0-517e-4f8e-a286-df7c67fa05a6">FT</a>, <a href="https://www.bbc.co.uk/news/articles/cry49plv8v3go">BBC</a></p>
+<h3>US moves to block remote access to Nvidia chips in Southeast Asia and Brazil</h3>
+<p>The Trump administration announced new licensing requirements for advanced chip sales to data centers in Southeast Asia and Brazil, closing loopholes that allowed remote computational access from restricted regions. The rule tightens an already aggressive export control regime and directly constrains AI model training capacity in China and allied cloud operators across APEC economies. Market reaction has been swift: Chinese AI developer Z.AI crashed 85% on chip-access fears, signaling that geopolitical friction on semiconductors now overrides AI demand optimism. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/videos/2026-11-17/impact-of-us-move-to-curb-chip-access">Bloomberg</a></p>
+<h3>Russia escalates infrastructure strikes on Kyiv; bridges targeted</h3>
+<p>Russian forces struck two major bridges spanning the Dnipro River in Kyiv on Monday, with Kyiv Mayor Vitali Klitschko confirming damage to the North and South crossings after a Ukrainian assault on the Crimean Bridge earlier that day. The escalation marks a new phase in infrastructure targeting, raising questions about supply-chain resilience for Ukrainian military logistics and civilian movement. Estonia's defense ministry secretary warned that Putin aims to dismantle Europe's post-Cold War security architecture, signaling that the conflict is now explicitly framed as a struggle over continental order. <strong>Source:</strong> <a href="https://www.dw.com/en/ukraine-russian-strikes-hit-bridges-in-kyiv-mayor-says/live-79964446">DW</a>, <a href="https://www.lemonde.fr/international/live/2026/11/17/en-direct-guerre-en-ukraine-des-frappes-russes-ont-touche-deux-ponts-importants-de-kiev-annonce-le-maire-vitali-klitschko_6810982_3210.html">Le Monde</a></p>
+<h3>Five EU states establish migrant deportation hub in Rwanda</h3>
+<p>Germany, Denmark, Austria, Greece, and the Netherlands announced a joint "return hub" in Rwanda to process failed asylum seekers, following the UK's contested Rwanda model but with explicit EU coordination. The move signals hardening European immigration policy and outsourcing of asylum processing, coinciding with street protests across French cities (Lyon, Toulouse, Lille, Rennes) demanding higher purchasing power and tighter labor market protections. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/cw987343352go">BBC</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>PLURAL closes €1B deeptech fund; anchors Paris as European AI hub</h3>
+<p>PLURAL announced a €1 billion fund dedicated to European deeptech across AI, quantum, biotech, and advanced materials, with significant commitments to Paris-based governance and follow-on investment capacity. The fund strategy emphasizes companies requiring multiple fundraising rounds before industrialization—a tacit acknowledgment that European deeptech cycles are longer but capital-efficient relative to US venture excess. This capital raise arrives as Anthropic's IPO draws institutional skepticism (AustralianSuper CIO flagged dot-com-like valuations), positioning European stacks as a hedge against US valuation compression and geopolitical chip restrictions. <strong>Source:</strong> <a href="https://www.frenchweb.fr/plural-leve-1-milliard-d-euros-pour-la-deeptech-europeenne-et-renforce-son-ancrage-a-paris/900000046">FrenchWeb</a>, <a href="https://sifted.eu/articles/plural-new-fund-e1bn/">Sifted</a></p>
+<h3>Sofinnova Partners raises €725M for biotech crossover strategy</h3>
+<p>Sofinnova Partners closed its Crossover II fund at €725 million, targeting biotech companies navigating clinical-to-commercial transitions with deep EU/US regulatory arbitrage. The fund targets a 3–5 year deployment window, reinforcing French institutional capacity for late-stage biotech financing outside the US VC ecosystem. <strong>Source:</strong> <a href="https://www.maddyness.com/2026/11/16/sofinnova-partners-leve-725-millions-deuros-pour-son-fonds-crossover-ii/">Maddyness</a></p>
+<h3>PRÉSAGE deploys cloud testing platform; ex-Meta scientist leads R&amp;D</h3>
+<p>PRÉSAGE, a Paris-based startup, launched a cloud change-simulation platform with Tony Tung (former Meta AI scientist) as cofounder and chief scientist. The startup targets DevOps/SRE teams preventing production failures via pre-deployment software testing—a defensible infrastructure play in a market where European cloud adoption lags US and Asia by 18–24 months. <strong>Source:</strong> <a href="https://www.frenchweb.fr/presage-veut-tester-les-changements-du-cloud-avant-leur-mise-en-production/900000047">FrenchWeb</a></p>
+<h3>Vulcan's 40-satellite loss weakens Amazon's Kuiper constellation odds</h3>
+<p>An Arianespace Vulcan launch failure destroyed 40 Amazon Kuiper internet satellites, delaying Amazon's challenge to Starlink and introducing execution risk into the low-earth-orbit internet race. The next Kuiper batch depends on Ariane 6 launches from Kourou, adding European supply-chain dependency to what was positioned as a US-dominated market. <strong>Source:</strong> <a href="https://www.frenchweb.fr/crash-spatial-vulcan-perd-40-satellites-et-fragilise-le-pari-d-amazon-contre-starlink/900000045">FrenchWeb</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Aluminum supply squeeze hits extreme tightness; traders scramble for near-term contracts</h3>
+<p>LME aluminum markets are experiencing a severe supply crunch, with extreme backwardation in near-term contracts forcing traders to source physical metal at elevated premiums. The squeeze reflects both mine output constraints and strategic inventory drawdowns ahead of tariff uncertainty under the Trump administration. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-17/aluminum-squeeze-intensifies-lme-traders-scrambling-for-metal">Bloomberg</a></p>
+<h3>Global developing-country debt jumps to $9.4 trillion amid rate shock</h3>
+<p>The World Bank reported that debt held by developing economies surged to $9.4 trillion as elevated global interest rates, currency volatility, and commodity price shocks cascade through emerging markets. The trend exacerbates fiscal constraints for countries already financing climate adaptation and infrastructure, raising recession risk for commodity exporters and threatening demand for NASDAQ-listed exporters of industrial goods (VAL, BRES tilts). <strong>Source:</strong> <a href="https://www.nytimes.com/2026/11/17/business/economy/global-debt-economy-world-bank.html">NYT</a></p>
+<h3>Shoe prices hit record high; tariffs and material costs accelerate inflation</h3>
+<p>Athletic and casual footwear prices reached all-time highs in October as brands absorbed tariff increases and raw material (rubber, synthetic fiber) cost escalation. The trend signals that tariff pass-through to consumers is accelerating faster than wages, potentially dampening discretionary spending and triggering margin compression across apparel retail. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/11/17/business/shoe-prices-inflation-tariffs.html">NYT</a></p>
+<h3>Banks offload AI-linked debt as public backlash mounts</h3>
+<p>Major lenders are actively reducing exposure to debt financing data-center and semiconductor infrastructure as grassroots opposition to mega-projects intensifies and regulatory scrutiny tightens. Pimco flags that slower data-center construction could ease AI-debt issuance and potentially tighten bond spreads—a structural relief for credit markets if demand-side weakness emerges. <strong>Source:</strong> <a href="https://www.ft.com/content/2351d9db-e938-4102-a449-318b1037765a">FT</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Anthropic IPO draws skepticism as AustralianSuper flags valuation excess</h3>
+<p>Anthropic's imminent initial public offering has triggered institutional pushback, with Australia's largest pension fund (AustralianSuper CIO) comparing the target valuation to dot-com era exuberance. The skepticism reflects broader concern that generative AI valuations have decoupled from revenue realization and face margin compression as competition intensifies. Despite the caution, the IPO will be a bellwether for OpenAI and other pure-play AI labs seeking liquidity outside venture timelines. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-17/anthropic-frenzy-echoes-dot-com-bubble-says-australiansuper-cio">Bloomberg</a>, <a href="https://www.bloomberg.com/news/videos/2026-11-17/big-take-all-eyes-on-anthropic-s-ipo-video">Bloomberg</a></p>
+<h3>China's Z.AI crashes 85% on US chip curbs and remote-access fears</h3>
+<p>Model developer Z.AI, a high-flyer in China's AI upstart ecosystem, collapsed 85% on Monday after Trump administration chip-export tightening became clear. The stock implosion exposes structural vulnerability: China's AI-focused startups lack diversified revenue streams and face hard constraints on compute access, undermining growth narratives and valuation multiples. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-17/china-ai-highflier-crashes-85-as-chip-fears-hit-model-makers">Bloomberg</a></p>
+<h3>Baidu CEO warns AI monetization crisis looms if heavy capex continues</h3>
+<p>Robin Li, CEO of Baidu, flagged an increasingly urgent need to demonstrate cash-flowing AI products to justify ongoing multibillion-dollar infrastructure spending. The statement signals that even China's largest internet company is now doubting the capex-first "field of dreams" model and demanding near-term revenue proof—a candid admission that AI sector confidence is eroding. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-17/baidu-s-robin-li-says-ai-needs-monetization-to-avoid-bubble-risk">Bloomberg</a></p>
+<h3>Corma, cybersecurity AI startup, valued at $1B after three-month sprint</h3>
+<p>Corma raised $125 million in Series A funding at a $1 billion valuation just three months post-launch, backed by NEA. The compressed timeline reflects strong enterprise demand for AI-powered security—a rare bright spot in the AI market as traditional infosec tools struggle with complexity and skill shortages. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/16/cybersecurity-ai-startup-corma-reaches-1b-valuation-in-about-3-months/">TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The Great Decoupling: European Deeptech Breaks from US Venture Excess</strong></p>
+<p><strong>The fact:</strong> Within 48 hours, PLURAL closed a €1 billion deeptech fund anchored in Paris, Sofinnova Partners raised €725 million for biotech commercialization, and Amazon's Kuiper internet constellation suffered a launch failure that pushes satellite operations dependency back to Ariane 6 from Kourou. Simultaneously, Anthropic's IPO drew institutional criticism for valuation excess, Baidu's CEO admitted AI monetization is in crisis, and US chip-export restrictions are systematically blocking China and Southeast Asia from compute access. The contrast is stark: European capital is hardening into a 3–5 year thesis around sovereign AI/deeptech stacks, regulatory arbitrage, and industrial resilience—while US venture and Chinese startups are caught in a compression trap of geopolitical friction and valuation unwind.</p>
+<p><strong>Broader pattern:</strong> The last 72 hours reveal a structural pivot away from "move fast and break things" venture capitalism. PLURAL's fund architecture (emphasis on multi-round capital efficiency and industrialization cycles) mirrors the thesis of government-backed European AI initiatives (France's National AI Strategy, Germany's Gaia-X). Meanwhile, Anthropic's IPO troubles and Z.AI's 85% collapse expose the speed at which VC-era metrics (user growth, model capability) lose credibility when cash-flow durability becomes the question. The geopolitical squeeze—US curbs on chip exports, China's AI labs losing compute access—accelerates this recalibration: founders and LPs are now pricing in a 5–10 year horizon of fragmented tech stacks (US, China, EU) rather than a unified global supply chain. That favors patient capital, regional consolidation, and deep-tech sectors where IP is location-bound (biotech, advanced materials, robotics).</p>
+<p><strong>Implication for future entrepreneurs:</strong> If you are building in France or Europe with €10M–€100M ambitions, the thesis window is closing on pure "AI applied" plays (chatbots, copilots). Capital is migrating toward: (1) infrastructure plays that assume fragmented compute access (cloud simulation, edge AI, local LLM deployment); (2) biotech commercialization with EU regulatory tailwinds; (3) industrial robotics and materials science where US geopolitical pressure creates moats instead of commoditizing them. The entrepreneurs winning in 2027–2029 will be those who treat European deeptech capital not as "consolation prize to US VC" but as the structural home for 7–10 year moonshots outside the US/China sandbox war.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://www.frenchweb.fr/plural-leve-1-milliard-d-euros-pour-la-deeptech-europeenne-et-renforce-son-ancrage-a-paris/900000046">PLURAL's €1B Fund Thesis — Deeptech's Escape Velocity</a></strong> — How Paris-anchored mega-funds are reshaping European VC from venture-speed to industrialization-speed cycles.</p>
+</li>
+<li>
+<p><strong><a href="https://www.bloomberg.com/news/articles/2026-11-17/baidu-s-robin-li-says-ai-needs-monetization-to-avoid-bubble-risk">Baidu CEO on AI Monetization Crisis — The Reckoning Begins</a></strong> — Why even Baidu admits capex-first AI strategies are hitting a wall without revenue proof.</p>
+</li>
+<li>
+<p><strong><a href="https://www.bloomberg.com/news/articles/2026-11-16/asia-s-data-center-hotbed-hit-by-us-chip-curbs-as-trump-visits">US Chip Curbs &amp; the Great Decoupling — Geopolitics Now Shapes VC</a></strong> — How export controls are fragmenting the global AI infrastructure market in real-time.</p>
+</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Tuesday, November 17 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
