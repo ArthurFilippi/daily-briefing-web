@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>Geopolitical theatre as economic scaffolding</strong>: Trump–Xi–Putin trilateral in Shenzhen signals power realignment beyond rhetoric. China positions itself as dealmaker neutral ground while Russia courts de-dollarization narratives and the US flexes selective de-risking (chip export bans to China, Navy control of Hormuz). This fragmentation raises hedging costs for multinational portfolios; expect continued volatility in commodities (copper near 5-month lows) and emerging-market assets until clarity on tariff regimes emerges post-summit. <em>For SP500/NASDAQ exposure: watch currency pairs (yuan/dollar, ruble positioning) and defence allocations — geopolitical tail risk is repricing upward.</em></p>
+</li>
+<li>
+<p><strong>AI as infrastructure monopoly, not science project</strong>: Nvidia's $65B private portfolio, Anthropic's $1.4tn IPO, and Isomorphic's €4.5B raise all signal venture capital has shifted from funding <em>AI models</em> to funding <em>AI-dependent logistics</em> (robotics, drug discovery, humanoid labour). Simultaneously, Jensen Huang's ouster and China's spy scandal reveal concentration risk — when one person or one nation's regulatory whim can reshape $500B+ in allocations, capital flows bifurcate. Europe (6,500 new tech founders in 2026, Qonto's banking licence, Model ML's €1.3B valuation) is building parallel stacks, but funding density and exit multiples remain US-tilted.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Trump meets Xi, Putin in Shenzhen; trilateral economics summit reshapes Pacific order.
+- Anthropic IPO valued at $1.4 trillion; Sequoia, Lightspeed increase backing.
+- Nvidia refuses China chip sales post-Huang; forecasts record Q4 revenue anyway.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Trump, Xi, and Putin Converge in Shenzhen for APEC Summit</h3>
+<p>China orchestrates a three-way meeting between the US, Russia, and itself on 18–19 November, positioning Beijing as indispensable broker. Xi seeks to frame the summit around stability and openness while constraining conversations on points of friction; Putin promotes "Eurasian" order de-linked from Western institutions. Trump's presence—including floated discussions with Kim Jong-un—injects unpredictability into an otherwise choreographed event. The summit's outcome will signal whether US-China competition remains manageable or escalates into sectoral decoupling (trade, tech, defence). <em>Source: <a href="https://www.lemonde.fr/international/article/2026/11/18/avec-donald-trump-et-vladimir-poutine-a-ses-cotes-xi-jinping-se-place-sur-le-devant-de-la-scene-mondiale_6813065_3210.html">Le Monde</a>, <a href="https://www.nytimes.com/live/2026/11/17/world/trump-asean-summit">NYT</a></em></p>
+<h3>Russia Conducts Shadow-War Operations Across Europe</h3>
+<p>Covert attacks attributed to Moscow—notably a drone strike on Leipzig/Halle airport in eastern Germany—are escalating against Ukraine's NATO allies. These raids, occurring below the threshold of treaty violation, indicate a shift toward indirect destabilization that bypasses formal diplomatic channels. Villages near the airport now live with elevated security risks; Germany's response framework remains unclear, testing NATO cohesion. <em>Source: <a href="https://www.nytimes.com/2026/11/18/world/europe/liepzig-airport-drone-attack-russia-ukraine-war.html">NYT</a></em></p>
+<h3>Democrats Clinch Senate Control; Alaska Seat Finalizes 56–44 Majority</h3>
+<p>Mary Peltola's victory in Alaska gives Democrats their 56th Senate seat (Republicans hold 44), securing chamber control despite midterm headwinds. This outcome locks in legislative leverage for the remaining Trump administration and shapes 2027 confirmation battles. <em>Source: <a href="https://www.lemonde.fr/international/article/2026/11/18/midterms-2026-malgre-la-polemique-les-democrates-s-imposent-en-alaska-et-parachevent-le-basculement-du-senal-americain_6813069_3210.html">Le Monde</a></em></p>
+<h3>Pakistani Operative Sentenced for Trump–Biden Assassination Plot</h3>
+<p>Asif Merchant, with ties to Iran's government, received 27+ years for plotting to kill US political figures as alleged retaliation for General Soleimani's 2020 death. The plot was foiled before execution, but the case underscores persistent Iranian willingness to pursue high-profile US targets. <em>Source: <a href="https://www.dw.com/en/pakistani-man-gets-27-years-for-foiled-plot-to-kill-trump-biden/a-79976086?maca=en-rss-en-all-1573-rdf">DW</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Qonto Wins Full Banking Licence; Enters Lending Market</h3>
+<p>The French fintech unicorn secured regulatory approval to offer credit products—a milestone that removes the most critical bottleneck to competing with legacy banks. Qonto can now originate loans directly rather than through partnerships, deepening its moat in SME banking. Valuation and capital deployment post-licence remain undisclosed. <em>Source: <a href="https://www.maddyness.com/2026/11/17/qonto-obtient-sa-licence-bancaire-et-va-pouvoir-accorder-des-prets/">Maddyness</a>, <a href="https://www.frenchweb.fr/breaking-news/qonto-obtient-son-agrement-bancaire-et-prepare-ses-propres-offres-de-credit/">FrenchWeb</a></em></p>
+<h3>Genesis AI Closes €500M Series A; Deploys Factory Robots at Scale</h3>
+<p>The Munich-backed robotics startup raised $500 million (€425M equivalent) backed by Nvidia, Samsung, and Zoom to accelerate manufacturing and deployment of Eno, its wheeled production robot. The valuation reached ~€3 billion. Series A of this size signals investor conviction in autonomous factory labour replacing human workers across EU/APAC supply chains. <em>Source: <a href="https://www.maddyness.com/2026/11/17/robotique-genesis-ai-boucle-une-serie-a-dun-demi-milliard-de-dollars-aupres-de-nvidia-samsung-et-zoom/">Maddyness</a>, <a href="https://www.frenchweb.fr/genesis-ai-leve-425-millions-d-euros-pour-deployer-ses-robots-en-usine/">FrenchWeb</a></em></p>
+<h3>Isomorphic Labs Raises €4.5B for AI Drug Discovery; Sequoia, A16Z Lead</h3>
+<p>The DeepMind spinout (AI for protein-folding-based therapeutics) closed its largest round at €4.5 billion valuation, underscoring biotech's migration toward AI-first drug candidate generation. Capital intensity and regulatory pathway complexity remain high, but speed-to-IND (Investigational New Drug) applications is shortening. <em>Source: <a href="https://www.eu-startups.com/2026/11/ai-drug-discovery-giant-isomorphic-labs-raises-e4-5-billion-in-blockbuster-funding-round/">EU-Startups</a>, <a href="https://sifted.eu/articles/isomorphic-labs-raises-5bn-backed-by-sequoia-and-a16z/">Sifted</a></em></p>
+<h3>Model ML Becomes Europe's Newest Unicorn; €1.3B Valuation on AI Agents for Finance</h3>
+<p>London-based startup closed €227 million Series B to build autonomous AI agents for wealth management and professional services. At €1.3 billion post-money, it joins a shortlist of European unicorns in generative AI without a headline IPO announcement. <em>Source: <a href="https://www.eu-startups.com/2026/11/model-ml-is-europes-newest-unicorn-with-e227-million-raise-to-put-ai-agents-to-work-in-finance-makes/">EU-Startups</a></em></p>
+<h3>France Births 6,500 New Tech Founders in 2026; Ecosystem Momentum Accelerates</h3>
+<p>French entrepreneurship ecosystem recorded 6,500+ new tech founders in 2026 year-to-date, signalling sustained interest despite macro headwinds. No aggregate capital figures provided, but downstream exits (Qonto licensing, Genesis Series A) indicate earlier cohorts are reaching scale inflection. <em>Source: <a href="https://www.maddyness.com/2026/11/18/la-france-a-vu-naitre-plus-de-6-500-nouveaux-entrepreneurs-de-la-tech-en-2026/">Maddyness</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Nvidia Posts Record Quarterly Revenue; Huang Reinstatement Rejected by Board</h3>
+<p>The semiconductor giant delivered Q3 results exceeding Wall Street estimates and issued forward guidance suggesting the demand streak will persist. CEO Jenn-Hsuan Huang's exit after a Chinese spy scandal is irreversible—the board confirmed it has "no intention" to reinstate him. Nvidia's $65 billion private venture portfolio (up nearly 3× in nine months) faces scrutiny under new leadership; dealmaking is expected to become "more disciplined." <em>Source: <a href="https://www.bloomberg.com/news/videos/2026-11-18/nvidia-boosts-forecast-quashes-huang-s-return-video">Bloomberg</a>, <a href="https://techcrunch.com/2026/11/17/nvidias-startup-stakes-ballooned-to-65b-but-huangs-exit-puts-future-deals-in-doubt/">TechCrunch</a>, <a href="https://www.nytimes.com/2026/11/18/business/nvidia-earnings-jensen-huang.html">NYT</a></em></p>
+<h3>Nvidia Halts China Chip Exports; Strategic Realignment Underway</h3>
+<p>Despite US regulatory approval to sell a crippled version of Hopper chips to China, Nvidia's interim CEO announced the company is <strong>no longer shipping</strong> advanced silicon to the region. This signals either internal risk aversion post-scandal or alignment with an emerging US consensus on decoupling. Financial impact on Q4–Q1 bookings remains opaque. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-18/interim-nvidia-ceo-says-it-s-no-longer-sending-ai-chips-to-china">Bloomberg</a></em></p>
+<h3>Copper Slides to 5-Month Low Amid Dollar Strength and China Weakness</h3>
+<p>Industrial metal prices fell as USD appreciated and AI-sector volatility (Nvidia drama, Huang ouster) coincided with gloomy demand signals from China's manufacturing outlook. No new commodity cycle appears imminent. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-18/copper-prices-industrial-metal-dollar-lme">Bloomberg</a></em></p>
+<h3>Wall Street Halves 2027 Corporate Earnings Growth Forecast to 16% from 33.5%</h3>
+<p>Analysts expect profit growth to decelerate sharply as AI capex expansion slows and macro headwinds tighten margins. This projection carries risk for equities priced on 2026–2027 multiple expansion; rotation into value and defensive sectors likely. <em>Source: <a href="https://www.ft.com/content/74fdac03-bd9b-4e68-9e6e-dc023eb47be9">FT</a></em></p>
+<h3>Private Equity Eyes €80 Billion in EU Insurance Assets After Regulatory Revamp</h3>
+<p>Blackstone, Carlyle, and other mega-funds are positioning to capture a larger share of Europe's €10 trillion insurance asset base following regulatory clarifications. This signals sustained appetite for illiquid yield in a lower-rate environment. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-18/private-fund-giants-target-80-billion-from-eu-insurance-regulatory-revamp">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Anthropic IPO Priced at $1.4 Trillion; Sequoia, Lightspeed Increase Backing</h3>
+<p>The AI safety-focused startup's IPO attracted new capital from existing VCs, signalling sustained conviction in Claude's market position despite competition from OpenAI and Google. No lock-up details released, but equity concentration and secondary-market pricing will reshape venture capital's power structure (smaller, newer firms gain outsized returns vs. mega-funds). <em>Source: <a href="https://sifted.eu/articles/anthropic-ipo-puts-europe-ai-boom-to-the-test/">Sifted</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-17/anthropic-backers-sequoia-lightspeed-set-to-invest-more-in-ipo">Bloomberg</a></em></p>
+<h3>Atomico: Europe Hosts Fastest-Growing Tech Companies Ever; Sovereignty Key</h3>
+<p>Europe's leading VC firm published its annual State of European Tech report, highlighting that the continent produces the fastest-scaling startups globally by growth rate—yet capital concentration and exit multiples remain US-dominated. The implication: Europe must own its success stories or risk permanent subordination to US venture capital's governance frameworks. <em>Source: <a href="https://sifted.eu/articles/stripe-backer-atomico-calls-for-europe-to-own-its-success-stories/">Sifted</a>, <a href="https://sifted.eu/articles/atomico-state-of-european-tech-report-2026/">Sifted</a></em></p>
+<h3>Reliance Industries (Ambani) Pursues 1,600-Satellite Broadband Constellation; Starlink Challenge</h3>
+<p>India's billionaire-led conglomerate is exploring manufacturing partnerships to build a satellite network rivalling Elon Musk's Starlink, signalling emerging-market appetite to escape Western telecom monopolies. Capital requirements and regulatory timelines remain undefined. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-18/ambani-seeks-to-build-satellite-capacity-for-starlink-challenge">Bloomberg</a></em></p>
+<h3>Google's AI-Generated Search Answers Reduce Organic Traffic by 40%</h3>
+<p>Search marketers report sharp declines in click-through rates to websites, as Google's AI Overviews cannibalize traditional search result engagement. This represents a structural shift in how venture-backed content and SaaS businesses acquire users; SEO playbooks face obsolescence. <em>Source: <a href="https://revscope.co/blog/search-seo-geo-2026/">Hacker News / RevScope</a></em></p>
+<h3>Singapore Deploys AI for Financial Crime &amp; Business Lending; Three-Mission Framework</h3>
+<p>Deputy PM announces coordinated AI initiatives spanning fraud detection, loan origination, and AI-agent transactions—signalling regional competition with Hong Kong and London for fintech-AI talent and infrastructure. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-18/singapore-to-deploy-ai-to-fight-scams-boost-business-lending">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The "Bank of Nvidia" Collapses; Disciplined Deployment Era Begins</strong></p>
+<p>For 18 months, Nvidia under Jensen Huang became a quasi-sovereign wealth fund for AI startups—deploying billions into robotics, language models, chip startups, and infrastructure with minimal public scrutiny. Huang's October exit (Chinese spy scandal) and the board's refusal to reinstate him has triggered a sharp reversal: Bloomberg reports the "Bank of Nvidia" is now "becoming more discriminating" and "disciplined," with deal velocity expected to slow materially. </p>
+<p>This matters because it unmasks a hidden subsidy structure. When a chip monopolist can backstop funding for downstream customers (robotics, cloud, model labs), it distorts capital allocation—startups optimise for Nvidia endorsement rather than unit economics. Huang's departure removes the charismatic founder effect that justified outsized bets; new leadership requires ROI discipline on a $65 billion portfolio. The spillover: second-tier AI startups that banked on Nvidia largesse face a sudden funding drought. Series B/C rounds will compress; only startups with independent revenue or marquee co-investors (Sequoia, A16Z) survive the crunch.</p>
+<p>For you as a 21-year-old deeptech founder: this is a window to hire talent cheaply. Robotics engineers, ML systems architects, and chip designers from failed Huang-backed startups are now available. The flip side: if you pitch VCs in 2027, they will demand 18-month unit economics proofs and customer concentration risk analysis—the "moonshot" era is over. Your NASDAQ/SP500 portfolio (heavy ETFs like WPEA, PAEEM) benefits from this discipline: capital gravitates toward profitable enterprises and away from cash-sink AI labs, supporting sector rotation into profitability.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong>Atomico State of European Tech 2026</strong> — Comprehensive analysis of funding flows, founder geography, and exit multiples across EU; essential for calibrating European</li>
+</ul>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
