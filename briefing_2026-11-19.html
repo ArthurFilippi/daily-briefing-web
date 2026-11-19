@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>AI infrastructure hitting a reality wall.</strong> Anthropic's $107.3B IPO (record-breaking) masks deeper anxiety: the company disclosed activating its "responsible scaling policy" over safety fears; Nordic grids cannot absorb planned AI data center capacity; Nvidia's turmoil is forcing Wall Street to separate hype from unit economics. This consolidation favors capital-intensive, defensible players with proven ROI over speculative compute plays. <em>Portfolio implication:</em> expect volatility in broad AI exposure; structural demand for power, cooling, and security infrastructure (less glamorous, more durable) now outpacing pure AI-software bets.</p>
+</li>
+<li>
+<p><strong>Geopolitics fragmenting tech sovereignty and trade.</strong> Trump-Xi-Putin trilateral in Shenzhen signals tactical stabilization but masks structural divergence: France debates Israeli settlement commerce; Ukraine tensions resurface over Starlink militarization; Colombia rebuffs US anti-cartel ops; Malaysia courts US sovereign AI backing. Tech decoupling is accelerating beneath diplomatic theater, reshaping where hardware, chips, and AI models can flow. This favors European/allied-bloc independence plays over global-arbitrage models.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Anthropic raises $107.3B, surpassing SpaceX record; discloses safety policy activation.
+- Crimean Bridge attacked again; Trump-Xi-Putin trilateral proceeds in Shenzhen.
+- Spanish rail crash reignites infrastructure maintenance debate; euro hits 18-month low.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Trump, Xi, and Putin Hold Trilateral Summit as Diplomatic Realignment Unfolds</h3>
+<p>China's Xi Jinping warmly received President Trump in Shenzhen for a regional APEC summit, with the three leaders expected to hold joint talks. The optics signal desire for measured stability, though analysts note unresolved tensions over Taiwan, Ukraine, and trade—the welcome itself carrying symbolic weight even without concrete outcomes. <a href="https://www.nytimes.com/live/2026/11/18/world/trump-xi-putin-apec/heres-the-latest">Source: <em>New York Times</em></a></p>
+<h3>Crimean Bridge Targeted Again as Ukraine Presses Supply Disruption Campaign</h3>
+<p>Russia's installed governor reported a fresh attack on the Kerch Strait crossing, suspending traffic as Putin prepared trilateral talks. Infrastructure damage compounds Moscow's logistical strain in occupied territory and signals continued Ukrainian capacity to strike rear-area targets regardless of diplomatic activity. <a href="https://www.bbc.co.uk/news/articles/cm879dqn3e1jo?at_medium=RSS&amp;at_campaign=rss">Source: BBC</a></p>
+<h3>France Deploys Military Advisors in Ukraine; Parliament Debate Over Cobelligerent Status Intensifies</h3>
+<p>The government acknowledged stationing French forces in Ukraine for training and maintenance, triggering renewed parliamentary scrutiny of whether such presence constitutes cobelligerent status and invites Russian retaliation. The acknowledgment follows weeks of denial, raising questions about parliamentary oversight and strategic escalation thresholds. <a href="https://www.lemonde.fr/international/article/2026/11/19/guerre-en-ukraine-la-presence-de-soldats-francais-en-ukraine-fait-elle-de-paris-un-cobelligerant-contre-qui-la-russie-pourrait-riposter_6813225_3210.html">Source: <em>Le Monde</em></a></p>
+<h3>Spain's Rail Disaster Triggers Infrastructure Maintenance Crisis Debate</h3>
+<p>Following a high-speed train crash, Spain faces electoral-year reckoning over whether expansion outpaced maintenance. Critics question capacity planning and upkeep rigor as the country prepares for elections amid booming demographics straining aging systems. <a href="https://www.nytimes.com/2026/11/19/world/europe/spain-trains-infrastructure.html">Source: <em>New York Times</em></a></p>
+<h3>Iran Conflict Accelerates Renewable Adoption, IEA Analysis Shows</h3>
+<p>The International Energy Agency's most comprehensive analysis of the ongoing war's spillovers found oil shocks could front-load global alternative energy deployment. Rising geopolitical risk premiums on hydrocarbons are shortening payback periods for solar, wind, and storage infrastructure. <a href="https://www.nytimes.com/2026/11/19/business/cop31-energy-iea.html">Source: <em>New York Times</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Stryx AI, Founded by Brevo Alum, Secures €7.7M for Anti-Drone Defense</h3>
+<p>The French defense-tech startup, backed by Jacques Veyrat's holding vehicle, raised €7.7 million to commercialize counter-UAS solutions. The deeptech bet reflects rising European appetite for homegrown defense capabilities outside US-dependent supply chains. <a href="https://www.maddyness.com/2026/11/19/stryx-ai/">Source: <em>Maddyness</em></a></p>
+<h3>MountAIn Raises €7.3M to Deploy Advanced AI on Sub-€10 Microcontrollers</h3>
+<p>Grenoble's frugal AI startup closed Seed funding led by 360 Capital and Supernova Invest to run neural models on low-cost chips, targeting embedded industrial and IoT applications. The round validates European edge-AI positioning against US cloud-centric models. <a href="https://www.eu-startups.com/2026/11/french-frugal-ai-infrastructure-startup-mountain-raises-e7-3-million-to-bring-advanced-ai-to-sub-e9-chips/">Source: <em>EU-Startups</em></a></p>
+<h3>Ireland's Disseqt AI Raises €7.3M for Enterprise AI Agent Safety</h3>
+<p>Dublin-based AI assurance platform secured funding from Gresham House Ventures and others to help enterprises deploy agentic systems at scale while meeting regulatory obligations. The round underscores European regulatory premium and demand for AI governance tooling. <a href="https://www.eu-startups.com/2026/11/irelands-disseqt-ai-raises-e7-3-million-to-safely-deploy-ai-agents/">Source: <em>EU-Startups</em></a></p>
+<h3>ElevenLabs, Lovable, DeepL CEOs Call for EU AI Investment and Sovereignty</h3>
+<p>CEOs of three European AI leaders penned open letter urging EU policy backing to compete with US and Chinese generative AI scale. Signatories argue European computational independence requires sustained public-sector capital, not purely venture-driven scaling. <a href="https://sifted.eu/articles/elevenlabs-lovable-deepl-yann-lecun-eu-ai-open-letter/">Source: <em>Sifted</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Anthropic IPO Raises $107.3B, Eclipsing SpaceX's Previous Record</h3>
+<p>The AI lab's blockbuster debut—combining initial offering and concurrent private placement—valued the company at $1.3+ trillion pre-trade. Gray market indications show 22–26% premiums, signaling retail and institutional appetite despite the company's disclosure that it activated safety-policy thresholds due to AI development pace outstripping risk controls. <a href="https://www.bloomberg.com/news/articles/2026-11-19/anthropic-ipo-raises-$107-3-billion-to-top-spacex-record-debut">Source: <em>Bloomberg</em></a></p>
+<h3>Deutsche Bank's Italian Unit Concealed €800M in Mortgage Losses</h3>
+<p>Internal probe codenamed "Project Aetos" found systematic non-disclosure of lending deterioration; German lender avoided public announcement despite regulatory discovery. The scandal highlights compliance gaps and raises questions about cross-border subsidiary oversight within eurozone banking. <a href="https://www.ft.com/content/06be5c7d-b1f2-44e9-9cad-a2dcb5a2f452">Source: <em>Financial Times</em></a></p>
+<h3>Euro Plunges to 18-Month Low as French Political and Fiscal Risks Mount</h3>
+<p>Traders bet on further currency weakness ahead of France's 2027 election, with expectations of continued policy uncertainty and fiscal stress outweighing ECB tightening signals. The slide reflects market repricing of eurozone structural fragmentation risks. <a href="https://www.bloomberg.com/news/articles/2026-11-19/french-risks-traders-betting-euro-slide-currency">Source: <em>Bloomberg</em></a></p>
+<h3>SK Telecom Scores $3B+ Windfall From Anthropic IPO</h3>
+<p>South Korea's largest mobile carrier—an early backer of Anthropic—captures multibillion-dollar gains on strategic AI bet, validating venture positioning in generative models as enterprise adoption accelerates globally. <a href="https://www.bloomberg.com/news/articles/2026-11-19/anthropic-ipo-hands-sk-hynix-tycoon-s-firm-3-billion-windfall">Source: <em>Bloomberg</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Anthropic Discloses Safety Policy Activation; Market Cheers Despite Risks</h3>
+<p>The AI lab revealed it triggered part of its "responsible scaling policy"—designed to halt development if risks become "catastrophic"—just before IPO. Disclosure signals internal concern over pace of capability growth outstripping safety validation, yet investors treated it as transparency win rather than red flag. <a href="https://www.ft.com/content/d8be4655-211c-49a8-bfe4-18a00b8e8619">Source: <em>Financial Times</em></a></p>
+<h3>Nordic Power Grids Cannot Absorb Planned AI Data Center Capacity</h3>
+<p>Analysis shows that projected AI compute centers in Denmark and Finland exceed peak electrical load capacity their networks can support. Infrastructure bottleneck—not just capital or cooling—now constrains hyperscaler expansion across Europe, forcing geographic and technical redesigns. <a href="https://legrandcontinent.eu/fr/2026/11/19/les-reseaux-electriques-peuvent-ils-absorber-les-centres-de-donnees-de-lia/">Source: <em>Le Grand Continent</em></a></p>
+<h3>Trump Warns Against "Robust" AI Regulation, Citing Industry Stifling Risk</h3>
+<p>President Trump cautioned that stringent oversight would hamper development, even as US export controls on advanced AI chips tighten. The position signals deregulatory intent but underscores deeper tension: domestic policy freedom vs. geopolitical chip control. <a href="https://www.bloomberg.com/news/articles/2026-11-19/trump-warns-against-regulations-that-would-stifle-ai-industry">Source: <em>Bloomberg</em></a></p>
+<h3>Singapore Central Bank Warns AI Agents Could Accelerate Financial Instability Risks</h3>
+<p>MAS flagged that autonomous AI systems managing corporate or retail deposits could move funds faster than traditional circuit breakers allow, raising liquidity and systemic risks. First major central bank to formally surface agentic-finance hazards. <a href="https://www.bloomberg.com/news/articles/2026-11-19/mas-warns-ai-agents-could-move-money-faster-raise-finance-risks">Source: <em>Bloomberg</em></a></p>
+<h3>Microsoft CEO Nadella Explains 60K Buyout Offer: AI Talent Reallocation, Not Layoff</h3>
+<p>Nadella clarified that October's mass voluntary-severance program aimed to redeploy workforce composition toward AI-native roles, not shrink headcount via attrition. The move signals internal acknowledgment that legacy software skill sets require rapid upskilling or exit. <a href="https://techcrunch.com/2026/11/18/microsoft-ceo-satya-nadella-explains-why-he-asked-60k-employees-to-quit/">Source: <em>TechCrunch</em></a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The Anthropic IPO's Safety-Policy Disclosure and What It Reveals About AI Governance Cracking</strong></p>
+<p>Anthropic's decision to disclose that it activated its "responsible scaling policy" just before going public—flagging internal concerns that AI capability growth was outpacing safety validation—is a watershed moment, though markets treated it as a compliance tick. The company built a formal kill-switch mechanism into its corporate bylaws, designed to pause development if systems approached "catastrophic risk" thresholds. That it needed to invoke it now, days before a $107B debut, suggests two things: first, capability velocity is genuinely outrunning evaluation rigor, and second, the company believes transparency on that tension builds investor confidence rather than eroding it. </p>
+<p>What this reveals more broadly is a brittle equilibrium. Anthropic is the world's largest public benefit corporation—legally bound to balance profit maximization against safety obligations. That structure was supposed to anchor ethical AI development. Instead, it appears to have created a scenario where achieving scale requires constantly negotiating between growth and guardrails, with each activation of safety protocols becoming a press release rather than a reason to pause. The IPO's 22–26% gray-market premium despite this disclosure confirms that markets are pricing safety concerns as <em>table stakes for legitimacy</em>, not as showstoppers. </p>
+<p>For an entrepreneur building in AI, the implication is stark: governance structures and transparency around risk are becoming competitive advantages, not liabilities. The window for opaque scaling (à la earlier LLM booms) has closed. Investors now expect startups to articulate their safety assumptions, test them credibly, and disclose failures or policy triggers. This raises funding velocity but demands rigor. Deeptech founders should expect regulatory and investor scrutiny on three fronts: (1) capability evaluation methodology, (2) oversight boards with real authority, and (3) disclosed activation thresholds for scaling pauses. Anthropic proved that market-leading scale is compatible with these constraints—if articulated early.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong>Anthropic's Public Governance Experiment:</strong> <a href="https://www.nytimes.com/2026/11/18/business/anthropic-ipo-corporate-governance.html">NYT analysis on the first mega-IPO of a "public benefit corporation"</a> — read for how alternative corporate structures are reshaping AI accountability.</li>
+<li><strong>IEA War-to-Energy-Transition Linkage:</strong> <a href="https://www.nytimes.com/2026/11/19/business/cop31-energy-iea.html">Bloomberg/NYT synthesis of how geopolitical shocks accelerate renewable timelines</a> — critical for deeptech energy founders sizing addressable markets.</li>
+<li><strong>Atomico's State of European Tech 2026:</strong> <a href="https://www.eu-startups.com/2026/11/5-key-findings-from-atomicos-state-of-european-tech-2026/">EU-Startups snapshot of investment trends, capital concentration, and structural gaps</a> — benchmark your funding ambitions against ecosystem realities.</li>
+</ul>
+<hr />
+<p><em>Sources: RSS 24h — Thursday, November 19 2026</em></p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
