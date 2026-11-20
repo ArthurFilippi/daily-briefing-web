@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>AI market correction is now systemic, not cyclical.</strong> Anthropic's record $81.3B IPO (largest ever) failed to arrest a broader rout in semiconductor and AI-exposed equities across Asia and emerging markets. Taiwan's benchmark hit its worst week since 1991; Hong Kong entered bear territory (−20% YTD); emerging markets face bear classification. This signals investors are repricing AI unit economics downward, not rotating sectors. <strong>For NASDAQ/SP500-heavy portfolios: near-term volatility will spike, but mega-cap AI infrastructure plays (Nvidia, cloud providers) retain defensive positioning as consolidation unfolds.</strong></p>
+</li>
+<li>
+<p><strong>Geopolitical fragmentation is now openly reshaping supply chains and negotiating leverage.</strong> Putin's staged Shenzhen summit with Trump and Xi contrasted sharply with Europe's emergency Berlin coalition on Ukraine—each side performing strength while actual ceasefire negotiations remain stalled. Simultaneously, UK-EU reconciliation (youth mobility scheme, Brexit easing) and talk of "neutral ground" Ukraine talks signal middle powers seeking leverage by playing honest broker. This decouples the conflict from great-power theater, creating transactional space for European actors.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- Anthropic IPO lands at $81.3B; shares fall next day on AI doubts.
+- Ukraine destroys Crimea bridge; Russia loses singular road supply route.
+- UK-EU restore youth mobility scheme; Brexit normalization accelerates.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Ukraine's Crimea Bridge Attack Narrows Russian Logistics to Single Corridor</h3>
+<p>Ukraine damaged the Kerch Strait bridge's road section, forcing Russia to rely exclusively on one overland resupply route into Crimea. The destruction constrains military operations and signals a shift toward infrastructure-focused targeting. This may accelerate Russian adaptation or trigger escalation, but materially degrades operational flexibility. <strong>Source:</strong> <a href="https://legrandcontinent.eu/fr/2026/11/20/pourquoi-lattaque-ukrainienne-du-pont-de-crimee-pourrait-marquer-un-tournant/">Le Grand Continent</a></p>
+<h3>Putin Secures Symbolic Parity With Trump and Xi in Shenzhen Summit</h3>
+<p>Trump, Putin, and Xi held their first trilateral meeting in China, allowing Putin to claim restored great-power status after Western sanctions. No substantive breakthroughs emerged on nuclear control, Ukraine, or AI governance. The summit was largely theatrical—Putin subsequently rejected ceasefire talks—but signaled to Beijing and Washington that Russia remains a veto player. <strong>Source:</strong> <a href="https://www.nytimes.com/2026/11/20/world/europe/putin-trump-xi-summit-apec.html">New York Times</a></p>
+<h3>UK and EU Agree Youth Mobility Scheme; Brexit Normalization Deepens</h3>
+<p>Britain and the 27-nation EU bloc agreed Friday to restore youth mobility rights, alongside deals on food trade and carbon emissions. This marks the first major bilateral advance since Brexit implementation in 2021. Economic modeling shows full EU re-entry would boost UK GDP twice as much as a Swiss-style arrangement, underpinning ongoing rapprochement pressure. <strong>Source:</strong> <a href="https://www.bbc.co.uk/news/articles/c623j4kpg94go?at_medium=RSS&amp;at_campaign=rss">BBC</a></p>
+<h3>Europe Coordinates Ukraine Support; Germany Signals "Neutral Ground" Talks Possible</h3>
+<p>Berlin hosted Ukraine's coalition partners, who pledged to maintain 2026 aid flows into 2027. Concurrently, German Chancellor Merz signaled readiness for fresh Ukraine negotiations on neutral ground, suggesting Europe may insert itself as mediator between US, Russia, and Kyiv. This bifurcates Western strategy: unconditional aid vs. diplomatic runway. <strong>Source:</strong> <a href="https://www.dw.com/en/new-ukraine-talks-including-europe-to-be-held-soon-merz/a-79997961?maca=en-rss-en-all-1573-rdf">DW</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>STRYX AI Raises €7.7M for Counter-Drone Systems; Targets 2027 Deployment</h3>
+<p>French deeptech startup STRYX AI secured funding to scale anti-drone interception technology for defense applications. The company aims to begin production and commercial sales in early 2027, competing against established suppliers like Latvia's Origin Robotics who have already secured French military trials. This positions STRYX as a credible contender in Europe's fragmented counter-UAS ecosystem. <strong>Source:</strong> <a href="https://www.frenchweb.fr/anti-drones-comment-stryx-ai-compte-rattraper-les-premiers-fournisseurs-des-armees/900000058?utm_source=rss&amp;utm_medium=syndication&amp;utm_campaign=flux_general&amp;utm_content=article">FrenchWeb</a></p>
+<h3>Anthropic's €81.3B IPO Reflects AI Ambitions, But No Major European Competitor Near Launch</h3>
+<p>Anthropic's record valuation underscores the absence of a comparable European AI lab positioned for public markets. While UK restrictions on sovereign AI models drew VC backlash, France and others lack venture capital depth to fund 2026-scale AI unicorns. The gap widens as US and Chinese players consolidate computational moats. <strong>Source:</strong> <a href="https://www.frenchweb.fr/anthropic-signe-la-plus-grosse-ipo-de-l-histoire-combien-lui-coute-la-croissance-de-claude/900000057?utm_source=rss&amp;utm_medium=syndication&amp;utm_campaign=flux_general&amp;utm_content=article">FrenchWeb</a></p>
+<h3>Airbnb's New Cleaning Standards Trigger Mass Host Exodus; Platform Shifts Toward Hospitality Model</h3>
+<p>Tens of thousands of small Airbnb hosts are leaving the platform following stricter rules on housekeeping tasks and commission restructuring. Critics allege Airbnb is morphing into a licensed hotel operator, squeezing independent supply. This fragmentation may accelerate uptake of competing platforms and regulatory scrutiny in Europe where housing policy is politically charged. <strong>Source:</strong> <a href="https://www.lemonde.fr/economie/article/2026/11/20/vaisselle-poubelles-draps-les-nouvelles-regles-d-airbnb-suscitent-la-colere-des-petits-proprietaires_6813590_3234.html">Le Monde</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Anthropic IPO at $83/Share Hits $81.3B Valuation; Founders Pocket ~$2B Combined</h3>
+<p>Anthropic PBC listed on NASDAQ at the upgraded price, raising ~$105B in company proceeds. Seven co-founders each collected approximately $280M. The IPO was oversubscribed but failed to arrest a broader AI sector selloff, closing lower on day two. Retail and institutional demand was robust initially, but sell-the-news dynamics dominated. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/features/2026-11-20/anthropic-ant-ipo-on-nasdaq-overcame-ai-fears-and-warnings">Bloomberg</a>, <a href="https://techcrunch.com/2026/11/19/anthropics-7-founders-cashed-out-nearly-2b-in-record-breaking-ipo/">TechCrunch</a></p>
+<h3>Taiwan Tech Stocks Hit Worst Week Since 1991; Hong Kong Bear Market, Emerging Markets Nearing Brink</h3>
+<p>Taiwan's TAIEX plummeted as AI-led sell-off widened, marking the worst weekly performance in 35 years. Hong Kong's Hang Seng fell 20% from 2026 highs, entering bear territory. Copper hit March lows. Emerging-market equities are set for bear classification as rising US rates, AI doubts, and trade tensions converge. This reverses momentum that peaked in October. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-20/taiwan-stocks-taiex-twse-1991-ai-chips-tsmc-hon-hai-foxconn">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-20/hong-kong-stocks-hang-seng-hsi-hkex-2026-ai-selloff-bear-market">Bloomberg</a></p>
+<h3>Treasuries Rally to 5-Month High on Haven Demand; Yen Outperforms G-10</h3>
+<p>Long-dated US Treasuries posted their longest rally in nearly five months as investors fled equities. The yen led G-10 currency gains, signaling classic risk-off repositioning. This reverses the year-to-date trend of elevated yields supporting USD strength and suggests capital is rotating to duration and currency stability. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-20/treasuries-eye-longest-rally-in-five-months-on-haven-demand">Bloomberg</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-20/yen-outperforms-g-10-peers-as-tech-selloff-fuels-haven-demand">Bloomberg</a></p>
+<h3>Cyberattacks Surge at Japan Insurers; AI-Driven Hacking Incidents Spike Claims</h3>
+<p>Japan's largest property and casualty insurers reported sharp jumps in cyber insurance claims as AI-powered attacks grow more sophisticated. Incidents nationwide have accelerated, forcing carriers to reprice risk. This mirrors broader IT security crises (OpenSSL buffer overflow CVE-2026-121481, CVSS 9.8; Visa/Mastercard/JPMorgan data breaches) and signals rising operational costs for tech-exposed firms. <strong>Source:</strong> <a href="https://www.bloomberg.com/news/articles/2026-11-20/ai-fueled-cyberattacks-drive-claims-surge-at-japan-insurers">Bloomberg</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Apple Developing In-House AI Agent for macOS; Competes With Claude, Meta Muse</h3>
+<p>Apple is building proprietary AI agents capable of autonomous macOS control, rivaling OpenAI's Dots, Anthropic's Claude, and Meta's Muse. The move suggests Apple intends to verticalize LLM deployment within its ecosystem rather than rely on third-party APIs. This could reduce dependence on external AI labs but raises latency and integration complexity. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/19/apple-may-be-developing-its-own-ai-agent-that-runs-your-mac/">TechCrunch</a></p>
+<h3>OpenSSL Flaw (CVE-2026-121481, CVSS 9.8) Exposed; Buffer Overflow in EVP_EncodeBlock()</h3>
+<p>A critical buffer overflow vulnerability in OpenSSL's encryption function poses severe risk to cryptographic libraries globally. The high CVSS score (9.8) and infrastructure-level exposure mirror the SolarWinds and log4j incidents in severity. Patches are live; adoption urgency is maximal. <strong>Source:</strong> <a href="https://github.com/openssl/openssl/pull/33652">GitHub</a></p>
+<h3>PostgreSQL 19 Ships With Native Table-Bloat Cleanup; Enterprise Adoption Accelerates</h3>
+<p>PostgreSQL 19 introduced built-in repack functionality for table bloat mitigation, reducing operational overhead for DBA teams. Availability on Databricks Lakebase and Neon Cloud broadens adoption across data warehouse and serverless platforms. This consolidates Postgres dominance in open-source OLTP/OLAP stacks. <strong>Source:</strong> <a href="https://www.postgresql.org/docs/release/19.0/">PostgreSQL</a>, <a href="https://www.databricks.com/blog/postgresql-19-available-lakebase">Databricks</a></p>
+<h3>SpaceX Plans Miniature Rooftop Cell Towers to Eliminate Mobile Dead Zones</h3>
+<p>Elon Musk announced SpaceX has completed design of compact satellite-to-phone relay hardware, aiming to blanket rural and isolated areas with coverage. This leverages Starlink's orbital constellation but targets consumer mobile devices directly. Market impact depends on carrier licensing and regulatory approval; feasibility timeline remains unclear. <strong>Source:</strong> <a href="https://techcrunch.com/2026/11/19/elon-musk-says-spacex-has-a-plan-to-eliminate-cell-phone-dead-zones">TechCrunch</a></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The IPO That Failed to Stop the Selloff: Anthropic and the AI Bubble's Structural Crack</strong></p>
+<p>Anthropic's historic $81.3B IPO should have been a circuit-breaker for AI sector anxiety. Instead, its successful listing coincided with the worst week in Taiwan's equity market since 1991, Hong Kong entering bear territory, and emerging markets approaching bear classification. This inversion of the usual "IPO confidence effect" reveals a deeper market recognition: valuations in the AI supply chain (chips, cloud, semiconductors) have decoupled from fundamental demand. Investors are now pricing in sustained over-capacity, competitive margin compression, and unit economics that don't justify current multiples—not cyclical pessimism that a successful mega-cap exit could cure.</p>
+<p>The parallel surge in cyber insurance claims (AI-driven attacks) and critical security vulnerabilities (OpenSSL CVSS 9.8) underscores that the AI ecosystem's operational maturity lags its valuation. This creates a liability overhang: if Claude, Gemini, and others are driving more sophisticated attacks, the insurance and infrastructure costs to defend against them rise faster than revenue from those models. For venture-stage entrepreneurs, this signals two things: (1) infrastructure plays (security, compliance, edge compute) will outperform large model development for the next 18 months, and (2) customer acquisition in AI-dependent verticals will require demonstrable ROI, not narrative. The age of "buy now, justify later" in AI spend is over.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li>
+<p><strong><a href="https://frenchweb.fr/anthropic-signe-la-plus-grosse-ipo-de-l-histoire-combien-lui-coute-la-croissance-de-claude/">Anthropic's Path to Profitability: Claude's Compute Economics vs. Training Burn</a></strong> — FrenchWeb analysis of Claude's production costs and the firm's trajectory toward operating break-even.</p>
+</li>
+<li>
+<p><strong><a href="https://www.bloomberg.com/news/articles/2026-11-20/ai-fueled-cyberattacks-drive-claims-surge-at-japan-insurers">Cyber Insurance and AI Risk: Japan's Insurers as Canaries for the Global Tech Ecosystem</a></strong> — Bloomberg's mapping of surging claims and the emerging actuarial crisis in AI-related liability.</p>
+</li>
+<li>
+<p><strong><a href="https://legrandcontinent.eu/fr/2026/11/20/pourquoi-lattaque-ukrainienne-du-pont-de-crimee-pourrait-marquer-un-tournant/">Ukraine's Infrastructure War: Why the Crimea Bridge Matters More Than Artillery Counts</a></strong> — Le Grand Continent on logistics as a binding constraint for sustained Russian operations.</p>
+</li>
+</ul>
+<hr />
+<p><strong>Sources:</strong> Reuters, Bloomberg, Financial Times, New York Times, BBC, Le Monde, DW, TechCrunch, FrenchWeb, Maddyness, Sifted, PostgreSQL, GitHub — 24-hour cycle, Friday, November 20, 2026.</p>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
