@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Briefing</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1a1a1a;--muted:#666;--accent:#1a4f8f;--sec:#f0efe9;--border:#e0ddd2;--slide-w:100vw}
+[data-theme=dark]{--bg:#16161a;--fg:#e8e8e3;--muted:#999;--accent:#6ea8ff;--sec:#222226;--border:#2e2e34}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);height:100vh;overflow:hidden;transition:background .2s,color .2s}
+
+/* Toolbar */
+.bar{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
+.bar-left{display:flex;align-items:center;gap:10px}
+.bar-title{font-size:13px;font-weight:600;opacity:.7}
+.bar button{border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:44px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:100}
+
+/* Slider */
+.slider-wrap{position:fixed;top:44px;left:0;right:0;bottom:56px;overflow:hidden}
+.slider{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{min-width:100vw;height:100%;overflow-y:auto;padding:28px 32px 20px;scroll-behavior:smooth}
+
+/* Slide header */
+.slide-header{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* Content */
+.slide h2{font-size:17px;padding:7px 12px;background:var(--sec);border-left:3px solid var(--fg);margin-bottom:14px;display:none}
+.slide h3{font-size:14px;font-weight:700;margin:18px 0 4px}
+.slide h3:first-of-type{margin-top:0}
+.slide p{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--fg)}
+.slide ul{padding-left:16px;margin-bottom:10px}
+.slide li{font-size:14px;line-height:1.65;margin-bottom:6px}
+.slide a{color:var(--accent);text-decoration:none}
+.slide strong{font-weight:700}
+.slide em{color:var(--muted)}
+.slide hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+/* Cover slide (TL;DR) */
+.slide.cover{display:flex;flex-direction:column;justify-content:center;padding:40px 48px}
+.cover .date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.cover h1{font-size:26px;font-weight:700;border-bottom:2px solid var(--fg);padding-bottom:10px;margin-bottom:20px}
+.cover .trends-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.cover ul{list-style:none;padding:0;margin-bottom:18px}
+.cover ul li{font-size:14px;line-height:1.65;margin-bottom:8px;padding-left:14px;position:relative}
+.cover ul li::before{content:"→";position:absolute;left:0;color:var(--accent);font-weight:700}
+.cover .stories-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+
+/* Navigation */
+.nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.nav-center{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+.nav-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover{background:var(--sec)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <span class="bar-title" id="bar-title">Daily Briefing</span>
+  </div>
+  <div>
+    <button id="theme">🌓</button>
+    <button onclick="window.print()">🖨️</button>
+  </div>
+</div>
+
+<div class="progress-bar" id="prog"></div>
+
+<div class="slider-wrap">
+  <div class="slider" id="slider">
+    <div class="slide cover" id="slide-0">
+  <div class="date" id="briefing-date"></div>
+  <h1>Daily Briefing</h1>
+  <div class="trends-label">📊 Macro trends</div>
+  <ul></ul>
+  <div class="stories-label">🗞 Top stories</div>
+  <ul></ul>
+</div>
+<script>
+  document.getElementById('briefing-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+</script>
+<div class="slide" id="slide-1">
+  <div class="slide-header">📄 TL;DR</div>
+  <p><strong>Macro trends:</strong></p>
+<ol>
+<li>
+<p><strong>AI euphoria faces hard reckoning on ROI and concentration risk.</strong> Wall Street's week-long tech selloff—S&amp;P 500 and Dow into correction territory, Anthropic shares sliding despite blockbuster IPO, Nvidia probed by SEC over accounting amid Asia sales questions—reflects investor doubt about whether AI capex spending (data centers, chips, infrastructure) will generate returns. For portfolios tilted NASDAQ-heavy (WPEA, ESE, ETZ, PAEEM), this volatility signals structural repricing of valuation multiples; near-term dislocation likely, but selective entry points emerging in proven cash-flow names.</p>
+</li>
+<li>
+<p><strong>Geopolitical fragmentation accelerating policy divergence at critical juncture.</strong> Trump's public friendship with Putin amid Russia's largest 2026 attacks on Ukraine, Spain's left-wing government facing electoral collapse, France's sixth consecutive weekend of cost-of-living protests, and Brazil's political uncertainty (Bolsonaro hospitalized) all converge to show weakening center-left consensus on multilateralism and social stability. This creates regulatory unpredictability in EU tech/deeptech (cyber gaps, subsidy flows) and increases odds of unilateral US tech/trade moves.</p>
+</li>
+</ol>
+<p><strong>Top stories:</strong>
+- S&amp;P 500, Dow enter correction as AI valuations face hard scrutiny.
+- Anthropic mathematician claims Riemann hypothesis solution using Claude.
+- GTA VI breaks all-time record: $3.79bn first-day revenue globally.</p>
+<hr />
+</div>
+<div class="slide" id="slide-2">
+  <div class="slide-header">🌍 Geopolitics & Policy</div>
+  <h3>Trump defends proximity to Putin despite Russia's escalating Ukraine strikes</h3>
+<p>Trump returned from Asia on Friday and reiterated his communications with both Putin and Xi Jinping, framing them as productive toward resolving Ukraine. This comes as Russia unleashed its largest attack wave of 2026 against Ukrainian targets. Zelensky publicly called Putin a "killer," directly contradicting Trump's diplomatic framing and signaling deepening rift between US executive and Kyiv over the conflict's settlement terms. The divergence underscores how Trump's dealmaking posture may sideline Ukrainian security interests in pursuit of Great Power accommodation. <em>Source: <a href="https://www.bbc.co.uk/news/articles/cxnv4zvmdy0jo">BBC</a>, <a href="https://www.lemonde.fr/international/article/2026/11/21/">Le Monde</a></em></p>
+<h3>Spain's center-left government faces electoral extinction next week</h3>
+<p>Pedro Sánchez, Europe's most visible left-wing leader, is on a last-ditch campaign push ahead of polls that appear set to remove his Socialist government from power. The shift mirrors broader European fragmentation: France experiencing its sixth consecutive Saturday of cost-of-living protests (with declining turnout), French media accused of inflammatory coverage amplifying social divisions, and UK anti-migrant activist jailed for attacking a dinghy mid-rescue. These parallel movements suggest exhaustion with center-left incumbents struggling to manage inflation, housing, and migration pressures simultaneously. <em>Source: <a href="https://www.nytimes.com/2026/11/21/world/europe/spain-sanchez-interview-election-basketball.html">NYT</a>, <a href="https://www.lemonde.fr/societe/article/2026/11/21/">Le Monde</a></em></p>
+<h3>Three French police officers convicted of racist brutality; signal for judicial reckoning</h3>
+<p>A Paris court found three officers guilty of racially motivated violence against music producer Michel Zecler in 2020, imposing prison sentences. Surveillance footage directly contradicted their false claims that Zecler had attacked them first. The ruling marks a rare conviction on racial character grounds in France and follows years of institutional denial; lawyers hope it establishes precedent for future prosecutions of police misconduct rooted in discrimination. <em>Source: <a href="https://www.lemonde.fr/societe/article/2026/11/21/">Le Monde</a>, <a href="https://www.nytimes.com/2026/11/20/world/europe/france-police-brutality-black-producer.html">NYT</a></em></p>
+<h3>Bayer settles Roundup cancer litigation for $7.25 billion</h3>
+<p>A US federal judge approved Bayer's settlement ending tens of thousands of lawsuits claiming its Roundup weedkiller caused non-Hodgkin lymphoma. The agreement carries no admission of liability or fault (per Bayer's 2024 stipulation). Some plaintiff attorneys argue compensation is inadequate, but the ruling effectively closes a years-long litigation front for the company post-Monsanto acquisition (2018). <em>Source: <a href="https://www.dw.com/en/us-judge-approves-bayer-s-7-25-billion-cancer-settlement/">DW</a>, <a href="https://www.nytimes.com/2026/11/20/business/judge-approves-7-billion-settlement-over-claims-that-roundup-caused-cancer.html">NYT</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-3">
+  <div class="slide-header">🇫🇷 🇷 French/European Entrepreneurship</div>
+  <h3>Mailchimp's unexpected pivot to European ownership signals capital rebalance</h3>
+<p>Intuit agreed to sell Mailchimp to Italian software firm Bending Spoons for €3.13 billion—a 69% discount from Intuit's €10.3 billion acquisition price in 2021. The transaction reverses a decade-long trend of US platforms consolidating European SaaS; it reflects depressed US valuations for mid-market software and suggests European buyers (Bending Spoons, now operating globally) can compete where American acquirers retreat. The move underscores fragmentation in venture-backed growth strategies post-AI bubble. <em>Source: <a href="https://www.frenchweb.fr/contre-toute-attente-mailchimp-passe-sous-pavillon-europeen/">Frenchweb</a></em></p>
+<h3>Aikido seeks €4 billion valuation with Storonsky backing; European fintech consolidation accelerates</h3>
+<p>Storonsky-backed payments fintech Aikido is targeting a €4 billion valuation in new funding rounds, signaling continued private capital appetite for European infrastructure plays despite public market volatility. Parallel deals—Hoplite raising $5.5M from Stripe founders and Paul Graham for AI agent swarms, European angels capturing outsized returns via Anthropic IPO—show European founders are still accessing capital at scale but increasingly through specialized syndicates rather than mega-funds. <em>Source: <a href="https://sifted.eu/articles/exclusive-aikido-4bn-valuation/">Sifted</a>, <a href="https://sifted.eu/articles/hoplite-raise-stripe-founders/">Sifted</a></em></p>
+<h3>French state lagging on cybersecurity five years after repeated alerts</h3>
+<p>Analysis spanning five years of French infrastructure breaches—from La Courneuve to tax authority DGFiP—reveals persistent gaps between known vulnerabilities and incomplete protective measures. Incidents document structural failures in public digital services despite Matignon prioritizing cyber resilience. The gap exposes regulatory and execution weaknesses that could handicap French/EU deeptech firms competing for sensitive contracts and signals ongoing friction between state tech capacity and private-sector capability. <em>Source: <a href="https://www.frenchweb.fr/cyberattaques-cinq-ans-d-alertes-l-etat-toujours-en-rattrapage/">Frenchweb</a></em></p>
+<h3>Ubisoft cuts 166 Montreal and Quebec roles amid broader gaming sector pressure</h3>
+<p>Ubisoft announced headcount reductions at its Canadian studios, part of a wider industry contraction following GTA VI's release and persistent labor cost pressures. Meanwhile, GTA VI's $3.79 billion first-day revenue (€3.5bn equivalent) dwarfs prior franchise launches and sets entertainment industry records. The disparity—blockbuster revenues alongside layoffs—reflects winner-take-all dynamics in gaming; smaller studios cannot match AAA production scale or IP power. <em>Source: <a href="https://www.frenchweb.fr/breaking-news/ubisoft-supprime-166-postes-a-montreal-et-a-quebec/">Frenchweb</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-4">
+  <div class="slide-header">💼 Business & Finance</div>
+  <h3>Wall Street's worst week since Covid: S&amp;P 500 and Dow enter correction on AI reckoning</h3>
+<p>Chipmakers led a broad sell-off on Friday, pushing both the S&amp;P 500 and Dow Jones Industrial Average more than 10% below recent peaks—crossing into formal correction territory. The decline reverses months of AI-driven gains and reflects growing skepticism about data center ROI, Nvidia's SEC accounting probe, and Anthropic's volatile IPO execution. Bloomberg reported this was the worst week for US equities since the pandemic, driven by simultaneous repricing of AI infrastructure spending and concerns over geopolitical chip restrictions. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-20/wall-street-nears-breaking-point-as-fear-grips-global-markets">Bloomberg</a>, <a href="https://www.nytimes.com/2026/11/20/business/anthropic-ai-stocks-sp500.html">NYT</a></em></p>
+<h3>Nvidia faces SEC investigation into accounting practices amid Asia sales controversy</h3>
+<p>The Securities and Exchange Commission has opened a formal probe into Nvidia's accounting disclosures, focusing on questionable chip sales in Asia and related transparency lapses. The investigation intensifies pressure on the company following Jensen Huang's abrupt resignation and parallels concerns from Alice Huang's alleged espionage (linking her to Chinese military tech firms). Trump publicly called for Huang to apologize and resume leadership—a suggestion market consensus views as unrealistic given geopolitical and legal entanglement. <em>Source: <a href="https://www.nytimes.com/2026/11/20/business/nvidia-sec-accounting.html">NYT</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-21/china-military-bans-sf-express-from-procurement-over-misconduct">Bloomberg</a></em></p>
+<h3>China bans SF Express from military procurement over misconduct; supply chain tensions escalate</h3>
+<p>China's military suspended SF Express Co., a leading delivery and logistics operator, from all military-wide procurement (goods, engineering, services) due to alleged violations. The move signals Beijing's tightening control over critical infrastructure access and follows patterns of weaponizing procurement as geopolitical pressure. For US-EU tech firms, the precedent reinforces risk of rapid, non-transparent debarment from major markets. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-21/">Bloomberg</a></em></p>
+<h3>Vietnam accelerates land clearance law to unblock infrastructure projects for double-digit growth</h3>
+<p>Vietnam's National Assembly passed amendments to streamline property and infrastructure development timelines, aiming to sustain double-digit economic growth targets. The reform reduces friction in site acquisition for strategic sectors (semiconductors, power, logistics). For deeptech investors, Vietnam's regulatory pivot signals openness to foreign capital in critical infrastructure but also reflects state control over land allocation—a risk factor for long-term property rights. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-21/vietnam-amends-laws-to-speed-land-clearance-development-of-new-projects">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-5">
+  <div class="slide-header">🚀 Tech / Deeptech / VC</div>
+  <h3>Anthropic researcher claims solution to Riemann Hypothesis using Claude; verification pending</h3>
+<p>An Anthropic mathematician announced Friday that he used the company's Claude AI to prove the Riemann Hypothesis—one of mathematics' most famous unsolved problems, standing since 1859. The claim arrives on the heels of Anthropic's record-breaking IPO and amid intense market scrutiny of AI ROI. Formal verification is pending peer review; if confirmed, it would represent a watershed moment for AI-assisted mathematical reasoning and vindicate speculative valuations. If not, it underscores hype risk in the sector. <em>Source: <a href="https://www.bbc.co.uk/news/articles/c6pqr2g7w059o">BBC</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-21/anthropic-researcher-claims-to-solve-riemann-problem-with-claude">Bloomberg</a></em></p>
+<h3>Grand Theft Auto VI sets entertainment revenue record: $3.79 billion in one day</h3>
+<p>Rockstar Games' GTA VI grossed $3.79 billion (€3.5bn) on day one—nearly five times the first-day take of GTA V (2013) and shattering all-time records across film, music, and gaming. The release drove US internet traffic to historic peaks, stressing ISP infrastructure nationwide. The blockbuster outcome demonstrates undiminished consumer appetite for premium entertainment IP and validates continued AAA studio investment despite industry-wide layoffs. It also reveals a bifurcated gaming market: massive franchises thrive while mid-tier studios contract. <em>Source: <a href="https://www.lemonde.fr/pixels/article/2026/11/21/">Le Monde</a>, <a href="https://www.bloomberg.com/news/articles/2026-11-20/-grand-theft-auto-drives-internet-providers-to-busiest-day-ever">Bloomberg</a></em></p>
+<h3>CrowdStrike in talks to acquire Zscaler for potential megadeal in cybersecurity consolidation</h3>
+<p>CrowdStrike Holdings is negotiating to buy Zscaler Inc., which had a $32 billion market cap at Friday's close, in what would rank among the largest-ever cybersecurity sector acquisitions. The deal reflects ongoing consolidation in cloud security and signals that platform players are absorbing specialized tools to offer integrated stacks. Market responded positively (Zscaler +16%), suggesting investors view the combination as strategically rational despite near-term macro headwinds. <em>Source: <a href="https://www.bloomberg.com/news/videos/2026-11-20/crowdstrike-said-in-talks-to-buy-zscaler-video">Bloomberg</a></em></p>
+<h3>Cognition AI coding startup valued at $75 billion in new funding round; two months after prior raise</h3>
+<p>AI coding platform Cognition is in funding discussions at a $75 billion valuation, merely two months after announcing its last round. The repeated repricing reflects investor appetite for AI agent tooling but also highlights valuation instability in the sector; without anchoring to revenue multiples or user growth metrics, funding rounds risk becoming divorced from fundamentals. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-20/cognition-in-talks-for-75-billion-value-with-new-funding">Bloomberg</a></em></p>
+<h3>China expands 5G industrial deployment; 26,000+ private networks active nationwide ahead of 6G testing</h3>
+<p>China Central Television reported Saturday that China has built more than 26,000 private 5G industrial networks across manufacturing, with 6G testing underway. The scale of domestic 5G rollout (versus US fragmentation) gives Beijing strategic advantage in next-generation telecom infrastructure and embedded AI at the edge. For European and US deeptech firms targeting manufacturing automation, the gap in wireless infrastructure maturity represents a competitive disadvantage outside protected markets. <em>Source: <a href="https://www.bloomberg.com/news/articles/2026-11-21/china-deploys-5g-across-manufacturing-base-as-6g-testing-advances-cctv-reports">Bloomberg</a></em></p>
+<hr />
+</div>
+<div class="slide" id="slide-6">
+  <div class="slide-header">🔍 Signal of the Day</div>
+  <p><strong>The Bifurcation: Entertainment Wins, Infrastructure Faces Reckoning</strong></p>
+<p>GTA VI's $3.79 billion first-day revenue sits in stark contrast to the week-long carnage in AI and semiconductor stocks. What explains this divergence?</p>
+<p><strong>The fact:</strong> Consumer-facing entertainment with proven IP (GTA VI) generates immediate, undeniable cash. Capital-intensive infrastructure plays (data centers, chips, AI training) are now facing investor demands for concrete ROI timelines and cost-per-unit economics. The S&amp;P 500 and Dow entered correction territory Friday as doubts about data center profitability, Nvidia's accounting opacity, and broader AI valuation excess triggered repositioning.</p>
+<p><strong>Broader pattern:</strong> Venture and public markets are reverting to two separate equilibria. One rewards monopolistic franchises with predictable demand (entertainment, luxury goods, fintech rails). The other punishes speculative infrastructure spending lacking transparent unit economics. This mirrors 2000–2001: when connectivity was cheap, every startup burned cash on bandwidth; once pricing power evaporated, only the core network operators survived. Today, the AI parallel suggests many mid-tier infrastructure plays will face funding droughts unless they can demonstrate clear path to profitability per data center, training run, or inference API call.</p>
+<p><strong>Implication for a future entrepreneur:</strong> If you're building in deeptech—quantum, biotech, advanced manufacturing—the near-term capital environment has become bifurcated. Generalist AI agents and foundation model training are facing scrutiny; specialized tools with narrow, defensible use cases (CrowdStrike + Zscaler's pairing) are still commanding premiums. As an early-stage founder, avoid pitching pure infrastructure plays or incremental AI tooling; instead, anchor your narrative to a specific vertical (healthcare, materials science, defense) where AI's output has measurable, recurring value. The 6-month runway for a correcting market is long enough to separate signal from noise—meaning investors will increasingly back companies that can show traction, not just TAM and AI optionality.</p>
+<hr />
+</div>
+<div class="slide" id="slide-7">
+  <div class="slide-header">📚 Deep Dives</div>
+  <ul>
+<li><strong><a href="https://www.bloomberg.com/news/articles/2026-11-20/wall-street-nears-breaking-point-as-fear-grips-global-markets">Wall Street's AI Reckoning: What Investor Rotation Means for Deeptech</a></strong> — Bloomberg's analysis</li>
+</ul>
+</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prev" disabled>&#8592;</button>
+  <div class="nav-center" id="dots"></div>
+  <button class="nav-btn" id="next">&#8594;</button>
+</div>
+
+<script>
+const slider  = document.getElementById('slider');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const titleEl = document.getElementById('bar-title');
+const slides  = Array.from(document.querySelectorAll('.slide'));
+const titles  = ["⚡ TL;DR", "📄 TL;DR", "🌍 Geopolitics & Policy", "🇫🇷 🇷 French/European Entrepreneurship", "💼 Business & Finance", "🚀 Tech / Deeptech / VC", "🔍 Signal of the Day", "📚 Deep Dives"];
+let cur = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slider.style.transform = `translateX(-${cur * 100}vw)`;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === slides.length - 1;
+  progEl.style.width = ((cur + 1) / slides.length * 100) + '%';
+  titleEl.textContent = titles[cur] || 'Daily Briefing';
+  slides[cur].scrollTop = 0;
+}
+
+prevBtn.onclick = () => goTo(cur - 1);
+nextBtn.onclick = () => goTo(cur + 1);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goTo(cur + 1);
+  if (e.key === 'ArrowLeft')  goTo(cur - 1);
+});
+
+// Swipe — only trigger on predominantly horizontal gestures
+let tx = 0, ty = 0;
+slider.addEventListener('touchstart', e => {
+  tx = e.touches[0].clientX;
+  ty = e.touches[0].clientY;
+}, {passive:true});
+slider.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  const dy = e.changedTouches[0].clientY - ty;
+  // Require: horizontal displacement > 50px AND more horizontal than vertical
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    goTo(dx < 0 ? cur + 1 : cur - 1);
+  }
+}, {passive:true});
+
+// Theme
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+themeBtn.onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('theme', n);
+};
+
+goTo(0);
+</script>
+</body>
+</html>
